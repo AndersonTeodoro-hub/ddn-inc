@@ -471,12 +471,12 @@ function afterPdfReady(){
 function extraZone(){const w=pageDims.w,h=pageDims.h;return {x:w*0.04,y:h*0.05,w:w*0.92,h:h*0.90};}
 function activeZone(){return S.where==="page"?extraZone():S.zone;}
 function computeLayout(zone,n){
-  const pad=Math.min(zone.w,zone.h)*0.025;
+  const PM=Math.max(pageDims.w,pageDims.h), pad=PM*0.004;
   const ix=zone.x+pad, iy=zone.y+pad, iw=zone.w-2*pad, ih=zone.h-2*pad;
-  const bandFont=Math.max(Math.min(iw*0.016,ih*0.05),1);
+  const bandFont=Math.max(Math.min(PM*0.0055,ih*0.05),1);
   const bandH=bandFont*2.0, bandGap=bandFont*0.8;
   const gx=ix, gy=iy+bandH+bandGap, gw=iw, gh=ih-bandH-bandGap;
-  const g=Math.min(gw,gh)*0.02;
+  const g=PM*0.003;
   const ratio=PHOTO_RATIO+TEXT_RATIO;
   let best=null;
   for(let cols=1;cols<=n;cols++){
@@ -492,7 +492,16 @@ function computeLayout(zone,n){
   const x0=gx+(gw-gridW)/2;
   const boxes=[];
   for(let i=0;i<n;i++){const c=i%best.cols, r=Math.floor(i/best.cols);boxes.push({x:x0+c*(w+g),y:gy+r*(h+g),w,h,photoH,textH});}
-  return {band:{x:ix,y:iy,w:iw,h:bandH,font:bandFont},boxes,fontMax:w*0.05,fontMin:w*0.032,badge:w*0.09};
+  const gridH=best.rows*h+(best.rows-1)*g;
+  return {band:{x:x0,y:iy,w:gridW,h:bandH,font:bandFont},boxes,fontMax:w*0.05,fontMin:w*0.032,badge:w*0.09,
+          content:{x:x0,y:iy,w:gridW,h:(gy-iy)+gridH},pad};
+}
+/* the area really used by the band and the boxes, plus a thin margin */
+function coverRect(L){const p=L.pad;return {x:L.content.x-p,y:L.content.y-p,w:L.content.w+2*p,h:L.content.h+2*p};}
+/* shrink the zone so its edges and handles sit right against the boxes */
+function snapZone(){
+  if(!S.zone||!pageDims) return;
+  for(let k=0;k<3;k++){const L=computeLayout(S.zone,S.n); if(!L) return; S.zone=coverRect(L);}
 }
 function bandText(){
   const id=S.ident, d=id.data?id.data.split("-").reverse().join("/"):"";
@@ -601,7 +610,8 @@ function buildOverlay(){
   ov.setAttribute("viewBox","0 0 "+pageDims.w+" "+pageDims.h); ov.setAttribute("preserveAspectRatio","none");
   if(S.where==="plan"&&S.zone){
     const z=S.zone;
-    if(S.cover) sv("rect",{class:"zone-fill",x:z.x,y:z.y,width:z.w,height:z.h},ov);
+    const Lc=S.cover?computeLayout(z,S.n):null;
+    if(Lc){const c=coverRect(Lc); sv("rect",{class:"zone-fill",x:c.x,y:c.y,width:c.w,height:c.h},ov);}
     if(mode==="zone"){
       sv("rect",{class:"zone-edit",x:z.x,y:z.y,width:z.w,height:z.h},ov);
       const hs=Math.max(pageDims.w,pageDims.h)*0.012;
@@ -687,7 +697,7 @@ let drag=null;
     const d=drag; drag=null;
     if(d.kind==="pan"){ if(cancel){S.planT.dx=d.d0.dx;S.planT.dy=d.d0.dy;applyPlanT();buildOverlay();} persist(); return; }
     if(d.kind!=="draw"){
-      if(cancel){S.zone=d.z0;} else S.zone=editedZone(d,toPts(e));
+      if(cancel){S.zone=d.z0;} else {S.zone=editedZone(d,toPts(e)); if(d.kind==="resize") snapZone();}
       persist(); layoutSheets(); zoneStatus(); return;
     }
     d.el.remove(); if(cancel) return;
@@ -696,7 +706,7 @@ let drag=null;
     const w=Math.min(pageDims.w-x,Math.abs(p.x-d.x0)), h=Math.min(pageDims.h-y,Math.abs(p.y-d.y0));
     if(mode==="zone"){
       if(w<pageDims.w*0.06||h<pageDims.h*0.06){setStatus("A zona é pequena demais. Arrasta um retângulo maior sobre a parte livre da folha.","err");return;}
-      S.zone={x,y,w,h}; persist(); layoutSheets(); zoneStatus();
+      S.zone={x,y,w,h}; snapZone(); persist(); layoutSheets(); zoneStatus();
     }else{
       let m={n:parseInt($("#markNum").value,10)||1,cx:x+w/2,cy:y+h/2,rx:w/2,ry:h/2};
       const minR=pageDims.w*0.0035;
@@ -728,7 +738,10 @@ function fillMarkNums(){
 /* ================= modes & hints ================= */
 function setMode(m){
   mode=m; selected=-1;
-  if(m==="zone"&&!S.zone&&pageDims){ S.zone={x:pageDims.w*0.45,y:pageDims.h*0.56,w:pageDims.w*0.42,h:pageDims.h*0.38}; persist(); layoutSheets(); }
+  if(m==="zone"&&pageDims){
+    if(!S.zone) S.zone={x:pageDims.w*0.45,y:pageDims.h*0.56,w:pageDims.w*0.42,h:pageDims.h*0.38};
+    snapZone(); persist(); layoutSheets();
+  }
   const sheet=$("#planSheet"); sheet.classList.toggle("mode-zone",m==="zone"); sheet.classList.toggle("mode-mark",m==="mark"); sheet.classList.toggle("mode-plan",m==="plan");
   $("#planBtn").setAttribute("aria-pressed",String(m==="plan")); $("#planBtn").textContent=m==="plan"?"Concluir o ajuste da planta":"Ajustar a planta"; $("#planCtl").hidden=m!=="plan";
   $("#zoneBtn").setAttribute("aria-pressed",String(m==="zone")); $("#zoneBtn").textContent=m==="zone"?"Concluir a zona":(S.zone?"Redesenhar a zona das caixas":"Desenhar a zona das caixas");
@@ -1032,9 +1045,9 @@ saveBtn.addEventListener("click",async()=>{
     }
 
     let target=page, zone=activeZone();
-    if(S.where==="page"){ target=out.addPage([W,H]); }
-    else if(S.cover){ page.drawRectangle({x:X(zone.x),y:Y(zone.y,zone.h),width:zone.w*kx,height:zone.h*ky,color:WHITE}); }
     const L=computeLayout(zone,S.n);
+    if(S.where==="page"){ target=out.addPage([W,H]); }
+    else if(S.cover){ const c=coverRect(L); page.drawRectangle({x:X(c.x),y:Y(c.y,c.h),width:c.w*kx,height:c.h*ky,color:WHITE}); }
     // identification band
     {
       const b=L.band; let fs=b.font*kx;

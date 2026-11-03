@@ -170,6 +170,10 @@ svg.ov{position:absolute;inset:0;width:100%;height:100%;z-index:1;pointer-events
 .photo img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;transform-origin:50% 50%;pointer-events:none}
 .photo.filled{cursor:grab}
 .photo.panning{cursor:grabbing}
+.pick{position:fixed;inset:0;z-index:60;background:rgba(10,12,15,.5);display:flex;align-items:flex-end;justify-content:center}
+.pick-card{background:var(--panel);width:100%;max-width:440px;border-radius:14px 14px 0 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom,0px));display:grid;gap:10px}
+.pick-title{margin:0 0 4px;font-weight:600;font-size:16px}
+.pick .btn{font-size:16px;padding:13px 14px}
 .lb{position:fixed;inset:0;z-index:50;background:rgba(10,12,15,.94);display:flex;flex-direction:column;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 .lb-bar{display:flex;align-items:center;gap:10px;padding:10px 16px;color:#fff;font-size:14px}
 .lb-bar .spacer{flex:1}
@@ -213,6 +217,10 @@ textarea.txt:focus{outline:2px solid var(--drop);outline-offset:-2px}
   .nav .prod,.nav .divider{display:none}
   .nav{padding:0 14px}
   .how ol{grid-template-columns:1fr}
+  .topbar{flex-wrap:wrap;padding:8px 14px;gap:8px}
+  .topbar .hint{flex-basis:100%}
+  .zoombar > span{display:none}
+  .stage{padding:12px}
 }
 </style>
 </head>
@@ -394,6 +402,15 @@ textarea.txt:focus{outline:2px solid var(--drop);outline-offset:-2px}
   <div class="lb-bar"><span id="lbCap"></span><span class="spacer"></span><button type="button" class="btn sm" id="lbReal">Tamanho real</button><button type="button" class="btn sm" id="lbClose">Fechar</button></div>
   <div class="lb-body" id="lbBody"><img id="lbImg" alt=""></div>
 </div>
+<div id="sheetPick" class="pick" hidden role="dialog" aria-modal="true" aria-labelledby="pickTitle">
+  <div class="pick-card">
+    <p class="pick-title" id="pickTitle">Foto da caixa</p>
+    <button type="button" class="btn primary wide" id="pickCam">Tirar foto com a câmara</button>
+    <button type="button" class="btn wide" id="pickGal">Escolher da galeria</button>
+    <button type="button" class="btn warn wide" id="pickCancel">Cancelar</button>
+  </div>
+</div>
+<input type="file" id="cameraPicker" accept="image/*" capture="environment" hidden>
 <input type="file" id="photoPicker" accept="image/*" multiple hidden>
 
 <script>
@@ -644,9 +661,9 @@ function buildBoxes(){
     ta.style.padding=cq(g.w*0.02)+" "+cq(g.w*0.025); ta.setAttribute("aria-label","Resumo do problema da caixa "+(i+1));
     ta.dataset.max=L.fontMax; ta.dataset.min=L.fontMin;
     ta.addEventListener("input",()=>{S.boxes[i].text=ta.value; fitText(i); persist();});
-    ph.addEventListener("click",()=>{ if(S.boxes[i].img) return; pickTarget=i; photoPicker.value=""; photoPicker.click(); });
+    ph.addEventListener("click",()=>{ if(S.boxes[i].img) return; choosePhoto(i); });
     ph.addEventListener("dblclick",()=>{ if(S.boxes[i].img) openLightbox(i); });
-    el.querySelector('[data-act="rep"]').addEventListener("click",()=>{pickTarget=i; photoPicker.value=""; photoPicker.click();});
+    el.querySelector('[data-act="rep"]').addEventListener("click",()=>choosePhoto(i));
     el.querySelector('[data-act="zin"]').addEventListener("click",()=>zoomPhoto(i,1.25));
     el.querySelector('[data-act="zout"]').addEventListener("click",()=>zoomPhoto(i,1/1.25));
     ph.addEventListener("wheel",e=>{ if(!S.boxes[i].img||document.activeElement!==ph) return; e.preventDefault(); zoomPhoto(i,e.deltaY<0?1.12:1/1.12); },{passive:false});
@@ -1044,6 +1061,21 @@ window.addEventListener("dragover",e=>{if(hasFiles(e))e.preventDefault();});
 window.addEventListener("drop",e=>{if(hasFiles(e)){e.preventDefault(); if(pdfDoc) setStatus("Larga a foto em cima de uma caixa.","err");}});
 let pickTarget=0;
 photoPicker.addEventListener("change",()=>placePhotos(photoPicker.files,pickTarget));
+const cameraPicker=$("#cameraPicker");
+cameraPicker.addEventListener("change",()=>placePhotos(cameraPicker.files,pickTarget));
+/* on phones and tablets ask: camera or gallery; on a computer open the file chooser directly */
+function isTouch(){try{return matchMedia("(pointer:coarse)").matches;}catch(_){return false;}}
+function choosePhoto(i){
+  pickTarget=i;
+  if(isTouch()){ $("#pickTitle").textContent="Foto da caixa "+(i+1); $("#sheetPick").hidden=false; $("#pickCam").focus(); }
+  else { photoPicker.value=""; photoPicker.click(); }
+}
+function closePick(){$("#sheetPick").hidden=true;}
+$("#pickCam").addEventListener("click",()=>{closePick(); cameraPicker.value=""; cameraPicker.click();});
+$("#pickGal").addEventListener("click",()=>{closePick(); photoPicker.value=""; photoPicker.click();});
+$("#pickCancel").addEventListener("click",closePick);
+$("#sheetPick").addEventListener("click",e=>{if(e.target===$("#sheetPick")) closePick();});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!$("#sheetPick").hidden) closePick();});
 async function fileToJpeg(file){
   const name=file.name||"imagem";
   if(/\.(heic|heif)$/i.test(name)||/heic|heif/i.test(file.type)) throw new Error(name+": o formato HEIC não abre no browser. Exporta a foto como JPEG e larga-a de novo.");

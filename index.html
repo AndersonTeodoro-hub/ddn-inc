@@ -149,6 +149,10 @@ svg.ov{position:absolute;inset:0;width:100%;height:100%;z-index:1;pointer-events
 .zone-h{fill:#fff;stroke:#1f7a36;stroke-width:2.5;vector-effect:non-scaling-stroke}
 .zone-h[data-h="nw"],.zone-h[data-h="se"]{cursor:nwse-resize}
 .zone-h[data-h="ne"],.zone-h[data-h="sw"]{cursor:nesw-resize}
+.zone-h[data-h="n"],.zone-h[data-h="s"]{cursor:ns-resize}
+.zone-h[data-h="e"],.zone-h[data-h="w"]{cursor:ew-resize}
+.half-cover{fill:#fff;fill-rule:evenodd;pointer-events:none}
+.half-frame{fill:none;stroke:#000;pointer-events:none}
 .sheet.mode-zone .layer{opacity:.35}
 .zone-tmp{fill:rgba(31,122,54,.10);stroke:#1f7a36;stroke-dasharray:6 4;vector-effect:non-scaling-stroke;stroke-width:1.5}
 .mk{fill:none;stroke:#d0021b;pointer-events:none}
@@ -275,17 +279,32 @@ textarea.txt:focus{outline:2px solid var(--drop);outline-offset:-2px}
   <section class="step off" id="s2">
     <h2><span>02</span>Caixas das fotos</h2>
     <div class="seg" role="group" aria-label="Onde ficam as caixas">
+      <button type="button" data-where="split" aria-pressed="false">Metade da folha</button>
       <button type="button" data-where="plan" aria-pressed="true">Na planta</button>
-      <button type="button" data-where="page" aria-pressed="false">Numa página a seguir</button>
+      <button type="button" data-where="page" aria-pressed="false">Página a seguir</button>
+    </div>
+    <div id="splitOpts" hidden>
+      <p class="note">A folha fica dividida em duas caixas grandes: metade para as fotos e metade para a planta. No PDF a planta fica cortada na sua metade e nunca passa por baixo das fotos.</p>
+      <label class="f" for="splitSide">Metade das fotos</label>
+      <select id="splitSide"><option value="top">Em cima (planta em baixo)</option><option value="bottom">Em baixo (planta em cima)</option></select>
+      <div class="row"><button type="button" class="btn wide" id="fitPlanBtn">Encaixar a planta na sua metade</button></div>
+    </div>
+    <div id="zoneOpts">
+      <div class="row"><button type="button" class="btn wide" id="zoneBtn" aria-pressed="false">Desenhar a zona das caixas</button></div>
     </div>
     <div id="planOpts">
-      <div class="row"><button type="button" class="btn wide" id="zoneBtn" aria-pressed="false">Desenhar a zona das caixas</button></div>
       <label class="check"><input type="checkbox" id="coverChk" checked> Tapar o que está por baixo da zona</label>
     </div>
     <div class="row" style="justify-content:space-between">
       <span>Número de caixas</span>
       <div class="stepper"><button type="button" id="nMinus" aria-label="Menos uma caixa">−</button><output id="nOut">6</output><button type="button" id="nPlus" aria-label="Mais uma caixa">+</button></div>
     </div>
+    <div class="row" style="justify-content:space-between">
+      <span>Colunas</span>
+      <div class="stepper"><button type="button" id="cMinus" aria-label="Menos uma coluna">−</button><output id="colsOut" style="min-width:52px">Auto</output><button type="button" id="cPlus" aria-label="Mais uma coluna">+</button></div>
+    </div>
+    <div class="range"><label for="textR">Altura do texto</label><input type="range" id="textR" min="10" max="45" step="1" value="23"><output id="textROut">23%</output></div>
+    <p class="note">As caixas esticam para ocupar toda a zona. A largura e a altura mudam-se puxando os lados e os cantos da zona (“Ajustar a zona das caixas”); as colunas e a altura do texto afinam a divisão.</p>
   </section>
 
   <section class="step off" id="s3">
@@ -321,7 +340,8 @@ textarea.txt:focus{outline:2px solid var(--drop);outline-offset:-2px}
     <label class="f" for="cMsg">Mensagem</label>
     <textarea class="msg" id="cMsg" rows="10" placeholder="Escreve aqui a comunicação, como num email."></textarea>
     <div class="row"><button type="button" class="btn" id="cModelo">Usar modelo</button><button type="button" class="btn" id="cCopy">Copiar texto</button><button type="button" class="btn" id="cMail">Abrir no email</button></div>
-    <p class="note">No PDF, a comunicação vai numa página A4 à frente da planta, com a lista das fotos. “Abrir no email” cria a mensagem no teu programa de email; o PDF tens de o anexar tu.</p>
+    <label class="check"><input type="checkbox" id="commPageChk"> Juntar ao PDF uma página A4 com esta comunicação</label>
+    <p class="note">Por defeito o PDF sai só com a folha da planta. “Abrir no email” cria a mensagem no teu programa de email; o PDF tens de o anexar tu.</p>
   </section>
 
   <section class="step off" id="s5">
@@ -380,7 +400,7 @@ textarea.txt:focus{outline:2px solid var(--drop);outline-offset:-2px}
           <li><span class="eyebrow">01</span><b>Carregar a planta</b><span>Qualquer PDF, de qualquer tamanho. Pode ajustar a posição e a escala.</span></li>
           <li><span class="eyebrow">02</span><b>Marcar e fotografar</b><span>Assinale os elementos no desenho e largue as fotos nas caixas numeradas.</span></li>
           <li><span class="eyebrow">03</span><b>Escrever a comunicação</b><span>Não conformidade, pedido de esclarecimento ou observação, para quem tem de responder.</span></li>
-          <li><span class="eyebrow">04</span><b>Guardar o PDF</b><span>Comunicação em A4 à frente e a planta original, vetorial, com tudo assinalado.</span></li>
+          <li><span class="eyebrow">04</span><b>Guardar o PDF</b><span>A planta original, vetorial, com as fotos e tudo assinalado. A página A4 da comunicação é opcional.</span></li>
         </ol>
       </section>
     </div>
@@ -423,7 +443,7 @@ const statusEl=$("#status");
 function setStatus(msg,kind){statusEl.textContent=msg||"";statusEl.className="status"+(kind?" "+kind:"");}
 function today(){const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");}
 function blankBoxes(){return Array.from({length:NMAX},()=>({img:null,fit:"cover",text:"",z:1,tx:0,ty:0}));}
-function freshState(){return {fileName:"",pageIndex:0,where:"plan",zone:null,cover:true,n:6,boxes:blankBoxes(),marks:[],texts:[],planT:{s:1,dx:0,dy:0,r:0},comm:{tipo:"nc",para:"empreiteiro",nome:"",assunto:"",prazo:"",msg:""},ident:{obra:"",data:today(),fiscal:"",ref:""}};}
+function freshState(){return {fileName:"",pageIndex:0,where:"plan",zone:null,cover:true,n:6,cols:0,textR:0.23,splitSide:"top",commPage:false,boxes:blankBoxes(),marks:[],texts:[],planT:{s:1,dx:0,dy:0,r:0},comm:{tipo:"nc",para:"empreiteiro",nome:"",assunto:"",prazo:"",msg:""},ident:{obra:"",data:today(),fiscal:"",ref:""}};}
 let S=freshState();
 let pdfBytes=null;      // Uint8Array (master copy)
 let pdfDoc=null;        // pdf.js document
@@ -529,6 +549,22 @@ function afterPdfReady(){
 /* ================= geometry (points, top-left origin, as displayed) ================= */
 function extraZone(){const w=pageDims.w,h=pageDims.h;return {x:w*0.04,y:h*0.05,w:w*0.92,h:h*0.90};}
 function activeZone(){return S.where==="page"?extraZone():S.zone;}
+/* split mode: the sheet is divided in two big boxes, one for the photos and one for the plan */
+function halves(){
+  // always a horizontal division: one half on top, the other below
+  const W=pageDims.w,H=pageDims.h,m=Math.max(W,H)*0.008,side=S.splitSide==="bottom"?"bottom":"top";
+  const hh=(H-3*m)/2, a={x:m,y:m,w:W-2*m,h:hh}, b={x:m,y:2*m+hh,w:W-2*m,h:hh};
+  return side==="top"?{photo:a,plan:b}:{photo:b,plan:a};
+}
+function zoneBounds(){return S.where==="split"?halves().photo:{x:0,y:0,w:pageDims.w,h:pageDims.h};}
+function fitPlanToHalf(){
+  const P=halves().plan, W=pageDims.w,H=pageDims.h, r=(S.planT.r||0)*Math.PI/180;
+  const bw=Math.abs(W*Math.cos(r))+Math.abs(H*Math.sin(r)), bh=Math.abs(W*Math.sin(r))+Math.abs(H*Math.cos(r));
+  const sc=Math.min(P.w/bw,P.h/bh);
+  S.planT.s=sc; S.planT.dx=P.x+P.w/2-sc*W/2; S.planT.dy=P.y+P.h/2-sc*H/2;
+}
+function frameW(){return Math.max(0.4,Math.max(pageDims.w,pageDims.h)*0.0005);}
+/* boxes stretch to fill the whole zone: width and height follow the zone edges */
 function computeLayout(zone,n){
   const PM=Math.max(pageDims.w,pageDims.h), pad=PM*0.004;
   const ix=zone.x+pad, iy=zone.y+pad, iw=zone.w-2*pad, ih=zone.h-2*pad;
@@ -536,24 +572,31 @@ function computeLayout(zone,n){
   const bandH=bandFont*2.0, bandGap=bandFont*0.8;
   const gx=ix, gy=iy+bandH+bandGap, gw=iw, gh=ih-bandH-bandGap;
   const g=PM*0.003;
-  const ratio=PHOTO_RATIO+TEXT_RATIO;
-  let best=null;
-  for(let cols=1;cols<=n;cols++){
-    const rows=Math.ceil(n/cols);
-    const bw=(gw-(cols-1)*g)/cols, bh=(gh-(rows-1)*g)/rows;
-    if(bw<=0||bh<=0) continue;
-    const w=Math.min(bw,bh/ratio);
-    if(!best||w>best.w+1e-6) best={cols,rows,w};
+  const tr=Math.min(0.45,Math.max(0.10,S.textR||0.23));
+  const target=1/(PHOTO_RATIO+TEXT_RATIO); // preferred width/height of a box when columns are automatic
+  let cols=Math.min(n,Math.max(0,S.cols|0));
+  if(!cols){
+    let bestErr=Infinity;
+    for(let c=1;c<=n;c++){
+      const r=Math.ceil(n/c), bw=(gw-(c-1)*g)/c, bh=(gh-(r-1)*g)/r;
+      if(bw<=0||bh<=0) continue;
+      const err=Math.abs(Math.log((bw/bh)/target));
+      if(err<bestErr){bestErr=err;cols=c;}
+    }
   }
-  if(!best) return null;
-  const w=best.w, photoH=w*PHOTO_RATIO, textH=w*TEXT_RATIO, h=photoH+textH;
-  const gridW=best.cols*w+(best.cols-1)*g;
-  const x0=gx+(gw-gridW)/2;
+  if(!cols) return null;
+  const rows=Math.ceil(n/cols), bh=(gh-(rows-1)*g)/rows, bw=(gw-(cols-1)*g)/cols;
+  if(bw<=0||bh<=0) return null;
   const boxes=[];
-  for(let i=0;i<n;i++){const c=i%best.cols, r=Math.floor(i/best.cols);boxes.push({x:x0+c*(w+g),y:gy+r*(h+g),w,h,photoH,textH});}
-  const gridH=best.rows*h+(best.rows-1)*g;
-  return {band:{x:x0,y:iy,w:gridW,h:bandH,font:bandFont},boxes,fontMax:w*0.05,fontMin:w*0.032,badge:w*0.09,
-          content:{x:x0,y:iy,w:gridW,h:(gy-iy)+gridH},pad};
+  for(let i=0;i<n;i++){
+    const r=Math.floor(i/cols), inRow=Math.min(cols,n-r*cols), c=i-r*cols;
+    const w=(gw-(inRow-1)*g)/inRow; // the last row stretches so no space is wasted
+    boxes.push({x:gx+c*(w+g),y:gy+r*(bh+g),w,h:bh,photoH:bh*(1-tr),textH:bh*tr});
+  }
+  const ref=Math.min(bw,bh/(PHOTO_RATIO+TEXT_RATIO));
+  return {band:{x:gx,y:iy,w:gw,h:bandH,font:bandFont},boxes,cols,rows,
+          fontMax:Math.min(ref*0.05,bh*tr*0.42),fontMin:Math.min(ref*0.032,bh*tr*0.3),badge:Math.min(bw,bh)*0.09,
+          content:{x:gx,y:iy,w:gw,h:ih},pad};
 }
 /* the area really used by the band and the boxes, plus a thin margin */
 function coverRect(L){const p=L.pad;return {x:L.content.x-p,y:L.content.y-p,w:L.content.w+2*p,h:L.content.h+2*p};}
@@ -747,20 +790,30 @@ function lblPos(m){const o=rotPt(m.rx*Math.SQRT1_2,-m.ry*Math.SQRT1_2,m.a||0);re
 function buildOverlay(){
   const ov=$("#ov"); ov.innerHTML="";
   ov.setAttribute("viewBox","0 0 "+pageDims.w+" "+pageDims.h); ov.setAttribute("preserveAspectRatio","none");
-  if(S.where==="plan"&&S.zone){
+  let markParent=ov;
+  if(S.where==="split"){
+    const HV=halves(), P=HV.plan, Ph=HV.photo, W=pageDims.w, H=pageDims.h;
+    // white everywhere except the plan half: the plan never shows under the photos
+    sv("path",{class:"half-cover",d:"M0 0H"+W+"V"+H+"H0Z M"+P.x+" "+P.y+"V"+(P.y+P.h)+"H"+(P.x+P.w)+"V"+P.y+"Z"},ov);
+    for(const r of [P,Ph]) sv("rect",{class:"half-frame",x:r.x,y:r.y,width:r.w,height:r.h,"stroke-width":frameW()},ov);
+    const defs=sv("defs",{},ov), cp=sv("clipPath",{id:"planHalfClip"},defs);
+    sv("rect",{x:P.x,y:P.y,width:P.w,height:P.h},cp);
+    markParent=sv("g",{"clip-path":"url(#planHalfClip)"},ov);
+  }
+  if(S.where!=="page"&&S.zone){
     const z=S.zone;
-    const Lc=S.cover?computeLayout(z,S.n):null;
+    const Lc=S.where==="plan"&&S.cover?computeLayout(z,S.n):null;
     if(Lc){const c=coverRect(Lc); sv("rect",{class:"zone-fill",x:c.x,y:c.y,width:c.w,height:c.h},ov);}
     if(mode==="zone"){
       sv("rect",{class:"zone-edit",x:z.x,y:z.y,width:z.w,height:z.h},ov);
-      const hs=Math.max(pageDims.w,pageDims.h)*0.012;
-      for(const [k,hx,hy] of [["nw",z.x,z.y],["ne",z.x+z.w,z.y],["sw",z.x,z.y+z.h],["se",z.x+z.w,z.y+z.h]])
+      const hs=Math.max(pageDims.w,pageDims.h)*0.012, mx=z.x+z.w/2, my=z.y+z.h/2;
+      for(const [k,hx,hy] of [["nw",z.x,z.y],["ne",z.x+z.w,z.y],["sw",z.x,z.y+z.h],["se",z.x+z.w,z.y+z.h],["n",mx,z.y],["s",mx,z.y+z.h],["w",z.x,my],["e",z.x+z.w,my]])
         sv("rect",{class:"zone-h","data-h":k,x:hx-hs/2,y:hy-hs/2,width:hs,height:hs},ov);
     } else if(!boxEls.length) sv("rect",{class:"zone-rect",x:z.x,y:z.y,width:z.w,height:z.h},ov);
   }
   S.marks.forEach((m0,idx)=>{
     const m=sheetMark(m0);
-    const g=sv("g",{class:"mk-g"+(idx===selected?" sel":""),"data-idx":idx},ov);
+    const g=sv("g",{class:"mk-g"+(idx===selected?" sel":""),"data-idx":idx},markParent);
     const tf=m.a?{transform:"rotate("+m.a+" "+m.cx+" "+m.cy+")"}:{};
     sv("ellipse",Object.assign({class:"mk",cx:m.cx,cy:m.cy,rx:m.rx,ry:m.ry,"stroke-width":markStroke()},tf),g);
     sv("ellipse",Object.assign({class:"mk-hit",cx:m.cx,cy:m.cy,rx:m.rx,ry:m.ry,"stroke-width":markStroke()*5},tf),g);
@@ -789,13 +842,15 @@ function setPlanScale(s1){
 }
 function toPts(e){const r=$("#ov").getBoundingClientRect();return {x:(e.clientX-r.left)/r.width*pageDims.w,y:(e.clientY-r.top)/r.height*pageDims.h};}
 function editedZone(d,p){
-  const W=pageDims.w,H=pageDims.h,minW=W*0.06,minH=H*0.06, z=Object.assign({},d.z0), dx=p.x-d.p0.x, dy=p.y-d.p0.y;
-  if(d.kind==="move"){ z.x=Math.min(Math.max(0,z.x+dx),W-z.w); z.y=Math.min(Math.max(0,z.y+dy),H-z.h); return z; }
+  const B=zoneBounds(), L=B.x, T=B.y, R=B.x+B.w, Bo=B.y+B.h;
+  const minW=pageDims.w*0.06,minH=pageDims.h*0.06, z=Object.assign({},d.z0), dx=p.x-d.p0.x, dy=p.y-d.p0.y;
+  if(d.kind==="move"){ z.x=Math.min(Math.max(L,z.x+dx),R-z.w); z.y=Math.min(Math.max(T,z.y+dy),Bo-z.h); return z; }
   let x1=z.x,y1=z.y,x2=z.x+z.w,y2=z.y+z.h;
-  if(d.h.includes("w")) x1=Math.min(Math.max(0,x1+dx),x2-minW); else x2=Math.max(Math.min(W,x2+dx),x1+minW);
-  if(d.h.includes("n")) y1=Math.min(Math.max(0,y1+dy),y2-minH); else y2=Math.max(Math.min(H,y2+dy),y1+minH);
+  if(d.h.includes("w")) x1=Math.min(Math.max(L,x1+dx),x2-minW); else if(d.h.includes("e")) x2=Math.max(Math.min(R,x2+dx),x1+minW);
+  if(d.h.includes("n")) y1=Math.min(Math.max(T,y1+dy),y2-minH); else if(d.h.includes("s")) y2=Math.max(Math.min(Bo,y2+dy),y1+minH);
   return {x:x1,y:y1,w:x2-x1,h:y2-y1};
 }
+function clampToBounds(z){const B=zoneBounds();const x=Math.max(B.x,z.x),y=Math.max(B.y,z.y);return {x,y,w:Math.max(0,Math.min(B.x+B.w,z.x+z.w)-x),h:Math.max(0,Math.min(B.y+B.h,z.y+z.h)-y)};}
 function zoneStatus(){
   const L=computeLayout(S.zone,S.n), small=L&&L.boxes[0].w<pageDims.w*0.035;
   setStatus(small?"As caixas ficam muito pequenas para "+S.n+" fotos. Aumenta o retângulo ou reduz o número de caixas.":"Zona atualizada. Quando estiver no sítio certo, carrega em “Concluir a zona”.",small?"err":"ok");
@@ -849,8 +904,9 @@ let drag=null;
     const w=Math.min(pageDims.w-x,Math.abs(p.x-d.x0)), h=Math.min(pageDims.h-y,Math.abs(p.y-d.y0));
     if(mode==="text"){ addTextBox(x,y,w,h); return; }
     if(mode==="zone"){
-      if(w<pageDims.w*0.06||h<pageDims.h*0.06){setStatus("A zona é pequena demais. Arrasta um retângulo maior sobre a parte livre da folha.","err");return;}
-      S.zone={x,y,w,h}; snapZone(); persist(); layoutSheets(); zoneStatus();
+      const cz=clampToBounds({x,y,w,h});
+      if(cz.w<pageDims.w*0.06||cz.h<pageDims.h*0.06){setStatus(S.where==="split"?"A zona é pequena demais. Arrasta um retângulo maior dentro da metade das fotos.":"A zona é pequena demais. Arrasta um retângulo maior sobre a parte livre da folha.","err");return;}
+      S.zone=cz; snapZone(); persist(); layoutSheets(); zoneStatus();
     }else{
       let m={n:parseInt($("#markNum").value,10)||1,cx:x+w/2,cy:y+h/2,rx:w/2,ry:h/2};
       const minR=pageDims.w*0.005;
@@ -883,13 +939,13 @@ function fillMarkNums(){
 function setMode(m){
   mode=m; selected=-1;
   if(m==="zone"&&pageDims){
-    if(!S.zone) S.zone={x:pageDims.w*0.45,y:pageDims.h*0.56,w:pageDims.w*0.42,h:pageDims.h*0.38};
+    if(!S.zone) S.zone=S.where==="split"?Object.assign({},halves().photo):{x:pageDims.w*0.45,y:pageDims.h*0.56,w:pageDims.w*0.42,h:pageDims.h*0.38};
     snapZone(); persist(); layoutSheets();
   }
   const sheet=$("#planSheet"); sheet.classList.toggle("mode-zone",m==="zone"); sheet.classList.toggle("mode-mark",m==="mark"); sheet.classList.toggle("mode-plan",m==="plan"); sheet.classList.toggle("mode-text",m==="text");
   $("#textBtn").setAttribute("aria-pressed",String(m==="text")); $("#textBtn").textContent=m==="text"?"Cancelar":"Escrever na planta";
   $("#planBtn").setAttribute("aria-pressed",String(m==="plan")); $("#planBtn").textContent=m==="plan"?"Concluir o ajuste da planta":"Ajustar a planta no PDF"; $("#planCtl").hidden=m!=="plan";
-  $("#zoneBtn").setAttribute("aria-pressed",String(m==="zone")); $("#zoneBtn").textContent=m==="zone"?"Concluir a zona":(S.zone?"Redesenhar a zona das caixas":"Desenhar a zona das caixas");
+  $("#zoneBtn").setAttribute("aria-pressed",String(m==="zone")); $("#zoneBtn").textContent=m==="zone"?"Concluir a zona":zoneBtnText();
   $("#markBtn").setAttribute("aria-pressed",String(m==="mark")); $("#markBtn").textContent=m==="mark"?"Terminar marcação":"Marcar na planta";
   $("#markCtl").hidden=m!=="mark"; $("#markDel").disabled=true;
   if(pageDims) buildOverlay();
@@ -898,20 +954,28 @@ function setMode(m){
 function updateHint(){
   const h=$("#hint");
   if(!pdfDoc){h.textContent="Começa por carregar o PDF da planta.";return;}
-  if(mode==="zone"){h.textContent="Ajusta o retângulo azul: arrasta-o pelo meio para a zona livre da folha e puxa os quadrados dos cantos para mudar o tamanho. Também podes desenhar outro arrastando fora dele. No fim, carrega em “Concluir a zona”.";return;}
+  if(mode==="zone"){h.textContent="Ajusta o retângulo verde: arrasta-o pelo meio, puxa os quadrados dos lados para mudar só a largura ou só a altura, e os dos cantos para mudar as duas. As caixas esticam para ocupar a zona toda. No fim, carrega em “Concluir a zona”.";return;}
   if(mode==="text"){h.textContent="Arrasta um retângulo sobre a planta no sítio onde queres escrever (ou dá um clique para uma caixa de tamanho normal). Depois escreve diretamente na caixa.";return;}
   if(mode==="plan"){h.textContent="Arrasta a planta para a mover e usa o Tamanho (ou − e +) para a aumentar ou diminuir. O que ficar fora da folha é cortado no PDF. As marcas acompanham a planta. No fim, carrega em “Concluir o ajuste da planta”.";return;}
   if(mode==="mark"){h.textContent="Escolhe o número da caixa e arrasta sobre o desenho para envolver o elemento em não conformidade. Um clique simples põe uma marca pequena. Para apagar, clica no contorno ou no número da marca.";return;}
-  if(S.where==="plan"&&!S.zone){h.textContent="Define a zona das caixas: carrega em “Desenhar a zona das caixas”. Aparece um retângulo azul que podes mover e redimensionar.";return;}
+  if(S.where!=="page"&&!S.zone){h.textContent="Define a zona das caixas: carrega em “Desenhar a zona das caixas”. Aparece um retângulo azul que podes mover e redimensionar.";return;}
   h.textContent="Arrasta fotos para as caixas ou clica numa caixa vazia. Na foto: + e − aproximam, arrastar escolhe a parte visível, duplo clique abre em grande.";
 }
+function zoneBtnText(){return S.where==="split"?"Ajustar a zona das caixas":(S.zone?"Ajustar a zona das caixas":"Desenhar a zona das caixas");}
 function syncControls(){
   document.querySelectorAll("[data-where]").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.where===S.where)));
   $("#planOpts").hidden=S.where!=="plan";
+  $("#zoneOpts").hidden=S.where==="page";
+  $("#splitOpts").hidden=S.where!=="split";
+  if(S.splitSide!=="bottom") S.splitSide="top";
+  $("#splitSide").value=S.splitSide;
   $("#coverChk").checked=S.cover;
   $("#nOut").textContent=String(S.n);
+  $("#colsOut").textContent=S.cols?String(Math.min(S.cols,S.n)):"Auto";
+  const tp=Math.round((S.textR||0.23)*100); $("#textR").value=String(tp); $("#textROut").textContent=tp+"%";
+  $("#commPageChk").checked=!!S.commPage;
   $("#fObra").value=S.ident.obra; $("#fData").value=S.ident.data; $("#fFiscal").value=S.ident.fiscal; $("#fRef").value=S.ident.ref;
-  $("#zoneBtn").textContent=S.zone?"Redesenhar a zona das caixas":"Desenhar a zona das caixas";
+  $("#zoneBtn").textContent=zoneBtnText();
   const c=S.comm; $("#cTipo").value=c.tipo; $("#cPara").value=c.para; $("#cNome").value=c.nome; $("#cAssunto").value=c.assunto; $("#cPrazo").value=c.prazo; $("#cMsg").value=c.msg;
 }
 
@@ -940,12 +1004,32 @@ $("#pageSel").addEventListener("change",async e=>{
   S.marks=[]; S.texts=[]; S.zone=null; S.planT={s:1,dx:0,dy:0,r:0}; persist(); afterPdfReady();
   setStatus(had?"Mudaste de página: as marcas e a zona das caixas da página anterior foram retiradas. As fotos e os textos mantêm-se.":"Página "+(idx+1)+" aberta.",had?"err":"ok");
 });
+function enterSplit(){
+  S.zone=Object.assign({},halves().photo); fitPlanToHalf(); applyPlanT(); renderPlan();
+}
 document.querySelectorAll("[data-where]").forEach(b=>b.addEventListener("click",()=>{
-  S.where=b.dataset.where; persist(); if(mode==="zone") setMode("none"); syncControls(); layoutSheets(); updateHint();
+  const prev=S.where, next=b.dataset.where; if(prev===next) return;
+  if(mode==="zone"||mode==="plan") setMode("none");
+  S.where=next;
+  if(pageDims){
+    if(next==="split") enterSplit();
+    else if(prev==="split"){ S.zone=null; S.planT={s:1,dx:0,dy:0,r:S.planT.r||0}; applyPlanT(); renderPlan(); }
+  }
+  persist(); syncControls(); layoutSheets(); refitSoon(); updateHint();
+  if(next==="split") setStatus("Folha dividida na horizontal: fotos "+(S.splitSide==="bottom"?"em baixo":"em cima")+" e a planta encaixada na outra metade. Podes ajustar a planta (fica sempre cortada na sua metade) e a zona das caixas.","ok");
 }));
+$("#splitSide").addEventListener("change",e=>{
+  S.splitSide=e.target.value; if(mode==="zone") setMode("none"); enterSplit(); persist(); layoutSheets(); refitSoon();
+});
+$("#fitPlanBtn").addEventListener("click",()=>{ if(!pageDims) return; fitPlanToHalf(); applyPlanT(); buildOverlay(); persist(); renderPlan(); setStatus("Planta encaixada na sua metade.","ok"); });
+function setCols(c){S.cols=Math.max(0,Math.min(S.n,c)); persist(); syncControls(); buildOverlay(); buildBoxes(); refitSoon();}
+$("#cMinus").addEventListener("click",()=>setCols(S.cols?S.cols-1:Math.max(1,(computeLayout(activeZone()||{x:0,y:0,w:1,h:1},S.n)||{cols:1}).cols-1)));
+$("#cPlus").addEventListener("click",()=>setCols(S.cols?(S.cols>=S.n?0:S.cols+1):Math.min(S.n,(computeLayout(activeZone()||{x:0,y:0,w:1,h:1},S.n)||{cols:0}).cols+1)));
+$("#textR").addEventListener("input",e=>{S.textR=+e.target.value/100; $("#textROut").textContent=e.target.value+"%"; persist(); buildBoxes(); refitSoon();});
+$("#commPageChk").addEventListener("change",e=>{S.commPage=e.target.checked; persist();});
 $("#zoneBtn").addEventListener("click",()=>setMode(mode==="zone"?"none":"zone"));
 $("#coverChk").addEventListener("change",e=>{S.cover=e.target.checked; persist(); buildOverlay();});
-function setN(n){S.n=Math.max(NMIN,Math.min(NMAX,n)); persist(); $("#nOut").textContent=String(S.n); setStatus(""); buildBoxes(); refitSoon();}
+function setN(n){S.n=Math.max(NMIN,Math.min(NMAX,n)); if(S.cols>S.n) S.cols=S.n; persist(); syncControls(); setStatus(""); buildOverlay(); buildBoxes(); refitSoon();}
 $("#nMinus").addEventListener("click",()=>setN(S.n-1));
 $("#nPlus").addEventListener("click",()=>setN(S.n+1));
 for(const [id,key] of [["#fObra","obra"],["#fData","data"],["#fFiscal","fiscal"],["#fRef","ref"]]){
@@ -1193,12 +1277,12 @@ function addCommPages(out,font,bold,safe,safeB,rgb){
 const saveBtn=$("#saveBtn");
 saveBtn.addEventListener("click",async()=>{
   if(!pdfDoc||!pdfBytes){setStatus("Carrega primeiro o PDF da planta.","err");return;}
-  if(S.where==="plan"&&!S.zone&&S.boxes.slice(0,S.n).some(b=>b.img||b.text.trim())){setStatus("Ainda não definiste a zona das caixas na planta.","err");return;}
+  if(S.where!=="page"&&!S.zone&&S.boxes.slice(0,S.n).some(b=>b.img||b.text.trim())){setStatus("Ainda não definiste a zona das caixas na planta.","err");return;}
   if(!S.boxes.slice(0,S.n).some(b=>b.img||b.text.trim())&&!S.marks.length&&!S.texts.some(x=>x.t.trim())){setStatus("Ainda não há fotos, textos nem marcas para guardar.","err");return;}
   if(!window.PDFLib){setStatus("A biblioteca que gera o PDF não carregou. Verifica a ligação à internet e recarrega a página.","err");return;}
   saveBtn.disabled=true; saveBtn.textContent="A gerar PDF…"; setStatus("");
   try{
-    const {PDFDocument,rgb,StandardFonts,degrees,PDFName}=PDFLib;
+    const {PDFDocument,rgb,StandardFonts,degrees,PDFName,pushGraphicsState,popGraphicsState,rectangle,clip,endPath}=PDFLib;
     let src;
     try{src=await PDFDocument.load(pdfBytes.slice(),{updateMetadata:false});}
     catch(e){throw new Error("o PDF original não pode ser reutilizado ("+(e&&e.message||"protegido ou danificado")+")");}
@@ -1210,6 +1294,10 @@ saveBtn.addEventListener("click",async()=>{
     const W=(rot%180===0)?cw:ch, H=(rot%180===0)?ch:cw;
     const kx=W/pageDims.w, ky=H/pageDims.h; // should be 1
     const page=out.addPage([W,H]);
+    const HV=S.where==="split"?halves():null;
+    const Xc=x=>x*kx, Yc=(y,h=0)=>H-(y+h)*ky;
+    // split mode: everything of the plan (drawing and marks) is clipped to the plan half
+    if(HV){ const P=HV.plan; page.pushOperators(pushGraphicsState(),rectangle(Xc(P.x),Yc(P.y,P.h),P.w*kx,P.h*ky),clip(),endPath()); }
     const po=rot===0?{x:0,y:0}:rot===90?{x:0,y:cw,rotate:degrees(-90)}:rot===180?{x:cw,y:ch,rotate:degrees(180)}:{x:ch,y:0,rotate:degrees(90)};
     { const T=S.planT, r=T.r||0, th0=po.rotate?po.rotate.angle:0;
       // plan adjustment: rotate about the sheet centre (clockwise on screen = negative in PDF), scale about origin, translate
@@ -1230,11 +1318,13 @@ saveBtn.addEventListener("click",async()=>{
       const p=lblPos(m); page.drawCircle({x:X(p.x),y:Y(p.y),size:lr,color:RED});
       const t=String(m.n), fs=lr*1.25; page.drawText(t,{x:X(p.x)-bold.widthOfTextAtSize(t,fs)/2,y:Y(p.y)-fs*0.35,size:fs,font:bold,color:WHITE});
     }
+    if(HV){ page.pushOperators(popGraphicsState());
+      for(const r of [HV.plan,HV.photo]) page.drawRectangle({x:X(r.x),y:Y(r.y,r.h),width:r.w*kx,height:r.h*ky,borderColor:BLACK,borderWidth:frameW()*kx}); }
 
     let target=page, zone=activeZone();
     const L=zone?computeLayout(zone,S.n):null; // no zone = only marks and texts on the plan
     if(L&&S.where==="page"){ target=out.addPage([W,H]); }
-    else if(L&&S.cover){ const c=coverRect(L); page.drawRectangle({x:X(c.x),y:Y(c.y,c.h),width:c.w*kx,height:c.h*ky,color:WHITE}); }
+    else if(L&&S.cover&&S.where==="plan"){ const c=coverRect(L); page.drawRectangle({x:X(c.x),y:Y(c.y,c.h),width:c.w*kx,height:c.h*ky,color:WHITE}); }
     // identification band
     if(L){
       const b=L.band; let fs=b.font*kx;
@@ -1283,7 +1373,7 @@ saveBtn.addEventListener("click",async()=>{
       let ty=Y(x.y)-pad-fs*0.9;
       for(const ln of lines){page.drawText(ln,{x:X(x.x)+pad,y:ty,size:fs,font,color:BLACK}); ty-=fs*1.2;}
     }
-    if(S.comm.msg.trim()||S.comm.assunto.trim()) addCommPages(out,font,bold,safe,safeB,rgb);
+    if(S.commPage&&(S.comm.msg.trim()||S.comm.assunto.trim())) addCommPages(out,font,bold,safe,safeB,rgb);
     out.setTitle(TIPOS[S.comm.tipo]+(S.ident.ref?" "+S.ident.ref:""));
     out.setCreator("DDN-INC"); out.setProducer("pdf-lib");
     // open showing one whole page at a time, so the A4 letter and the large plan sheet both fit the window

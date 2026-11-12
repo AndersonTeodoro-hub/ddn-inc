@@ -185,6 +185,27 @@ svg.ov{position:absolute;inset:0;width:100%;height:100%;z-index:1;pointer-events
 .photo.contain img{object-fit:contain;background:#fff}
 .photo .empty{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:4%;font-family:Arial,Helvetica,sans-serif;line-height:1.25}
 .photo.filled .empty{display:none}
+.band>span{flex:none}
+.band input{font:inherit;box-sizing:content-box;border:0;border-bottom:1px dashed #8a929c;background:transparent;color:#000;padding:0 2px;min-width:6ch}
+.band input:focus{outline:2px solid var(--drop);outline-offset:1px}
+.band input::placeholder{color:#8a929c}
+.bandbar{position:absolute;z-index:4;display:flex;gap:6px;justify-content:flex-end;align-items:center;padding-bottom:4px;transform:translateY(-100%);pointer-events:none}
+.bandbar.inside{transform:none;padding:2px}
+.bandbar>*{pointer-events:auto}
+.bandbar button,.bandbar .lbl{appearance:none;border:0;border-radius:4px;font:600 12px/1 "IBM Plex Sans",Arial,sans-serif;padding:6px 9px;white-space:nowrap}
+.bandbar button{background:var(--accent);color:var(--accent-ink);cursor:pointer}
+.bandbar button.warn{background:#a8261d;color:#fff}
+.bandbar button.confirm{background:#7a0010;color:#fff}
+.bandbar .lbl{background:rgba(20,22,26,.85);color:#fff}
+.plantabs{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:8px 24px;border-bottom:1px solid var(--line);background:var(--bg)}
+.plantabs .lbl{font-family:"IBM Plex Mono",ui-monospace,Consolas,monospace;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.ptab{display:flex;align-items:stretch;border:1px solid var(--line-strong);border-radius:6px;background:var(--field);overflow:hidden}
+.ptab button{appearance:none;border:0;background:transparent;color:var(--ink);font:inherit;font-size:13.5px;padding:7px 10px;cursor:pointer;white-space:nowrap;max-width:280px;overflow:hidden;text-overflow:ellipsis}
+.ptab.on{border-color:var(--ink)}
+.ptab.on .pt-sel{background:var(--ink);color:var(--panel)}
+.ptab .pt-x{border-left:1px solid var(--line-strong);color:var(--muted);padding:7px 10px}
+.ptab .pt-x.confirm{background:#a8261d;color:#fff}
+.ptab .tag{font-family:"IBM Plex Mono",ui-monospace,Consolas,monospace;font-size:11px;margin-left:6px;opacity:.8}
 .zoombar{display:flex;align-items:center;gap:6px;white-space:nowrap}
 .zoombar select{width:auto;font-size:13.5px;padding:5px 8px}
 .btn.sm{padding:4px 11px;font-size:16px;line-height:1.2}
@@ -256,6 +277,7 @@ textarea.txt:focus{outline:2px solid var(--drop);outline-offset:-2px}
     <button type="button" class="btn primary wide" id="loadBtn">Carregar PDF da planta</button>
     <input type="file" id="pdfPicker" accept="application/pdf,.pdf" hidden>
     <p class="file" id="fileName"></p>
+    <div class="row" id="addPlanRow" hidden><button type="button" class="btn wide" id="addPlanBtn">+ Adicionar outra planta (até 3)</button></div>
     <div id="planAdj" hidden>
       <button type="button" class="btn wide" id="planBtn" aria-pressed="false">Ajustar a planta no PDF</button>
       <div id="planCtl" hidden>
@@ -274,6 +296,7 @@ textarea.txt:focus{outline:2px solid var(--drop);outline-offset:-2px}
 
   <section class="step off" id="s2">
     <h2><span>02</span>Caixas das fotos</h2>
+    <div class="seg" id="boardSel" role="group" aria-label="Quadro a editar" hidden style="margin-bottom:10px"></div>
     <div class="seg" role="group" aria-label="Onde ficam as caixas">
       <button type="button" data-where="plan" aria-pressed="true">Na planta</button>
       <button type="button" data-where="page" aria-pressed="false">Numa página a seguir</button>
@@ -283,9 +306,11 @@ textarea.txt:focus{outline:2px solid var(--drop);outline-offset:-2px}
       <label class="check"><input type="checkbox" id="coverChk" checked> Tapar o que está por baixo da zona</label>
     </div>
     <div class="row" style="justify-content:space-between">
-      <span>Número de caixas</span>
+      <span id="nLabel">Número de caixas</span>
       <div class="stepper"><button type="button" id="nMinus" aria-label="Menos uma caixa">−</button><output id="nOut">6</output><button type="button" id="nPlus" aria-label="Mais uma caixa">+</button></div>
     </div>
+    <div class="range"><label for="textRatio">Texto por baixo da foto</label><input type="range" id="textRatio" min="10" max="60" step="1" value="30"><output id="textRatioOut">30%</output></div>
+    <p class="note">Até 30 fotos no total, em uma ou duas plantas de caixas (botão “+ Nova planta de caixas” por cima das caixas). A numeração é seguida e as marcas em qualquer planta usam esses números.</p>
   </section>
 
   <section class="step off" id="s3">
@@ -343,6 +368,7 @@ textarea.txt:focus{outline:2px solid var(--drop);outline-offset:-2px}
       <button type="button" class="btn sm" id="zoomIn" aria-label="Aproximar">+</button>
     </div>
   </div>
+  <div class="plantabs" id="planTabs" hidden></div>
   <div class="stage" id="stage">
     <div class="empty-stage" id="emptyStage">
       <section class="hero">
@@ -394,6 +420,10 @@ textarea.txt:focus{outline:2px solid var(--drop);outline-offset:-2px}
     <div class="sheet" id="extraSheet" hidden>
       <div class="layer" id="extraLayer"></div>
     </div>
+    <p class="pagecap" id="pageCap2" hidden>Segunda planta de caixas</p>
+    <div class="sheet" id="extraSheet2" hidden>
+      <div class="layer" id="extraLayer2"></div>
+    </div>
   </div>
 </main>
 </div>
@@ -416,18 +446,39 @@ textarea.txt:focus{outline:2px solid var(--drop);outline-offset:-2px}
 <script>
 "use strict";
 /* ================= constants & state ================= */
-const NMAX=12, NMIN=1, PHOTO_RATIO=0.75, TEXT_RATIO=0.225;
+const NMAX=30, NMIN=1, NPLANS=3, NBOARDS=2, PHOTO_RATIO=0.75;
 const SVGNS="http://www.w3.org/2000/svg";
 const $=s=>document.querySelector(s);
 const statusEl=$("#status");
 function setStatus(msg,kind){statusEl.textContent=msg||"";statusEl.className="status"+(kind?" "+kind:"");}
 function today(){const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");}
-function blankBoxes(){return Array.from({length:NMAX},()=>({img:null,fit:"cover",text:"",z:1,tx:0,ty:0}));}
-function freshState(){return {fileName:"",pageIndex:0,where:"plan",zone:null,cover:true,n:6,boxes:blankBoxes(),marks:[],texts:[],planT:{s:1,dx:0,dy:0,r:0},comm:{tipo:"nc",para:"empreiteiro",nome:"",assunto:"",prazo:"",msg:""},ident:{obra:"",data:today(),fiscal:"",ref:""}};}
+function blankBox(){return {img:null,fit:"cover",text:"",z:1,tx:0,ty:0};}
+function blankBoxes(){return Array.from({length:NMAX},blankBox);}
+function freshBoard(zp,n){return {zone:null,zonePlan:zp||0,n:n||6,proj:""};}
+function freshPlan(fileName,pageIndex){return {fileName:fileName||"",pageIndex:pageIndex||0,planT:{s:1,dx:0,dy:0,r:0},marks:[],texts:[]};}
+let A=0;                // index of the plan on screen
+/* S.fileName, S.pageIndex, S.planT, S.marks and S.texts always refer to the plan on screen (S.plans[A]) */
+function wire(s){
+  for(const k of ["fileName","pageIndex","planT","marks","texts"]) Object.defineProperty(s,k,{configurable:true,enumerable:false,
+    get(){const p=s.plans&&s.plans[A]; if(p) return p[k]; return k==="planT"?{s:1,dx:0,dy:0,r:0}:(k==="marks"||k==="texts")?[]:(k==="pageIndex"?0:"");},
+    set(v){const p=s.plans&&s.plans[A]; if(p) p[k]=v;}});
+  /* S.zone, S.zonePlan and S.n always refer to the photo board being edited (S.boards[S.B]) */
+  for(const k of ["zone","zonePlan","n"]) Object.defineProperty(s,k,{configurable:true,enumerable:false,
+    get(){const b=s.boards&&s.boards[s.B||0]; return b?b[k]:(k==="n"?6:k==="zonePlan"?0:null);},
+    set(v){const b=s.boards&&s.boards[s.B||0]; if(b) b[k]=v;}});
+  return s;
+}
+function freshState(){return wire({plans:[],boards:[freshBoard(0,6)],B:0,where:"plan",cover:true,textRatio:0.225,boxes:blankBoxes(),comm:{tipo:"nc",para:"empreiteiro",nome:"",assunto:"",prazo:"",msg:""},ident:{obra:"",data:today(),fiscal:"",ref:""}});}
 let S=freshState();
-let pdfBytes=null;      // Uint8Array (master copy)
-let pdfDoc=null;        // pdf.js document
-let pageDims=null;      // {w,h} in points, as displayed (rotation applied)
+let docs=[];            // per plan: {bytes, doc (pdf.js), dims}
+let pdfBytes=null;      // plan on screen: Uint8Array (master copy)
+let pdfDoc=null;        // plan on screen: pdf.js document
+let pageDims=null;      // plan on screen: {w,h} in points, as displayed (rotation applied)
+function activate(k){A=Math.max(0,Math.min(k,docs.length-1)); const d=docs[A]; pdfDoc=d?d.doc:null; pdfBytes=d?d.bytes:null; pageDims=d?d.dims:null;}
+function boardDimsOf(bd){ if(S.where==="page") return docs[0]?docs[0].dims:pageDims; const d=docs[bd.zonePlan]; return d?d.dims:pageDims; }
+function boardDims(){ return boardDimsOf(S.boards[S.B]||S.boards[0]); }
+function off(bi){let o=0;for(let i=0;i<bi;i++) o+=S.boards[i].n; return o;}
+function totalBoxes(){return S.boards.reduce((a,b)=>a+b.n,0);}
 let mode="none";        // none | zone | mark
 let selected=-1;
 
@@ -458,39 +509,42 @@ function persist(){
 
 /* ================= PDF loading & rendering ================= */
 const MAX_MB=80;
-async function loadPdfFile(file){
+async function loadPdfFile(file,how){
   if(!file) return;
   if(!/\.pdf$/i.test(file.name)&&file.type!=="application/pdf"){ setStatus(file.name+": não é um PDF.","err"); return; }
   if(file.size>MAX_MB*1024*1024){ setStatus(file.name+": tem mais de "+MAX_MB+" MB. Usa um PDF mais leve (por exemplo, só a folha da planta).","err"); return; }
+  if(how==="add"&&S.plans.length>=NPLANS){ setStatus("Já tens "+NPLANS+" plantas. Remove uma antes de adicionar outra.","err"); return; }
   const bytes=new Uint8Array(await file.arrayBuffer());
-  const ok=await openPdf(bytes,0);
-  if(!ok) return;
-  const keepIdent=S.ident;
-  S=freshState(); S.ident=keepIdent; S.ident.data=today(); S.fileName=file.name;
-  try{ await kvPut("pdf",bytes); }catch(e){ setStatus("O PDF abriu, mas este browser não o guardou. Se fechares a página tens de o carregar de novo.","err"); }
-  persist();
-  afterPdfReady();
-  setStatus("Planta carregada. Agora define onde ficam as caixas.","ok");
+  const r=await openDoc(bytes,0); if(!r) return;
+  let k;
+  if(how==="replace"&&S.plans.length){
+    k=A; try{docs[k].doc.destroy();}catch(_){}
+    docs[k]={bytes,doc:r.doc,dims:r.dims}; S.plans[k]=freshPlan(file.name,r.idx);
+    for(const bd of S.boards) if(bd.zonePlan===k) bd.zone=null;
+  } else {
+    S.plans.push(freshPlan(file.name,r.idx)); docs.push({bytes,doc:r.doc,dims:r.dims}); k=S.plans.length-1;
+  }
+  activate(k);
+  try{ await kvPut("pdf"+k,bytes); }catch(e){ setStatus("O PDF abriu, mas este browser não o guardou. Se fechares a página tens de o carregar de novo.","err"); }
+  persist(); afterPdfReady();
+  setStatus(S.plans.length>1?"Planta "+(k+1)+" carregada. As marcas desta planta usam os números do mesmo quadro de fotos.":"Planta carregada. Agora define onde ficam as caixas.","ok");
 }
-async function openPdf(bytes,pageIndex){
-  if(!window.pdfjsLib){ setStatus("A biblioteca que lê PDF não carregou. Verifica a ligação à internet e recarrega a página.","err"); return false; }
+async function openDoc(bytes,pageIndex){
+  if(!window.pdfjsLib){ setStatus("A biblioteca que lê PDF não carregou. Verifica a ligação à internet e recarrega a página.","err"); return null; }
   try{
     const doc=await pdfjsLib.getDocument({data:bytes.slice(),isEvalSupported:false}).promise;
-    if(pdfDoc) try{pdfDoc.destroy();}catch(_){}
-    pdfDoc=doc; pdfBytes=bytes;
-    const idx=Math.min(Math.max(0,pageIndex),doc.numPages-1);
+    const idx=Math.min(Math.max(0,pageIndex||0),doc.numPages-1);
     const pg=await doc.getPage(idx+1);
     const vp=pg.getViewport({scale:1});
-    pageDims={w:vp.width,h:vp.height};
-    S.pageIndex=idx;
-    return true;
+    return {doc,dims:{w:vp.width,h:vp.height},idx};
   }catch(e){
     const n=e&&e.name;
     if(n==="PasswordException") setStatus("Este PDF está protegido por palavra-passe. Pede uma versão sem proteção.","err");
     else setStatus("Não foi possível abrir este PDF ("+(e&&e.message||n||"erro")+").","err");
-    return false;
+    return null;
   }
 }
+async function savePdfKeys(){ for(let i=0;i<NPLANS;i++){ try{ if(docs[i]) await kvPut("pdf"+i,docs[i].bytes); else await kvDel("pdf"+i); }catch(_){} } }
 let renderTask=null, renderSeq=0;
 async function renderPlan(){
   if(!pdfDoc) return;
@@ -517,26 +571,68 @@ async function renderPlan(){
 }
 function afterPdfReady(){
   $("#emptyStage").hidden=true; $("#planSheet").hidden=false;
-  $("#fileName").textContent=S.fileName; $("#planAdj").hidden=false;
-  $("#loadBtn").textContent="Carregar outro PDF";
+  $("#fileName").textContent=(S.plans.length>1?"Planta "+(A+1)+": ":"")+S.fileName; $("#planAdj").hidden=false;
+  $("#loadBtn").textContent="Substituir esta planta"; $("#addPlanRow").hidden=S.plans.length>=NPLANS;
   const sel=$("#pageSel"); sel.innerHTML="";
   for(let i=0;i<pdfDoc.numPages;i++){const o=document.createElement("option");o.value=i;o.textContent="Página "+(i+1)+" de "+pdfDoc.numPages;sel.appendChild(o);}
   sel.value=String(S.pageIndex); $("#pageWrap").hidden=pdfDoc.numPages<2;
   document.querySelectorAll(".step.off").forEach(s=>s.classList.remove("off"));
-  setMode("none"); syncControls(); layoutSheets(); renderPlan(); updateHint();
+  selected=-1; setMode("none"); syncControls(); layoutSheets(); renderPlan(); renderTabs(); updateHint();
+}
+function renderTabs(){
+  const bar=$("#planTabs"); bar.innerHTML="";
+  if(!S.plans.length){bar.hidden=true;return;}
+  bar.hidden=false;
+  const l=document.createElement("span"); l.className="lbl"; l.textContent="Plantas"; bar.appendChild(l);
+  S.plans.forEach((p,k)=>{
+    const w=document.createElement("div"); w.className="ptab"+(k===A?" on":"");
+    const b=document.createElement("button"); b.type="button"; b.className="pt-sel"; b.setAttribute("aria-pressed",String(k===A));
+    b.textContent=(k+1)+" ";
+    const nm=p.marks.length; const tags=[]; if(S.where==="plan"){ const q=S.boards.map((bd,i)=>bd.zone&&bd.zonePlan===k?i+1:0).filter(Boolean); if(q.length) tags.push(S.boards.length>1?"caixas "+q.join(" e "):"quadro"); } if(nm) tags.push(nm+" marca"+(nm>1?"s":""));
+    if(tags.length){const s=document.createElement("span"); s.className="tag"; s.style.margin="0 6px 0 0"; s.textContent="["+tags.join(" · ")+"]"; b.appendChild(s);}
+    b.appendChild(document.createTextNode(p.fileName));
+    b.title=p.fileName; b.addEventListener("click",()=>{ if(k!==A){ activate(k); afterPdfReady(); } });
+    const x=document.createElement("button"); x.type="button"; x.className="pt-x"; x.textContent="✕"; x.title="Retirar esta planta do registo";
+    x.addEventListener("click",()=>{
+      if(!x.classList.contains("confirm")){x.classList.add("confirm");x.textContent="Retirar?";setTimeout(()=>{x.classList.remove("confirm");x.textContent="✕";},3500);return;}
+      removePlan(k);
+    });
+    w.appendChild(b); w.appendChild(x); bar.appendChild(w);
+  });
+  if(S.plans.length<NPLANS){const add=document.createElement("button"); add.type="button"; add.className="btn sm"; add.textContent="+ Planta"; add.title="Adicionar outra planta (até 3)"; add.addEventListener("click",()=>pickPdf("add")); bar.appendChild(add);}
+}
+async function removePlan(k){
+  const name=S.plans[k].fileName;
+  try{docs[k].doc.destroy();}catch(_){}
+  docs.splice(k,1); S.plans.splice(k,1);
+  for(const bd of S.boards){ if(bd.zonePlan===k){bd.zone=null; bd.zonePlan=0;} else if(bd.zonePlan>k) bd.zonePlan--; }
+  await savePdfKeys(); persist();
+  if(!docs.length){ A=0; pdfDoc=null; pdfBytes=null; pageDims=null; showEmpty(); setStatus("Planta "+name+" retirada. Carrega uma planta para continuar; as fotos e os textos das caixas mantêm-se.","ok"); return; }
+  activate(Math.min(A,docs.length-1)); afterPdfReady();
+  setStatus("Planta "+name+" retirada, com as suas marcas e textos."+(S.zone?"":" Se o quadro de fotos estava nela, define de novo a zona das caixas."),"ok");
+}
+function showEmpty(){
+  setMode("none");
+  $("#planSheet").hidden=true; $("#extraSheet").hidden=true; $("#pageCap").hidden=true; $("#emptyStage").hidden=false;
+  $("#fileName").textContent=""; $("#pageWrap").hidden=true; $("#planAdj").hidden=true; $("#addPlanRow").hidden=true; $("#loadBtn").textContent="Carregar PDF da planta";
+  document.querySelectorAll("#s2,#s3,#s4,#s5,#s6").forEach(s=>s.classList.add("off"));
+  renderTabs(); syncControls(); updateHint();
 }
 
 /* ================= geometry (points, top-left origin, as displayed) ================= */
-function extraZone(){const w=pageDims.w,h=pageDims.h;return {x:w*0.04,y:h*0.05,w:w*0.92,h:h*0.90};}
-function activeZone(){return S.where==="page"?extraZone():S.zone;}
-function computeLayout(zone,n){
-  const PM=Math.max(pageDims.w,pageDims.h), pad=PM*0.004;
+function extraZoneFor(d){return {x:d.w*0.04,y:d.h*0.05,w:d.w*0.92,h:d.h*0.90};}
+function extraZone(){return extraZoneFor(boardDims());}
+function zoneOf(bd){return S.where==="page"?extraZoneFor(boardDimsOf(bd)):bd.zone;}
+function activeZone(){return zoneOf(S.boards[S.B]||S.boards[0]);}
+function computeLayout(zone,n,dims){
+  dims=dims||boardDims(); const TR=S.textRatio||0.225;
+  const PM=Math.max(dims.w,dims.h), pad=PM*0.004;
   const ix=zone.x+pad, iy=zone.y+pad, iw=zone.w-2*pad, ih=zone.h-2*pad;
   const bandFont=Math.max(Math.min(PM*0.0095,ih*0.07),1);
   const bandH=bandFont*2.0, bandGap=bandFont*0.8;
   const gx=ix, gy=iy+bandH+bandGap, gw=iw, gh=ih-bandH-bandGap;
   const g=PM*0.003;
-  const ratio=PHOTO_RATIO+TEXT_RATIO;
+  const ratio=PHOTO_RATIO+TR;
   let best=null;
   for(let cols=1;cols<=n;cols++){
     const rows=Math.ceil(n/cols);
@@ -546,7 +642,7 @@ function computeLayout(zone,n){
     if(!best||w>best.w+1e-6) best={cols,rows,w};
   }
   if(!best) return null;
-  const w=best.w, photoH=w*PHOTO_RATIO, textH=w*TEXT_RATIO, h=photoH+textH;
+  const w=best.w, photoH=w*PHOTO_RATIO, textH=w*TR, h=photoH+textH;
   const gridW=best.cols*w+(best.cols-1)*g;
   const x0=gx+(gw-gridW)/2;
   const boxes=[];
@@ -562,27 +658,28 @@ function snapZone(){
   if(!S.zone||!pageDims) return;
   for(let k=0;k<3;k++){const L=computeLayout(S.zone,S.n); if(!L) return; S.zone=coverRect(L);}
 }
-function bandText(){
+function bandText(bd){
   const id=S.ident, d=id.data?id.data.split("-").reverse().join("/"):"";
   const parts=[["Obra",id.obra],["Data",d],["Fiscal",id.fiscal],[TIPOS[S.comm.tipo]||"Referência",id.ref]];
-  if(S.where==="page") parts.push(["Planta",S.fileName+(pdfDoc&&pdfDoc.numPages>1?" (p. "+(S.pageIndex+1)+")":"")]);
+  if(S.where==="page") parts.push([S.plans.length>1?"Plantas":"Planta",planRef()]);
   return parts;
 }
 
 /* ================= sheets & DOM ================= */
 function pct(v,tot){return (v/tot*100)+"%";}
 function cq(pts){return (pts/pageDims.w*100)+"cqw";}
+function cqd(pts,d){return (pts/d.w*100)+"cqw";}
 function layoutSheets(){
   if(!pageDims) return;
-  const ar=pageDims.w+"/"+pageDims.h;
-  $("#planSheet").style.aspectRatio=ar; $("#extraSheet").style.aspectRatio=ar;
+  const ar=pageDims.w+"/"+pageDims.h, bd=boardDims();
+  $("#planSheet").style.aspectRatio=ar; $("#extraSheet").style.aspectRatio=bd.w+"/"+bd.h; $("#extraSheet2").style.aspectRatio=bd.w+"/"+bd.h;
   const z=parseFloat($("#zoom").value)||1;
   const stage=$("#stage"), avail=stage.clientWidth-32, availH=stage.clientHeight-32;
   let w=avail; if(z===1&&availH>200) w=Math.min(avail,availH*pageDims.w/pageDims.h*1.0);
   w=Math.max(320,w*z);
-  $("#planSheet").style.width=w+"px"; $("#extraSheet").style.width=w+"px";
-  const extra=S.where==="page";
-  $("#extraSheet").hidden=!extra; $("#pageCap").hidden=!extra;
+  $("#planSheet").style.width=w+"px"; $("#extraSheet").style.width=w+"px"; $("#extraSheet2").style.width=w+"px";
+  const extra=S.where==="page", two=extra&&S.boards.length>1;
+  $("#extraSheet").hidden=!extra; $("#pageCap").hidden=!extra; $("#extraSheet2").hidden=!two; $("#pageCap2").hidden=!two;
   buildOverlay(); buildBoxes();
 }
 let boxEls=[];
@@ -636,68 +733,102 @@ function addTextBox(x,y,w,h){
   setStatus("Caixa de texto criada: escreve diretamente nela. Para a mover usa “Mover”; para mudar o tamanho puxa o quadrado do canto.","ok");
 }
 function buildBoxes(){
-  const planLayer=$("#planLayer"), extraLayer=$("#extraLayer");
-  planLayer.innerHTML=""; extraLayer.innerHTML=""; boxEls=[];
+  const planLayer=$("#planLayer"), xl=[$("#extraLayer"),$("#extraLayer2")];
+  planLayer.innerHTML=""; xl.forEach(l=>l.innerHTML=""); boxEls=[];
   fillMarkNums(); buildTexts();
-  const zone=activeZone(); if(!zone) return;
-  const L=computeLayout(zone,S.n); if(!L) return;
-  const layer=S.where==="page"?extraLayer:planLayer;
-  const W=pageDims.w,H=pageDims.h;
-  // band
-  const band=document.createElement("div"); band.className="band";
-  Object.assign(band.style,{left:pct(L.band.x,W),top:pct(L.band.y,H),width:pct(L.band.w,W),height:pct(L.band.h,H),fontSize:cq(L.band.font),gap:cq(L.band.font*1.6)});
-  band.dataset.font=L.band.font;
-  layer.appendChild(band); renderBand(band,L.band);
-  L.boxes.forEach((g,i)=>{
-    const el=document.createElement("div"); el.className="box";
-    Object.assign(el.style,{left:pct(g.x,W),top:pct(g.y,H),width:pct(g.w,W),height:pct(g.h,H)});
-    el.innerHTML='<button type="button" class="photo"><span class="num"></span><span class="empty">Larga a foto aqui<br>ou clica</span><img alt=""></button>'+
-      '<div class="tools"><button type="button" data-act="zout" title="Afastar a foto" aria-label="Afastar a foto">−</button><button type="button" data-act="zin" title="Aproximar a foto" aria-label="Aproximar a foto">+</button><button type="button" data-act="fit" title="Alternar entre preencher a caixa e mostrar a foto inteira">Inteira</button><button type="button" data-act="rep" title="Trocar por outra foto">Trocar</button><button type="button" data-act="del" title="Remover a foto">✕</button></div>'+
-      '<textarea class="txt" rows="1" placeholder="Resumo do problema"></textarea>';
-    const ph=el.querySelector(".photo"), num=el.querySelector(".num"), ta=el.querySelector("textarea"), em=el.querySelector(".empty");
-    ph.style.height=pct(g.photoH,g.h); ph.setAttribute("aria-label","Foto da caixa "+(i+1)+": clicar para escolher");
-    num.textContent=String(i+1); Object.assign(num.style,{width:cq(L.badge),height:cq(L.badge),fontSize:cq(L.badge*0.62)});
-    em.style.fontSize=cq(Math.max(L.fontMax,1));
-    ta.style.padding=cq(g.w*0.02)+" "+cq(g.w*0.025); ta.setAttribute("aria-label","Resumo do problema da caixa "+(i+1));
-    ta.dataset.max=L.fontMax; ta.dataset.min=L.fontMin;
-    ta.addEventListener("input",()=>{S.boxes[i].text=ta.value; fitText(i); persist();});
-    ph.addEventListener("click",()=>{ if(S.boxes[i].img) return; choosePhoto(i); });
-    ph.addEventListener("dblclick",()=>{ if(S.boxes[i].img) openLightbox(i); });
-    el.querySelector('[data-act="rep"]').addEventListener("click",()=>choosePhoto(i));
-    el.querySelector('[data-act="zin"]').addEventListener("click",()=>zoomPhoto(i,1.25));
-    el.querySelector('[data-act="zout"]').addEventListener("click",()=>zoomPhoto(i,1/1.25));
-    ph.addEventListener("wheel",e=>{ if(!S.boxes[i].img||document.activeElement!==ph) return; e.preventDefault(); zoomPhoto(i,e.deltaY<0?1.12:1/1.12); },{passive:false});
-    let pan=null;
-    ph.addEventListener("pointerdown",e=>{ const b=S.boxes[i]; if(!b.img||e.button>0||(b.z||1)<=1.001) return;
-      pan={x:e.clientX,y:e.clientY,tx:b.tx||0,ty:b.ty||0,w:ph.clientWidth,h:ph.clientHeight}; ph.setPointerCapture(e.pointerId); ph.classList.add("panning"); });
-    ph.addEventListener("pointermove",e=>{ if(!pan) return; const b=S.boxes[i];
-      b.tx=pan.tx+(e.clientX-pan.x)/pan.w; b.ty=pan.ty+(e.clientY-pan.y)/pan.h; clampPan(b); applyPhotoT(i); });
-    const endPan=()=>{ if(!pan) return; pan=null; ph.classList.remove("panning"); persist(); };
-    ph.addEventListener("pointerup",endPan); ph.addEventListener("pointercancel",endPan);
-    el.querySelector('[data-act="fit"]').addEventListener("click",()=>{const b=S.boxes[i]; b.fit=b.fit==="cover"?"contain":"cover"; renderBox(i); persist();});
-    const del=el.querySelector('[data-act="del"]');
-    del.addEventListener("click",()=>{
-      if(!del.classList.contains("confirm")){del.classList.add("confirm");del.textContent="Confirmar";setTimeout(()=>{del.classList.remove("confirm");del.textContent="✕";},3000);return;}
-      S.boxes[i].img=null; S.boxes[i].z=1; S.boxes[i].tx=0; S.boxes[i].ty=0; renderBox(i); persist(); setStatus("Foto removida da caixa "+(i+1)+".","ok");
+  S.boards.forEach((bd,bi)=>{
+    const zone=zoneOf(bd); if(!zone) return;
+    if(S.where==="plan"&&bd.zonePlan!==A) return; // this board lives on another plan
+    const BD=boardDimsOf(bd), L=computeLayout(zone,bd.n,BD); if(!L) return;
+    const layer=S.where==="page"?xl[bi]:planLayer;
+    const W=BD.w,H=BD.h, cq=pts=>cqd(pts,BD), o=off(bi);
+    // header band (one per board)
+    const band=document.createElement("div"); band.className="band"; band.dataset.b=bi;
+    Object.assign(band.style,{left:pct(L.band.x,W),top:pct(L.band.y,H),width:pct(L.band.w,W),height:pct(L.band.h,H),fontSize:cq(L.band.font),gap:cq(L.band.font*1.6)});
+    band.dataset.font=L.band.font;
+    layer.appendChild(band); renderBand(band,L.band,BD,bd);
+    // buttons above the header (screen only, never in the PDF)
+    const bar=document.createElement("div"); bar.className="bandbar"+(L.band.y<H*0.05?" inside":"");
+    Object.assign(bar.style,{left:pct(L.band.x,W),top:pct(L.band.y,H),width:pct(L.band.w,W)});
+    if(S.boards.length>1){const l=document.createElement("span"); l.className="lbl"; l.textContent="Planta de caixas "+(bi+1); bar.appendChild(l);}
+    if(S.boards.length<NBOARDS){const nb=document.createElement("button"); nb.type="button"; nb.textContent="+ Nova planta de caixas"; nb.addEventListener("click",addBoard); bar.appendChild(nb);}
+    if(bi>0){const rb=document.createElement("button"); rb.type="button"; rb.className="warn"; rb.textContent="✕ Retirar esta planta de caixas";
+      rb.addEventListener("click",()=>{ if(!rb.classList.contains("confirm")){rb.classList.add("confirm");rb.textContent="Confirmar: retirar";setTimeout(()=>{rb.classList.remove("confirm");rb.textContent="✕ Retirar esta planta de caixas";},3500);return;} removeBoard(bi); });
+      bar.appendChild(rb);}
+    layer.appendChild(bar);
+      L.boxes.forEach((g,j)=>{ const i=o+j;
+      const el=document.createElement("div"); el.className="box";
+      Object.assign(el.style,{left:pct(g.x,W),top:pct(g.y,H),width:pct(g.w,W),height:pct(g.h,H)});
+      el.innerHTML='<button type="button" class="photo"><span class="num"></span><span class="empty">Larga a foto aqui<br>ou clica</span><img alt=""></button>'+
+        '<div class="tools"><button type="button" data-act="zout" title="Afastar a foto" aria-label="Afastar a foto">−</button><button type="button" data-act="zin" title="Aproximar a foto" aria-label="Aproximar a foto">+</button><button type="button" data-act="fit" title="Alternar entre preencher a caixa e mostrar a foto inteira">Inteira</button><button type="button" data-act="rep" title="Trocar por outra foto">Trocar</button><button type="button" data-act="del" title="Remover a foto">✕</button></div>'+
+        '<textarea class="txt" rows="1" placeholder="Resumo do problema"></textarea>';
+      const ph=el.querySelector(".photo"), num=el.querySelector(".num"), ta=el.querySelector("textarea"), em=el.querySelector(".empty");
+      ph.style.height=pct(g.photoH,g.h); ph.setAttribute("aria-label","Foto da caixa "+(i+1)+": clicar para escolher");
+      num.textContent=String(i+1); Object.assign(num.style,{width:cq(L.badge),height:cq(L.badge),fontSize:cq(L.badge*0.62)});
+      em.style.fontSize=cq(Math.max(L.fontMax,1));
+      ta.style.padding=cq(g.w*0.02)+" "+cq(g.w*0.025); ta.setAttribute("aria-label","Resumo do problema da caixa "+(i+1));
+      ta.dataset.max=L.fontMax; ta.dataset.min=L.fontMin; ta.dataset.pw=W;
+      ta.addEventListener("input",()=>{S.boxes[i].text=ta.value; fitText(i); persist();});
+      ph.addEventListener("click",()=>{ if(S.boxes[i].img) return; choosePhoto(i); });
+      ph.addEventListener("dblclick",()=>{ if(S.boxes[i].img) openLightbox(i); });
+      el.querySelector('[data-act="rep"]').addEventListener("click",()=>choosePhoto(i));
+      el.querySelector('[data-act="zin"]').addEventListener("click",()=>zoomPhoto(i,1.25));
+      el.querySelector('[data-act="zout"]').addEventListener("click",()=>zoomPhoto(i,1/1.25));
+      ph.addEventListener("wheel",e=>{ if(!S.boxes[i].img||document.activeElement!==ph) return; e.preventDefault(); zoomPhoto(i,e.deltaY<0?1.12:1/1.12); },{passive:false});
+      let pan=null;
+      ph.addEventListener("pointerdown",e=>{ const b=S.boxes[i]; if(!b.img||e.button>0||(b.z||1)<=1.001) return;
+        pan={x:e.clientX,y:e.clientY,tx:b.tx||0,ty:b.ty||0,w:ph.clientWidth,h:ph.clientHeight}; ph.setPointerCapture(e.pointerId); ph.classList.add("panning"); });
+      ph.addEventListener("pointermove",e=>{ if(!pan) return; const b=S.boxes[i];
+        b.tx=pan.tx+(e.clientX-pan.x)/pan.w; b.ty=pan.ty+(e.clientY-pan.y)/pan.h; clampPan(b); applyPhotoT(i); });
+      const endPan=()=>{ if(!pan) return; pan=null; ph.classList.remove("panning"); persist(); };
+      ph.addEventListener("pointerup",endPan); ph.addEventListener("pointercancel",endPan);
+      el.querySelector('[data-act="fit"]').addEventListener("click",()=>{const b=S.boxes[i]; b.fit=b.fit==="cover"?"contain":"cover"; renderBox(i); persist();});
+      const del=el.querySelector('[data-act="del"]');
+      del.addEventListener("click",()=>{
+        if(!del.classList.contains("confirm")){del.classList.add("confirm");del.textContent="Confirmar";setTimeout(()=>{del.classList.remove("confirm");del.textContent="✕";},3000);return;}
+        S.boxes[i].img=null; S.boxes[i].z=1; S.boxes[i].tx=0; S.boxes[i].ty=0; renderBox(i); persist(); setStatus("Foto removida da caixa "+(i+1)+".","ok");
+      });
+      let depth=0;
+      el.addEventListener("dragenter",e=>{if(hasFiles(e)){e.preventDefault();depth++;el.classList.add("drag");}});
+      el.addEventListener("dragover",e=>{if(hasFiles(e)){e.preventDefault();e.dataTransfer.dropEffect="copy";}});
+      el.addEventListener("dragleave",()=>{depth=Math.max(0,depth-1);if(!depth)el.classList.remove("drag");});
+      el.addEventListener("drop",e=>{e.preventDefault();e.stopPropagation();depth=0;el.classList.remove("drag");placePhotos(e.dataTransfer.files,i);});
+      layer.appendChild(el); boxEls.push(el); renderBox(i);
     });
-    let depth=0;
-    el.addEventListener("dragenter",e=>{if(hasFiles(e)){e.preventDefault();depth++;el.classList.add("drag");}});
-    el.addEventListener("dragover",e=>{if(hasFiles(e)){e.preventDefault();e.dataTransfer.dropEffect="copy";}});
-    el.addEventListener("dragleave",()=>{depth=Math.max(0,depth-1);if(!depth)el.classList.remove("drag");});
-    el.addEventListener("drop",e=>{e.preventDefault();e.stopPropagation();depth=0;el.classList.remove("drag");placePhotos(e.dataTransfer.files,i);});
-    layer.appendChild(el); boxEls.push(el); renderBox(i);
   });
   hiddenContentWarning();
   fillMarkNums();
 }
-function renderBand(band,b){
+function addBoard(){
+  if(S.boards.length>=NBOARDS) return;
+  const free=NMAX-totalBoxes(); if(free<1){ setStatus("Já tens "+NMAX+" caixas no total. Reduz o número de caixas do primeiro quadro para criar outro.","err"); return; }
+  S.boards.push(freshBoard(A,Math.min(6,free))); S.B=S.boards.length-1; persist();
+  if(S.where==="plan"){ setMode("zone"); setStatus("Nova planta de caixas criada. Posiciona e ajusta o retângulo azul e carrega em “Concluir a zona”.","ok"); }
+  else { setMode("none"); layoutSheets(); setStatus("Nova planta de caixas criada numa página própria.","ok"); }
+  syncControls(); renderTabs();
+}
+function removeBoard(bi){
+  S.boards.splice(bi,1); S.B=0; persist(); setMode("none"); syncControls(); layoutSheets(); renderTabs();
+  setStatus("Planta de caixas retirada. As fotos dessas caixas ficam guardadas mas não saem no PDF.","ok");
+}
+function renderBand(band,b,BD,bd){
+  const cq=pts=>cqd(pts,BD);
   band.innerHTML="";
-  for(const [k,v] of bandText()){const s=document.createElement("span");const bb=document.createElement("b");bb.textContent=k+": ";s.appendChild(bb);s.appendChild(document.createTextNode(v||"—"));band.appendChild(s);}
+  const pj=document.createElement("span"), pb=document.createElement("b"), inp=document.createElement("input");
+  pb.textContent="Projeto: "; inp.type="text"; inp.value=bd.proj||""; inp.placeholder="n.º do projeto"; inp.setAttribute("aria-label","Número do projeto desta planta de caixas");
+  const fitInp=()=>{inp.style.width=Math.max(10,inp.value.length+1)+"ch";};
+  fitInp();
+  inp.addEventListener("input",()=>{bd.proj=inp.value; fitInp(); persist(); syncControls();});
+  pj.append(pb,inp); band.appendChild(pj);
+  for(const [k,v] of bandText(bd)){const s=document.createElement("span");const bb=document.createElement("b");bb.textContent=k+": ";s.appendChild(bb);s.appendChild(document.createTextNode(v||"—"));band.appendChild(s);}
   // shrink to fit
   let f=b.font; band.style.fontSize=cq(f);
   let guard=0; while(band.scrollWidth>band.clientWidth+1&&guard++<40){f*=0.94;band.style.fontSize=cq(f);band.style.gap=cq(f*1.6);}
 }
-function refreshBand(){const band=document.querySelector(".band"); if(!band) return; const L=computeLayout(activeZone(),S.n); if(L) renderBand(band,L.band);}
+function refreshBand(){
+  document.querySelectorAll(".band").forEach(band=>{ const bd=S.boards[+band.dataset.b]; if(!bd) return; const z=zoneOf(bd); if(!z) return;
+    const BD=boardDimsOf(bd), L=computeLayout(z,bd.n,BD); if(L) renderBand(band,L.band,BD,bd); });
+}
 function renderBox(i){
   const b=S.boxes[i], el=boxEls[i]; if(!el) return;
   const ph=el.querySelector(".photo"), img=ph.querySelector("img"), ta=el.querySelector("textarea");
@@ -727,14 +858,14 @@ function closeLightbox(){$("#lb").hidden=true; $("#lbImg").removeAttribute("src"
 function toggleReal(){const bd=$("#lbBody"); bd.classList.toggle("real"); $("#lbReal").textContent=bd.classList.contains("real")?"Ajustar ao ecrã":"Tamanho real";}
 function fitText(i){
   const el=boxEls[i]; if(!el) return; const ta=el.querySelector("textarea");
-  const max=+ta.dataset.max, min=+ta.dataset.min;
+  const max=+ta.dataset.max, min=+ta.dataset.min, pw=+ta.dataset.pw||pageDims.w, cq=pts=>(pts/pw*100)+"cqw";
   let s=max; ta.style.fontSize=cq(s);
   while(ta.scrollHeight>ta.clientHeight+1&&s>min){s-=max*0.04; ta.style.fontSize=cq(s);}
   el.classList.toggle("over",ta.scrollHeight>ta.clientHeight+1);
 }
 function refitAll(){boxEls.forEach((_,i)=>fitText(i)); refreshBand();}
 function hiddenContentWarning(){
-  const hid=[]; for(let i=S.n;i<NMAX;i++) if(S.boxes[i].img||S.boxes[i].text.trim()) hid.push(i+1);
+  const hid=[]; for(let i=totalBoxes();i<NMAX;i++) if(S.boxes[i].img||S.boxes[i].text.trim()) hid.push(i+1);
   if(hid.length) setStatus("As caixas "+hid.join(", ")+" têm fotos ou texto mas ficaram escondidas porque reduziste o número de caixas. Não saem no PDF.","err");
 }
 
@@ -747,16 +878,15 @@ function lblPos(m){const o=rotPt(m.rx*Math.SQRT1_2,-m.ry*Math.SQRT1_2,m.a||0);re
 function buildOverlay(){
   const ov=$("#ov"); ov.innerHTML="";
   ov.setAttribute("viewBox","0 0 "+pageDims.w+" "+pageDims.h); ov.setAttribute("preserveAspectRatio","none");
-  if(S.where==="plan"&&S.zone){
+  if(S.where==="plan"){
+    if(S.cover) S.boards.forEach(bd=>{ if(!bd.zone||bd.zonePlan!==A) return; const Lc=computeLayout(bd.zone,bd.n,boardDimsOf(bd)); if(Lc){const c=coverRect(Lc); sv("rect",{class:"zone-fill",x:c.x,y:c.y,width:c.w,height:c.h},ov);} });
     const z=S.zone;
-    const Lc=S.cover?computeLayout(z,S.n):null;
-    if(Lc){const c=coverRect(Lc); sv("rect",{class:"zone-fill",x:c.x,y:c.y,width:c.w,height:c.h},ov);}
-    if(mode==="zone"){
+    if(mode==="zone"&&z&&S.zonePlan===A){
       sv("rect",{class:"zone-edit",x:z.x,y:z.y,width:z.w,height:z.h},ov);
       const hs=Math.max(pageDims.w,pageDims.h)*0.012;
       for(const [k,hx,hy] of [["nw",z.x,z.y],["ne",z.x+z.w,z.y],["sw",z.x,z.y+z.h],["se",z.x+z.w,z.y+z.h]])
         sv("rect",{class:"zone-h","data-h":k,x:hx-hs/2,y:hy-hs/2,width:hs,height:hs},ov);
-    } else if(!boxEls.length) sv("rect",{class:"zone-rect",x:z.x,y:z.y,width:z.w,height:z.h},ov);
+    }
   }
   S.marks.forEach((m0,idx)=>{
     const m=sheetMark(m0);
@@ -850,14 +980,14 @@ let drag=null;
     if(mode==="text"){ addTextBox(x,y,w,h); return; }
     if(mode==="zone"){
       if(w<pageDims.w*0.06||h<pageDims.h*0.06){setStatus("A zona é pequena demais. Arrasta um retângulo maior sobre a parte livre da folha.","err");return;}
-      S.zone={x,y,w,h}; snapZone(); persist(); layoutSheets(); zoneStatus();
+      S.zone={x,y,w,h}; S.zonePlan=A; snapZone(); persist(); layoutSheets(); renderTabs(); zoneStatus();
     }else{
       let m={n:parseInt($("#markNum").value,10)||1,cx:x+w/2,cy:y+h/2,rx:w/2,ry:h/2};
       const minR=pageDims.w*0.005;
       if(Math.max(w,h)<pageDims.w*0.002){m.cx=d.x0;m.cy=d.y0;m.rx=pageDims.w*0.011;m.ry=m.rx;}
       m.rx=Math.max(m.rx,minR); m.ry=Math.max(m.ry,minR);
       const T=S.planT, pp=sheetToPlan(m.cx,m.cy); m={n:m.n,cx:pp.x,cy:pp.y,rx:m.rx/T.s,ry:m.ry/T.s,a:-(T.r||0)};
-      S.marks.push(m); persist(); buildOverlay(); setStatus("Marca "+m.n+" colocada.","ok");
+      S.marks.push(m); persist(); buildOverlay(); renderTabs(); setStatus("Marca "+m.n+" colocada.","ok");
     }
   };
   ov.addEventListener("pointerup",e=>finish(e,false));
@@ -865,7 +995,7 @@ let drag=null;
 })();
 function deleteSelected(){
   if(selected<0) return; const n=S.marks[selected].n;
-  S.marks.splice(selected,1); selected=-1; $("#markDel").disabled=true; persist(); buildOverlay(); setStatus("Marca "+n+" apagada.","ok");
+  S.marks.splice(selected,1); selected=-1; $("#markDel").disabled=true; persist(); buildOverlay(); renderTabs(); setStatus("Marca "+n+" apagada.","ok");
 }
 document.addEventListener("keydown",e=>{
   if(mode!=="mark"||selected<0) return;
@@ -875,21 +1005,26 @@ document.addEventListener("keydown",e=>{
 });
 function fillMarkNums(){
   const sel=$("#markNum"), cur=sel.value; sel.innerHTML="";
-  for(let i=1;i<=S.n;i++){const o=document.createElement("option");o.value=o.textContent=String(i);sel.appendChild(o);}
-  if(cur&&+cur<=S.n) sel.value=cur;
+  const T=totalBoxes();
+  for(let i=1;i<=T;i++){const o=document.createElement("option");o.value=o.textContent=String(i);sel.appendChild(o);}
+  if(cur&&+cur<=T) sel.value=cur;
 }
 
 /* ================= modes & hints ================= */
 function setMode(m){
   mode=m; selected=-1;
   if(m==="zone"&&pageDims){
-    if(!S.zone) S.zone={x:pageDims.w*0.45,y:pageDims.h*0.56,w:pageDims.w*0.42,h:pageDims.h*0.38};
-    snapZone(); persist(); layoutSheets();
+    if(S.zone&&S.zonePlan!==A){ S.zone=null; setStatus("O quadro de fotos passou para a planta "+(A+1)+". As fotos e os textos mantêm-se.","ok"); }
+    S.zonePlan=A;
+    if(!S.zone){ const other=S.boards.find((bd,i)=>i!==S.B&&bd.zone&&bd.zonePlan===A);
+      const left=other&&other.zone.x+other.zone.w/2>pageDims.w/2;
+      S.zone={x:pageDims.w*(left?0.05:0.45),y:pageDims.h*0.56,w:pageDims.w*0.42,h:pageDims.h*0.38}; }
+    snapZone(); persist(); layoutSheets(); renderTabs();
   }
   const sheet=$("#planSheet"); sheet.classList.toggle("mode-zone",m==="zone"); sheet.classList.toggle("mode-mark",m==="mark"); sheet.classList.toggle("mode-plan",m==="plan"); sheet.classList.toggle("mode-text",m==="text");
   $("#textBtn").setAttribute("aria-pressed",String(m==="text")); $("#textBtn").textContent=m==="text"?"Cancelar":"Escrever na planta";
   $("#planBtn").setAttribute("aria-pressed",String(m==="plan")); $("#planBtn").textContent=m==="plan"?"Concluir o ajuste da planta":"Ajustar a planta no PDF"; $("#planCtl").hidden=m!=="plan";
-  $("#zoneBtn").setAttribute("aria-pressed",String(m==="zone")); $("#zoneBtn").textContent=m==="zone"?"Concluir a zona":(S.zone?"Redesenhar a zona das caixas":"Desenhar a zona das caixas");
+  $("#zoneBtn").setAttribute("aria-pressed",String(m==="zone")); $("#zoneBtn").textContent=m==="zone"?"Concluir a zona":zoneLabel();
   $("#markBtn").setAttribute("aria-pressed",String(m==="mark")); $("#markBtn").textContent=m==="mark"?"Terminar marcação":"Marcar na planta";
   $("#markCtl").hidden=m!=="mark"; $("#markDel").disabled=true;
   if(pageDims) buildOverlay();
@@ -902,51 +1037,65 @@ function updateHint(){
   if(mode==="text"){h.textContent="Arrasta um retângulo sobre a planta no sítio onde queres escrever (ou dá um clique para uma caixa de tamanho normal). Depois escreve diretamente na caixa.";return;}
   if(mode==="plan"){h.textContent="Arrasta a planta para a mover e usa o Tamanho (ou − e +) para a aumentar ou diminuir. O que ficar fora da folha é cortado no PDF. As marcas acompanham a planta. No fim, carrega em “Concluir o ajuste da planta”.";return;}
   if(mode==="mark"){h.textContent="Escolhe o número da caixa e arrasta sobre o desenho para envolver o elemento em não conformidade. Um clique simples põe uma marca pequena. Para apagar, clica no contorno ou no número da marca.";return;}
+  if(S.where==="plan"&&S.zone&&S.zonePlan!==A){h.textContent="O quadro de fotos está na planta "+(S.zonePlan+1)+". Aqui podes marcar e escrever: as marcas usam os números desse quadro.";return;}
   if(S.where==="plan"&&!S.zone){h.textContent="Define a zona das caixas: carrega em “Desenhar a zona das caixas”. Aparece um retângulo azul que podes mover e redimensionar.";return;}
   h.textContent="Arrasta fotos para as caixas ou clica numa caixa vazia. Na foto: + e − aproximam, arrastar escolhe a parte visível, duplo clique abre em grande.";
 }
+function zoneLabel(){ const q=S.boards.length>1?" ("+(S.B+1)+")":""; if(S.zone&&S.zonePlan!==A&&S.plans.length>1) return "Mudar o quadro"+q+" para esta planta"; return (S.zone?"Redesenhar a zona das caixas":"Desenhar a zona das caixas")+q; }
 function syncControls(){
   document.querySelectorAll("[data-where]").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.where===S.where)));
   $("#planOpts").hidden=S.where!=="plan";
   $("#coverChk").checked=S.cover;
   $("#nOut").textContent=String(S.n);
+  $("#nLabel").textContent=S.boards.length>1?"Caixas da planta "+(S.B+1):"Número de caixas";
+  const bs=$("#boardSel"); bs.innerHTML=""; bs.hidden=S.boards.length<2;
+  S.boards.forEach((bd,i)=>{const b=document.createElement("button"); b.type="button"; b.setAttribute("aria-pressed",String(i===S.B));
+    b.textContent="Planta de caixas "+(i+1)+(bd.proj?" · "+bd.proj:""); b.addEventListener("click",()=>{ if(i===S.B) return; S.B=i; persist(); setMode("none"); syncControls(); layoutSheets(); updateHint(); }); bs.appendChild(b);});
   $("#fObra").value=S.ident.obra; $("#fData").value=S.ident.data; $("#fFiscal").value=S.ident.fiscal; $("#fRef").value=S.ident.ref;
-  $("#zoneBtn").textContent=S.zone?"Redesenhar a zona das caixas":"Desenhar a zona das caixas";
+  $("#zoneBtn").textContent=zoneLabel();
+  const tr=Math.round((S.textRatio||0.225)/PHOTO_RATIO*100); $("#textRatio").value=String(tr); $("#textRatioOut").textContent=tr+"%";
   const c=S.comm; $("#cTipo").value=c.tipo; $("#cPara").value=c.para; $("#cNome").value=c.nome; $("#cAssunto").value=c.assunto; $("#cPrazo").value=c.prazo; $("#cMsg").value=c.msg;
 }
 
 /* ================= controls ================= */
 const pdfPicker=$("#pdfPicker"), photoPicker=$("#photoPicker");
 let replaceArmed=null;
-function hasWork(){return S.boxes.some(b=>b.img||b.text.trim())||S.marks.length>0||S.texts.some(x=>x.t.trim());}
+function hasWork(){return S.boxes.some(b=>b.img||b.text.trim())||S.plans.some(p=>p.marks.length||p.texts.some(x=>x.t.trim()));}
+let pickMode="add";
+function pickPdf(m){pickMode=m; pdfPicker.value=""; pdfPicker.click();}
 $("#loadBtn").addEventListener("click",()=>{
-  if(pdfDoc&&hasWork()&&!replaceArmed){
-    $("#loadBtn").textContent="Confirmar: substituir o registo atual";
-    replaceArmed=setTimeout(()=>{replaceArmed=null;$("#loadBtn").textContent="Carregar outro PDF";},4000); return;
+  if(!S.plans.length){ pickPdf("add"); return; }
+  if((S.marks.length||S.texts.some(x=>x.t.trim())||S.boards.some(bd=>bd.zone&&bd.zonePlan===A))&&!replaceArmed){
+    $("#loadBtn").textContent="Confirmar: substituir esta planta";
+    replaceArmed=setTimeout(()=>{replaceArmed=null;$("#loadBtn").textContent="Substituir esta planta";},4000); return;
   }
-  clearTimeout(replaceArmed); replaceArmed=null; $("#loadBtn").textContent=pdfDoc?"Carregar outro PDF":"Carregar PDF da planta";
-  pdfPicker.value=""; pdfPicker.click();
+  clearTimeout(replaceArmed); replaceArmed=null; $("#loadBtn").textContent="Substituir esta planta";
+  pickPdf("replace");
 });
-$("#heroLoad").addEventListener("click",()=>$("#loadBtn").click());
-pdfPicker.addEventListener("change",()=>{if(pdfPicker.files[0]) loadPdfFile(pdfPicker.files[0]);});
+$("#addPlanBtn").addEventListener("click",()=>pickPdf("add"));
+$("#heroLoad").addEventListener("click",()=>pickPdf("add"));
+pdfPicker.addEventListener("change",()=>{if(pdfPicker.files[0]) loadPdfFile(pdfPicker.files[0],pickMode);});
 const emptyStage=$("#emptyStage");
 emptyStage.addEventListener("dragover",e=>{if(hasFiles(e)){e.preventDefault();emptyStage.classList.add("drag");}});
 emptyStage.addEventListener("dragleave",()=>emptyStage.classList.remove("drag"));
-emptyStage.addEventListener("drop",e=>{e.preventDefault();e.stopPropagation();emptyStage.classList.remove("drag");const f=e.dataTransfer.files[0];if(f)loadPdfFile(f);});
+emptyStage.addEventListener("drop",e=>{e.preventDefault();e.stopPropagation();emptyStage.classList.remove("drag");const f=e.dataTransfer.files[0];if(f)loadPdfFile(f,"add");});
 $("#pageSel").addEventListener("change",async e=>{
   const idx=+e.target.value;
-  const had=S.marks.length||S.zone;
-  if(!(await openPdf(pdfBytes,idx))) return;
-  S.marks=[]; S.texts=[]; S.zone=null; S.planT={s:1,dx:0,dy:0,r:0}; persist(); afterPdfReady();
+  const had=S.marks.length||S.boards.some(bd=>bd.zone&&bd.zonePlan===A);
+  const r=await openDoc(pdfBytes,idx); if(!r) return;
+  try{docs[A].doc.destroy();}catch(_){}
+  docs[A]={bytes:pdfBytes,doc:r.doc,dims:r.dims}; activate(A);
+  S.pageIndex=r.idx; S.marks=[]; S.texts=[]; for(const bd of S.boards) if(bd.zonePlan===A) bd.zone=null; S.planT={s:1,dx:0,dy:0,r:0}; persist(); afterPdfReady();
   setStatus(had?"Mudaste de página: as marcas e a zona das caixas da página anterior foram retiradas. As fotos e os textos mantêm-se.":"Página "+(idx+1)+" aberta.",had?"err":"ok");
 });
 document.querySelectorAll("[data-where]").forEach(b=>b.addEventListener("click",()=>{
-  S.where=b.dataset.where; persist(); if(mode==="zone") setMode("none"); syncControls(); layoutSheets(); updateHint();
+  S.where=b.dataset.where; persist(); if(mode==="zone") setMode("none"); syncControls(); layoutSheets(); renderTabs(); updateHint();
 }));
 $("#zoneBtn").addEventListener("click",()=>setMode(mode==="zone"?"none":"zone"));
 $("#coverChk").addEventListener("change",e=>{S.cover=e.target.checked; persist(); buildOverlay();});
-function setN(n){S.n=Math.max(NMIN,Math.min(NMAX,n)); persist(); $("#nOut").textContent=String(S.n); setStatus(""); buildBoxes(); refitSoon();}
+function setN(n){const max=NMAX-(totalBoxes()-S.n); if(n>max) setStatus("O máximo é "+NMAX+" caixas no total.","err"); S.n=Math.max(NMIN,Math.min(max,n)); persist(); $("#nOut").textContent=String(S.n); setStatus(""); buildBoxes(); refitSoon();}
 $("#nMinus").addEventListener("click",()=>setN(S.n-1));
+$("#textRatio").addEventListener("input",e=>{ S.textRatio=(+e.target.value)/100*PHOTO_RATIO; $("#textRatioOut").textContent=e.target.value+"%"; persist(); buildOverlay(); buildBoxes(); refitSoon(); });
 $("#nPlus").addEventListener("click",()=>setN(S.n+1));
 for(const [id,key] of [["#fObra","obra"],["#fData","data"],["#fFiscal","fiscal"],["#fRef","ref"]]){
   $(id).addEventListener("input",e=>{S.ident[key]=e.target.value; persist(); refreshBand();});
@@ -976,14 +1125,12 @@ $("#newBtn").addEventListener("click",async()=>{
   if(!newArmed){$("#newBtn").textContent="Confirmar: apagar tudo e começar de novo";newArmed=setTimeout(()=>{newArmed=null;$("#newBtn").textContent="Novo registo";},4000);return;}
   clearTimeout(newArmed); newArmed=null; $("#newBtn").textContent="Novo registo";
   const keep={obra:S.ident.obra,fiscal:S.ident.fiscal};
-  S=freshState(); S.ident.obra=keep.obra; S.ident.fiscal=keep.fiscal;
-  pdfBytes=null; if(pdfDoc) try{pdfDoc.destroy();}catch(_){} pdfDoc=null; pageDims=null;
-  try{await kvDel("pdf");}catch(_){}
-  persist(); setMode("none");
-  $("#planSheet").hidden=true; $("#extraSheet").hidden=true; $("#pageCap").hidden=true; $("#emptyStage").hidden=false;
-  $("#fileName").textContent=""; $("#pageWrap").hidden=true; $("#planAdj").hidden=true; $("#loadBtn").textContent="Carregar PDF da planta";
-  document.querySelectorAll("#s2,#s3,#s4,#s5,#s6").forEach(s=>s.classList.add("off"));
-  syncControls(); updateHint(); setStatus("Registo apagado. A obra e o fiscal ficaram preenchidos para o próximo.","ok");
+  for(const d of docs){try{d.doc.destroy();}catch(_){}}
+  docs=[]; A=0; S=freshState(); S.ident.obra=keep.obra; S.ident.fiscal=keep.fiscal;
+  pdfBytes=null; pdfDoc=null; pageDims=null;
+  for(const k of ["pdf","pdf0","pdf1","pdf2"]){try{await kvDel(k);}catch(_){}}
+  persist(); showEmpty();
+  setStatus("Registo apagado. A obra e o fiscal ficaram preenchidos para o próximo.","ok");
 });
 $("#zoom").addEventListener("change",()=>{layoutSheets(); refitSoon(); renderPlan();});
 function stepZoom(dir){
@@ -1003,9 +1150,9 @@ const TIPOS={nc:"Não conformidade",pe:"Pedido de esclarecimento",ob:"Observaç�
 const PARA={empreiteiro:"Empreiteiro",gestao:"Gestão de projeto",dono:"Dono de obra",projetista:"Projetista",outro:"Outro"};
 function fmtDate(d){return d?d.split("-").reverse().join("/"):"";}
 function paraText(){const c=S.comm;const base=c.para==="outro"?"":PARA[c.para];return [base,c.nome.trim()].filter(Boolean).join(" – ")||"—";}
-function planRef(){return S.fileName+(pdfDoc&&pdfDoc.numPages>1?" (página "+(S.pageIndex+1)+")":"");}
-function photoList(){const out=[];for(let i=0;i<S.n;i++){const b=S.boxes[i];if(b.img||b.text.trim()) out.push({n:i+1,t:b.text.trim()||(b.img?"(sem descrição)":"")});}return out;}
-function marksFor(n){return S.marks.filter(m=>m.n===n).length;}
+function planRef(){return S.plans.map((p,k)=>p.fileName+(docs[k]&&docs[k].doc.numPages>1?" (página "+(p.pageIndex+1)+")":"")).join("; ");}
+function photoList(){const out=[];S.boards.forEach((bd,bi)=>{const o=off(bi);for(let j=0;j<bd.n;j++){const i=o+j,b=S.boxes[i];if(b&&(b.img||b.text.trim())) out.push({n:i+1,b:bi,t:b.text.trim()||(b.img?"(sem descrição)":"")});}});return out;}
+function marksFor(n){return S.plans.reduce((a,p)=>a+p.marks.filter(m=>m.n===n).length,0);}
 function modelText(){
   const c=S.comm, id=S.ident, prazo=c.prazo?" até "+fmtDate(c.prazo):"";
   const intro={nc:"No âmbito da fiscalização da obra"+(id.obra?" "+id.obra:"")+", foi verificada a seguinte não conformidade:",
@@ -1093,7 +1240,7 @@ async function fileToJpeg(file){
 async function placePhotos(files,start){
   const list=[...files]; if(!list.length) return;
   const targets=[start];
-  for(let i=start+1;i<S.n&&targets.length<list.length;i++) if(!S.boxes[i].img) targets.push(i);
+  for(let i=start+1;i<totalBoxes()&&targets.length<list.length;i++) if(!S.boxes[i].img) targets.push(i);
   for(let i=0;i<start&&targets.length<list.length;i++) if(!S.boxes[i].img) targets.push(i);
   const errs=[]; let placed=0;
   for(let j=0;j<list.length;j++){
@@ -1156,7 +1303,7 @@ function addCommPages(out,font,bold,safe,safeB,rgb){
   pg.drawRectangle({x:M,y:y-4,width:6,height:22,color:RED});
   pg.drawText(title,{x:M+14,y:y,size:17,font:bold,color:BLACK}); y-=34;
   // header table
-  const rows=[["Obra",id.obra],["Data",fmtDate(id.data)],["De",(id.fiscal?id.fiscal+" – ":"")+"Fiscalização"],["Para",paraText()],["Planta",planRef()]];
+  const rows=[["Obra",id.obra],["Data",fmtDate(id.data)],["De",(id.fiscal?id.fiscal+" – ":"")+"Fiscalização"],["Para",paraText()],[S.plans.length>1?"Plantas":"Planta",planRef()]];
   if(c.prazo) rows.push(["Resposta pedida até",fmtDate(c.prazo)]);
   const kW=122;
   for(const [k,v] of rows){
@@ -1177,7 +1324,10 @@ function addCommPages(out,font,bold,safe,safeB,rgb){
     y-=14; need(40);
     pg.drawText(safeB("Registo fotográfico"),{x:M,y:y-11,size:11,font:bold,color:BLACK}); y-=16;
     para(safe("A localização de cada foto está assinalada na planta em anexo com o número correspondente."),9.5,font,GREY); y-=4;
+    let lastB=-1;
     for(const p of ph){
+      if(S.boards.length>1&&p.b!==lastB){ lastB=p.b; const bd=S.boards[p.b]; y-=4; need(30);
+        pg.drawText(safeB("Planta de caixas "+(p.b+1)+(bd.proj?" – Projeto "+bd.proj:"")),{x:M,y:y-10.5,size:10.5,font:bold,color:GREY}); y-=17; }
       const mk=marksFor(p.n), tail=mk?"":" (sem marca na planta)";
       const lines=wrap(font,safe(p.t+tail),10,LW-28); need(lines.length*14+4);
       pg.drawRectangle({x:M,y:y-12,width:14,height:14,color:RED});
@@ -1192,97 +1342,109 @@ function addCommPages(out,font,bold,safe,safeB,rgb){
 }
 const saveBtn=$("#saveBtn");
 saveBtn.addEventListener("click",async()=>{
-  if(!pdfDoc||!pdfBytes){setStatus("Carrega primeiro o PDF da planta.","err");return;}
-  if(S.where==="plan"&&!S.zone&&S.boxes.slice(0,S.n).some(b=>b.img||b.text.trim())){setStatus("Ainda não definiste a zona das caixas na planta.","err");return;}
-  if(!S.boxes.slice(0,S.n).some(b=>b.img||b.text.trim())&&!S.marks.length&&!S.texts.some(x=>x.t.trim())){setStatus("Ainda não há fotos, textos nem marcas para guardar.","err");return;}
+  if(!docs.length){setStatus("Carrega primeiro o PDF da planta.","err");return;}
+  const boardHas=bi=>S.boxes.slice(off(bi),off(bi)+S.boards[bi].n).some(b=>b.img||b.text.trim());
+  const boxContent=S.boards.some((_,bi)=>boardHas(bi));
+  for(let bi=0;bi<S.boards.length;bi++) if(S.where==="plan"&&!S.boards[bi].zone&&boardHas(bi)){setStatus("Ainda não definiste a zona da planta de caixas "+(bi+1)+".","err");return;}
+  if(!boxContent&&!S.plans.some(p=>p.marks.length||p.texts.some(x=>x.t.trim()))){setStatus("Ainda não há fotos, textos nem marcas para guardar.","err");return;}
   if(!window.PDFLib){setStatus("A biblioteca que gera o PDF não carregou. Verifica a ligação à internet e recarrega a página.","err");return;}
   saveBtn.disabled=true; saveBtn.textContent="A gerar PDF…"; setStatus("");
+  const keepA=A;
   try{
     const {PDFDocument,rgb,StandardFonts,degrees,PDFName}=PDFLib;
-    let src;
-    try{src=await PDFDocument.load(pdfBytes.slice(),{updateMetadata:false});}
-    catch(e){throw new Error("o PDF original não pode ser reutilizado ("+(e&&e.message||"protegido ou danificado")+")");}
     const out=await PDFDocument.create();
-    const sp=src.getPage(S.pageIndex);
-    const crop=sp.getCropBox(), rot=((sp.getRotation().angle%360)+360)%360;
-    const emb=await out.embedPage(sp,{left:crop.x,bottom:crop.y,right:crop.x+crop.width,top:crop.y+crop.height});
-    const cw=crop.width, ch=crop.height;
-    const W=(rot%180===0)?cw:ch, H=(rot%180===0)?ch:cw;
-    const kx=W/pageDims.w, ky=H/pageDims.h; // should be 1
-    const page=out.addPage([W,H]);
-    const po=rot===0?{x:0,y:0}:rot===90?{x:0,y:cw,rotate:degrees(-90)}:rot===180?{x:cw,y:ch,rotate:degrees(180)}:{x:ch,y:0,rotate:degrees(90)};
-    { const T=S.planT, r=T.r||0, th0=po.rotate?po.rotate.angle:0;
-      // plan adjustment: rotate about the sheet centre (clockwise on screen = negative in PDF), scale about origin, translate
-      const Cx=W/2, Cy=H/2, a=-r*Math.PI/180, vx=po.x-Cx, vy=po.y-Cy;
-      const qx=vx*Math.cos(a)-vy*Math.sin(a), qy=vx*Math.sin(a)+vy*Math.cos(a);
-      const opt={x:T.s*(Cx+qx)+T.dx, y:T.s*(Cy+qy)+H*(1-T.s)-T.dy, xScale:T.s, yScale:T.s, rotate:degrees(th0-r)};
-      page.drawPage(emb,opt); }
     const font=await out.embedFont(StandardFonts.Helvetica), bold=await out.embedFont(StandardFonts.HelveticaBold);
     const safe=makeSafe(font), safeB=makeSafe(bold);
     const RED=rgb(208/255,2/255,27/255), BLACK=rgb(0,0,0), WHITE=rgb(1,1,1);
-    const X=x=>x*kx, Y=(y,h=0)=>H-(y+h)*ky;
+    const cut=[];
 
-    // marks on the plan
-    const sw=markStroke()*kx, lr=labelR()*kx;
-    const SM=S.marks.map(sheetMark);
-    for(const m of SM) page.drawEllipse({x:X(m.cx),y:Y(m.cy),xScale:m.rx*kx,yScale:m.ry*ky,rotate:degrees(-(m.a||0)),borderColor:RED,borderWidth:sw});
-    for(const m of SM){
-      const p=lblPos(m); page.drawCircle({x:X(p.x),y:Y(p.y),size:lr,color:RED});
-      const t=String(m.n), fs=lr*1.25; page.drawText(t,{x:X(p.x)-bold.widthOfTextAtSize(t,fs)/2,y:Y(p.y)-fs*0.35,size:fs,font:bold,color:WHITE});
-    }
-
-    let target=page, zone=activeZone();
-    const L=zone?computeLayout(zone,S.n):null; // no zone = only marks and texts on the plan
-    if(L&&S.where==="page"){ target=out.addPage([W,H]); }
-    else if(L&&S.cover){ const c=coverRect(L); page.drawRectangle({x:X(c.x),y:Y(c.y,c.h),width:c.w*kx,height:c.h*ky,color:WHITE}); }
-    // identification band
-    if(L){
-      const b=L.band; let fs=b.font*kx;
-      const parts=bandText().map(([k,v])=>[safeB(k+": "),safe(v||"—")]);
-      const gapW=()=>fs*1.6;
-      const total=()=>parts.reduce((a,[k,v])=>a+bold.widthOfTextAtSize(k,fs)+font.widthOfTextAtSize(v,fs),0)+gapW()*(parts.length-1);
-      let guard=0; while(total()>b.w*kx&&guard++<60) fs*=0.94;
-      let x=X(b.x); const y=Y(b.y,b.h)+(b.h*ky-fs)/2+fs*0.2;
-      for(const [k,v] of parts){target.drawText(k,{x,y,size:fs,font:bold,color:BLACK}); x+=bold.widthOfTextAtSize(k,fs);
-        target.drawText(v,{x,y,size:fs,font,color:BLACK}); x+=font.widthOfTextAtSize(v,fs)+gapW();}
-      target.drawLine({start:{x:X(b.x),y:Y(b.y,b.h)},end:{x:X(b.x+b.w),y:Y(b.y,b.h)},thickness:Math.max(0.4,L.boxes[0].w*0.006),color:BLACK});
-    }
-    const cut=[]; const lw=L?Math.max(0.4,L.boxes[0].w*0.006):0.5;
-    for(let i=0;i<(L?S.n:0);i++){
-      const b=S.boxes[i], g=L.boxes[i];
-      if(!b.img&&!b.text.trim()) continue;
-      target.drawRectangle({x:X(g.x),y:Y(g.y,g.h),width:g.w*kx,height:g.h*ky,color:WHITE});
-      if(b.img){const jb=await framed(b.img,b.fit,g.w,g.photoH,b.z,b.tx,b.ty);const ji=await out.embedJpg(jb);
-        target.drawImage(ji,{x:X(g.x),y:Y(g.y,g.photoH),width:g.w*kx,height:g.photoH*ky});}
-      else target.drawRectangle({x:X(g.x),y:Y(g.y,g.photoH),width:g.w*kx,height:g.photoH*ky,color:rgb(.953,.957,.961)});
-      target.drawRectangle({x:X(g.x),y:Y(g.y,g.h),width:g.w*kx,height:g.h*ky,borderColor:BLACK,borderWidth:lw});
-      target.drawLine({start:{x:X(g.x),y:Y(g.y,g.photoH)},end:{x:X(g.x+g.w),y:Y(g.y,g.photoH)},thickness:lw,color:BLACK});
-      const bs=L.badge*kx; target.drawRectangle({x:X(g.x),y:Y(g.y)-bs,width:bs,height:bs,color:rgb(.29,.32,.36)});
-      const nt=String(i+1), nfs=bs*0.62; target.drawText(nt,{x:X(g.x)+(bs-bold.widthOfTextAtSize(nt,nfs))/2,y:Y(g.y)-bs/2-nfs*0.35,size:nfs,font:bold,color:WHITE});
-      const txt=safe(b.text.trim());
-      if(txt){
-        const padX=g.w*0.025*kx, padY=g.w*0.02*kx, maxW=g.w*kx-2*padX, maxH=g.textH*ky-2*padY;
-        let fs=L.fontMax*kx, lines=wrap(font,txt,fs,maxW);
-        while(lines.length*fs*1.2>maxH&&fs>L.fontMin*kx){fs-=L.fontMax*kx*0.04; lines=wrap(font,txt,fs,maxW);}
-        const maxL=Math.max(1,Math.floor(maxH/(fs*1.2)));
-        if(lines.length>maxL){lines=lines.slice(0,maxL); lines[maxL-1]=lines[maxL-1].replace(/\s*\S{0,3}$/,"")+"…"; cut.push(i+1);}
-        let y=Y(g.y+g.photoH)-padY-fs*0.9;
-        for(const ln of lines){target.drawText(ln,{x:X(g.x)+padX,y,size:fs,font,color:BLACK}); y-=fs*1.2;}
+    // the photo board (band + boxes) on a page whose display size is dims
+    async function drawBoard(target,zone,dims,cover,H,kx,ky,bd,o){
+      const X=x=>x*kx, Y=(y,h=0)=>H-(y+h)*ky;
+      const L=computeLayout(zone,bd.n,dims); if(!L) return;
+      if(cover){ const c=coverRect(L); target.drawRectangle({x:X(c.x),y:Y(c.y,c.h),width:c.w*kx,height:c.h*ky,color:WHITE}); }
+      { const b=L.band; let fs=b.font*kx;
+        const parts=(bd.proj?[["Projeto",bd.proj]]:[]).concat(bandText(bd)).map(([k,v])=>[safeB(k+": "),safe(v||"—")]);
+        const gapW=()=>fs*1.6;
+        const total=()=>parts.reduce((a,[k,v])=>a+bold.widthOfTextAtSize(k,fs)+font.widthOfTextAtSize(v,fs),0)+gapW()*(parts.length-1);
+        let guard=0; while(total()>b.w*kx&&guard++<60) fs*=0.94;
+        let x=X(b.x); const y=Y(b.y,b.h)+(b.h*ky-fs)/2+fs*0.2;
+        for(const [k,v] of parts){target.drawText(k,{x,y,size:fs,font:bold,color:BLACK}); x+=bold.widthOfTextAtSize(k,fs);
+          target.drawText(v,{x,y,size:fs,font,color:BLACK}); x+=font.widthOfTextAtSize(v,fs)+gapW();}
+        target.drawLine({start:{x:X(b.x),y:Y(b.y,b.h)},end:{x:X(b.x+b.w),y:Y(b.y,b.h)},thickness:Math.max(0.4,L.boxes[0].w*0.006),color:BLACK}); }
+      const lw=Math.max(0.4,L.boxes[0].w*0.006);
+      for(let j=0;j<bd.n;j++){
+        const i=o+j, b=S.boxes[i], g=L.boxes[j];
+        if(!b.img&&!b.text.trim()) continue;
+        target.drawRectangle({x:X(g.x),y:Y(g.y,g.h),width:g.w*kx,height:g.h*ky,color:WHITE});
+        if(b.img){const jb=await framed(b.img,b.fit,g.w,g.photoH,b.z,b.tx,b.ty);const ji=await out.embedJpg(jb);
+          target.drawImage(ji,{x:X(g.x),y:Y(g.y,g.photoH),width:g.w*kx,height:g.photoH*ky});}
+        else target.drawRectangle({x:X(g.x),y:Y(g.y,g.photoH),width:g.w*kx,height:g.photoH*ky,color:rgb(.953,.957,.961)});
+        target.drawRectangle({x:X(g.x),y:Y(g.y,g.h),width:g.w*kx,height:g.h*ky,borderColor:BLACK,borderWidth:lw});
+        target.drawLine({start:{x:X(g.x),y:Y(g.y,g.photoH)},end:{x:X(g.x+g.w),y:Y(g.y,g.photoH)},thickness:lw,color:BLACK});
+        const bs=L.badge*kx; target.drawRectangle({x:X(g.x),y:Y(g.y)-bs,width:bs,height:bs,color:rgb(.29,.32,.36)});
+        const nt=String(i+1), nfs=bs*0.62; target.drawText(nt,{x:X(g.x)+(bs-bold.widthOfTextAtSize(nt,nfs))/2,y:Y(g.y)-bs/2-nfs*0.35,size:nfs,font:bold,color:WHITE});
+        const txt=safe(b.text.trim());
+        if(txt){
+          const padX=g.w*0.025*kx, padY=g.w*0.02*kx, maxW=g.w*kx-2*padX, maxH=g.textH*ky-2*padY;
+          let fs=L.fontMax*kx, lines=wrap(font,txt,fs,maxW);
+          while(lines.length*fs*1.2>maxH&&fs>L.fontMin*kx){fs-=L.fontMax*kx*0.04; lines=wrap(font,txt,fs,maxW);}
+          const maxL=Math.max(1,Math.floor(maxH/(fs*1.2)));
+          if(lines.length>maxL){lines=lines.slice(0,maxL); lines[maxL-1]=lines[maxL-1].replace(/\s*\S{0,3}$/,"")+"…"; cut.push(i+1);}
+          let y=Y(g.y+g.photoH)-padY-fs*0.9;
+          for(const ln of lines){target.drawText(ln,{x:X(g.x)+padX,y,size:fs,font,color:BLACK}); y-=fs*1.2;}
+        }
       }
     }
-    // free text boxes written on the plan
-    for(const x of S.texts){
-      const txt=safe((x.t||"").trim()); if(!txt) continue;
-      const PM=Math.max(pageDims.w,pageDims.h), pad=PM*0.002*kx;
-      if(x.bg!==false){ page.drawRectangle({x:X(x.x),y:Y(x.y,x.h),width:x.w*kx,height:x.h*ky,color:WHITE,borderColor:rgb(.25,.27,.3),borderWidth:Math.max(0.4,PM*0.0004)}); }
-      const maxW=x.w*kx-2*pad, maxH=x.h*ky-2*pad, fmax=textFontMax(x)*kx, fmin=textFontMin()*kx;
-      let fs=fmax, lines=wrap(font,txt,fs,maxW);
-      while(lines.length*fs*1.2>maxH&&fs>fmin){fs-=fmax*0.05; lines=wrap(font,txt,fs,maxW);}
-      const maxL=Math.max(1,Math.floor(maxH/(fs*1.2)));
-      if(lines.length>maxL){lines=lines.slice(0,maxL); lines[maxL-1]=lines[maxL-1].replace(/\s*\S{0,3}$/,"")+"…"; cut.push("texto na planta");}
-      let ty=Y(x.y)-pad-fs*0.9;
-      for(const ln of lines){page.drawText(ln,{x:X(x.x)+pad,y:ty,size:fs,font,color:BLACK}); ty-=fs*1.2;}
+
+    // one page per plan, in order
+    for(let k=0;k<S.plans.length;k++){
+      activate(k);
+      let src;
+      try{src=await PDFDocument.load(pdfBytes.slice(),{updateMetadata:false});}
+      catch(e){throw new Error("a planta "+(k+1)+" ("+S.fileName+") não pode ser reutilizada ("+(e&&e.message||"protegida ou danificada")+")");}
+      const sp=src.getPage(S.pageIndex);
+      const crop=sp.getCropBox(), rot=((sp.getRotation().angle%360)+360)%360;
+      const emb=await out.embedPage(sp,{left:crop.x,bottom:crop.y,right:crop.x+crop.width,top:crop.y+crop.height});
+      const cw=crop.width, ch=crop.height;
+      const W=(rot%180===0)?cw:ch, H=(rot%180===0)?ch:cw;
+      const kx=W/pageDims.w, ky=H/pageDims.h; // should be 1
+      const page=out.addPage([W,H]);
+      const po=rot===0?{x:0,y:0}:rot===90?{x:0,y:cw,rotate:degrees(-90)}:rot===180?{x:cw,y:ch,rotate:degrees(180)}:{x:ch,y:0,rotate:degrees(90)};
+      { const T=S.planT, r=T.r||0, th0=po.rotate?po.rotate.angle:0;
+        // plan adjustment: rotate about the sheet centre (clockwise on screen = negative in PDF), scale about origin, translate
+        const Cx=W/2, Cy=H/2, a=-r*Math.PI/180, vx=po.x-Cx, vy=po.y-Cy;
+        const qx=vx*Math.cos(a)-vy*Math.sin(a), qy=vx*Math.sin(a)+vy*Math.cos(a);
+        const opt={x:T.s*(Cx+qx)+T.dx, y:T.s*(Cy+qy)+H*(1-T.s)-T.dy, xScale:T.s, yScale:T.s, rotate:degrees(th0-r)};
+        page.drawPage(emb,opt); }
+      const X=x=>x*kx, Y=(y,h=0)=>H-(y+h)*ky;
+      // marks
+      const sw=markStroke()*kx, lr=labelR()*kx;
+      const SM=S.marks.map(sheetMark);
+      for(const m of SM) page.drawEllipse({x:X(m.cx),y:Y(m.cy),xScale:m.rx*kx,yScale:m.ry*ky,rotate:degrees(-(m.a||0)),borderColor:RED,borderWidth:sw});
+      for(const m of SM){
+        const p=lblPos(m); page.drawCircle({x:X(p.x),y:Y(p.y),size:lr,color:RED});
+        const t=String(m.n), fs=lr*1.25; page.drawText(t,{x:X(p.x)-bold.widthOfTextAtSize(t,fs)/2,y:Y(p.y)-fs*0.35,size:fs,font:bold,color:WHITE});
+      }
+      // photo board, when it lives on this plan
+      if(S.where==="plan") for(let bi=0;bi<S.boards.length;bi++){ const bd=S.boards[bi]; if(bd.zone&&bd.zonePlan===k) await drawBoard(page,bd.zone,pageDims,S.cover,H,kx,ky,bd,off(bi)); }
+      // free text boxes on this plan
+      for(const x of S.texts){
+        const txt=safe((x.t||"").trim()); if(!txt) continue;
+        const PM=Math.max(pageDims.w,pageDims.h), pad=PM*0.002*kx;
+        if(x.bg!==false){ page.drawRectangle({x:X(x.x),y:Y(x.y,x.h),width:x.w*kx,height:x.h*ky,color:WHITE,borderColor:rgb(.25,.27,.3),borderWidth:Math.max(0.4,PM*0.0004)}); }
+        const maxW=x.w*kx-2*pad, maxH=x.h*ky-2*pad, fmax=textFontMax(x)*kx, fmin=textFontMin()*kx;
+        let fs=fmax, lines=wrap(font,txt,fs,maxW);
+        while(lines.length*fs*1.2>maxH&&fs>fmin){fs-=fmax*0.05; lines=wrap(font,txt,fs,maxW);}
+        const maxL=Math.max(1,Math.floor(maxH/(fs*1.2)));
+        if(lines.length>maxL){lines=lines.slice(0,maxL); lines[maxL-1]=lines[maxL-1].replace(/\s*\S{0,3}$/,"")+"…"; cut.push("texto na planta "+(k+1));}
+        let ty=Y(x.y)-pad-fs*0.9;
+        for(const ln of lines){page.drawText(ln,{x:X(x.x)+pad,y:ty,size:fs,font,color:BLACK}); ty-=fs*1.2;}
+      }
     }
+    activate(keepA);
+    // photo board on its own page after the plans
+    if(S.where==="page") for(let bi=0;bi<S.boards.length;bi++){ if(!boardHas(bi)) continue; const bd=S.boards[bi], d=boardDimsOf(bd); const pg=out.addPage([d.w,d.h]); await drawBoard(pg,extraZoneFor(d),d,false,d.h,1,1,bd,off(bi)); }
     if(S.comm.msg.trim()||S.comm.assunto.trim()) addCommPages(out,font,bold,safe,safeB,rgb);
     out.setTitle(TIPOS[S.comm.tipo]+(S.ident.ref?" "+S.ident.ref:""));
     out.setCreator("DDN-INC"); out.setProducer("pdf-lib");
@@ -1291,7 +1453,7 @@ saveBtn.addEventListener("click",async()=>{
          out.catalog.set(PDFName.of("OpenAction"),out.context.obj([out.getPage(0).ref,PDFName.of("Fit")])); }catch(_){}
     const bytes=await out.save();
     const blob=new Blob([bytes],{type:"application/pdf"});
-    const base=(S.ident.ref||S.fileName.replace(/\.pdf$/i,"")||"planta").replace(/[\\/:*?"<>|]+/g,"-").slice(0,80);
+    const base=(S.ident.ref||(S.plans[0]?S.plans[0].fileName:"").replace(/\.pdf$/i,"")||"planta").replace(/[\\/:*?"<>|]+/g,"-").slice(0,80);
     const filename=TIPOS[S.comm.tipo]+" - "+base+" - "+(S.ident.data||today())+".pdf";
     const dl=window.claude&&typeof window.claude.use==="function"?await window.claude.use("downloads"):null;
     if(!dl){
@@ -1309,25 +1471,47 @@ saveBtn.addEventListener("click",async()=>{
       setStatus(c==="declined"?"O PDF não foi guardado: a gravação foi recusada.":c==="rate_limited"?"Já há um pedido de gravação aberto. Responde-lhe e tenta de novo.":"Não foi possível guardar o PDF ("+(c||"erro")+").","err");
     }
   }catch(e){ setStatus("Erro ao gerar o PDF: "+(e&&e.message||e)+".","err"); }
-  finally{ saveBtn.disabled=false; saveBtn.textContent="Guardar PDF"; }
+  finally{ if(A!==keepA&&docs.length) activate(keepA); saveBtn.disabled=false; saveBtn.textContent="Guardar PDF"; }
 });
 
 /* ================= start ================= */
 (async()=>{
   syncControls();
   try{
-    const st=await kvGet("state"), pb=await kvGet("pdf");
+    const st=await kvGet("state");
     if(st&&typeof st==="object"){
-      S=Object.assign(freshState(),st);
-      if(!Array.isArray(S.boxes)||S.boxes.length!==NMAX) S.boxes=blankBoxes();
-      if(!Array.isArray(S.marks)) S.marks=[];
-      if(!Array.isArray(S.texts)) S.texts=[];
-      if(!S.planT||!(S.planT.s>0)) S.planT={s:1,dx:0,dy:0,r:0};
-      if(typeof S.planT.r!=="number") S.planT.r=0;
-      S.ident=Object.assign(freshState().ident,S.ident||{});
-      S.comm=Object.assign(freshState().comm,S.comm||{});
+      const base=freshState();
+      if(Array.isArray(st.boards)&&st.boards.length){
+        base.boards=st.boards.slice(0,NBOARDS).map(bd=>{const q=freshBoard(bd.zonePlan|0,bd.n); q.zone=bd.zone&&typeof bd.zone==="object"?bd.zone:null; q.proj=typeof bd.proj==="string"?bd.proj:""; if(!(q.n>=NMIN&&q.n<=NMAX)) q.n=6; return q;});
+        base.B=0;
+      }
+      for(const k of ["where","zone","cover","n","textRatio","zonePlan","comm","ident"]) if(st[k]!==undefined&&st[k]!==null) base[k]=st[k];
+      if(Array.isArray(st.boxes)){ base.boxes=st.boxes.slice(0,NMAX).map(b=>Object.assign(blankBox(),b)); while(base.boxes.length<NMAX) base.boxes.push(blankBox()); }
+      let plans=Array.isArray(st.plans)?st.plans:(st.fileName?[{fileName:st.fileName,pageIndex:st.pageIndex||0,planT:st.planT,marks:st.marks,texts:st.texts}]:[]);
+      base.plans=plans.slice(0,NPLANS).map(p=>{const q=freshPlan(p.fileName,p.pageIndex);
+        q.planT=Object.assign({s:1,dx:0,dy:0,r:0},p.planT||{}); if(!(q.planT.s>0)) q.planT.s=1;
+        q.marks=Array.isArray(p.marks)?p.marks:[]; q.texts=Array.isArray(p.texts)?p.texts:[]; return q;});
+      base.ident=Object.assign(freshState().ident,base.ident||{});
+      base.comm=Object.assign(freshState().comm,base.comm||{});
+      for(const bd of base.boards) if(!(bd.n>=NMIN&&bd.n<=NMAX)) bd.n=6;
+      while(base.boards.reduce((a,b)=>a+b.n,0)>NMAX) base.boards[base.boards.length-1].n--;
+      S=base;
     }
-    if(pb){ const bytes=pb instanceof Uint8Array?pb:new Uint8Array(pb); if(await openPdf(bytes,S.pageIndex)){afterPdfReady(); setStatus("Registo recuperado: continua de onde ficaste.","ok");} }
+    // reopen the plans saved in this browser (older versions kept a single plan under "pdf")
+    const legacy=await kvGet("pdf");
+    const okPlans=[]; let lost=0;
+    for(let k=0;k<S.plans.length;k++){
+      let pb=await kvGet("pdf"+k);
+      if(!pb&&k===0&&legacy) pb=legacy;
+      if(!pb){lost++; continue;}
+      const bytes=pb instanceof Uint8Array?pb:new Uint8Array(pb);
+      const r=await openDoc(bytes,S.plans[k].pageIndex);
+      if(!r){lost++; continue;}
+      S.plans[k].pageIndex=r.idx; okPlans.push(S.plans[k]); docs.push({bytes,doc:r.doc,dims:r.dims});
+    }
+    if(lost||legacy){ if(lost){ const before=S.plans; S.plans=okPlans; for(const bd of S.boards){ const ni=S.plans.indexOf(before[bd.zonePlan]); if(ni<0){bd.zone=null;bd.zonePlan=0;} else bd.zonePlan=ni; } }
+      await savePdfKeys(); if(legacy){try{await kvDel("pdf");}catch(_){}} persist(); }
+    if(docs.length){ activate(0); afterPdfReady(); setStatus("Registo recuperado: continua de onde ficaste."+(lost?" Não foi possível reabrir "+lost+" planta(s).":""),lost?"err":"ok"); }
     else syncControls();
   }catch(e){ setStatus("Este browser não deixa guardar o trabalho localmente: guarda o PDF antes de fechar a página.","err"); }
 })();

@@ -246,7 +246,7 @@ dialog.full canvas{position:absolute;inset:0;width:100%;height:100%;display:bloc
     <p class="sect">Fases</p>
     <ul class="list" id="phasesList"></ul>
   </div>
-  <div class="dlg-foot"><button class="btn" id="newPhaseBtn">+ Nova fase</button></div>
+  <div class="dlg-foot"><button class="btn" id="newPhaseBtn">+ Nova fase</button><button class="btn primary" id="pkOpen">Partilhar pacote</button><button class="btn" id="pkImport">Importar pacote</button></div>
 </div></dialog>
 
 <!-- Uma fase -->
@@ -330,6 +330,32 @@ dialog.full canvas{position:absolute;inset:0;width:100%;height:100%;display:bloc
   <img id="fullImg" alt="">
   <button class="fnav prev" id="fPrev" aria-label="Anterior">‹</button><button class="fnav next" id="fNext" aria-label="Seguinte">›</button>
 </dialog>
+<!-- Partilhar pacote -->
+<dialog id="pkDlg"><div class="dlg">
+  <div class="dlg-head"><h2>Partilhar pacote<span class="sub">Junta as plantas num só ficheiro para abrir noutro aparelho, no teu telefone ou no de um colega.</span></h2><button class="btn sm" data-close>Fechar</button></div>
+  <div class="dlg-body">
+    <p class="sect" style="margin-top:0">Fases</p>
+    <ul class="pick" id="pkPhases"></ul>
+    <label class="f" for="pkEsp">Especialidade</label>
+    <select id="pkEsp" style="width:100%"></select>
+    <ul class="pick" style="margin-top:14px"><li><label><input type="checkbox" id="pkMarks" checked><div><span class="t">Incluir as minhas marcas e fotos</span><span class="m">Desliga para enviar só as plantas.</span></div></label></li></ul>
+    <p class="note" id="pkSum"></p>
+    <p class="note">Envia o ficheiro por WhatsApp, email, Drive ou cabo. No outro aparelho, abre o link da ferramenta, vai a Fases e toca em Importar pacote.</p>
+  </div>
+  <div class="dlg-foot"><button class="btn primary" id="pkGo">Criar pacote</button><button class="btn" data-close>Cancelar</button></div>
+</div></dialog>
+
+<!-- Importar pacote -->
+<dialog id="ipDlg"><div class="dlg">
+  <div class="dlg-head"><h2>Importar pacote</h2><button class="btn sm" data-close>Cancelar</button></div>
+  <div class="dlg-body">
+    <p id="ipSum" style="margin:0"></p>
+    <p class="note">Ao juntar, as fases com o mesmo número são a mesma fase. Uma planta com o mesmo nome na mesma fase é trocada pela do pacote e as marcas mantêm-se.</p>
+  </div>
+  <div class="dlg-foot"><button class="btn primary" id="ipMerge">Juntar ao que tenho</button><button class="btn danger" id="ipReplace">Substituir tudo</button></div>
+</div></dialog>
+<input id="pkPicker" type="file" hidden>
+
 <div id="toast" role="status"></div>
 
 <template id="viewerTpl"><style>
@@ -972,7 +998,9 @@ function refreshHeads(){
 function renderEmpty(){
   $('#pages').innerHTML = `<div class="empty"><h1>Ainda não há plantas</h1>
     <p>Carrega os PDFs da obra e diz a que fase pertence cada um. Ficam guardados neste dispositivo e abrem sem internet.</p>
-    <button class="btn primary" id="emptyLoad">Carregar plantas</button></div>`;
+    <div class="row" style="justify-content:center"><button class="btn primary" id="emptyLoad">Carregar plantas</button><button class="btn" id="emptyImport">Importar pacote</button></div>
+    <p class="note">Se alguém te enviou um pacote de plantas, usa Importar pacote.</p></div>`;
+  $('#emptyImport').onclick = () => pickPack();
   $('#emptyLoad').onclick = () => pickPdfs();
   $('#whereName').textContent = 'Acompanhamento de obra';
   $('#wherePage').textContent = 'Sem plantas carregadas';
@@ -1871,6 +1899,140 @@ async function deliver(blob, filename, mime){
   setTimeout(() => URL.revokeObjectURL(url), 60000);
   toast('Ficheiro guardado: ' + filename + '. Vê a pasta de transferências.', 5000);
 }
+
+/* ================= pacote: levar tudo para outro aparelho ================= */
+const PKG_MAGIC = 'DDNOBRA1';
+let pkPending = null;
+function openPack(){
+  if (!docMetas.length){ toast('Ainda não há plantas para partilhar.'); return; }
+  const ul = $('#pkPhases'); ul.innerHTML = '';
+  phases.forEach(ph => {
+    const nd = docsOf(ph.id).length; if (!nd) return;
+    const li = document.createElement('li');
+    li.innerHTML = '<label><input type="checkbox" checked><div><span class="t"></span><span class="m"></span></div></label>';
+    li.querySelector('input').value = ph.id; li.querySelector('input').onchange = packSummary;
+    li.querySelector('.t').textContent = phaseTitle(ph);
+    li.querySelector('.m').textContent = `${nd} ${nd===1?'planta':'plantas'}, ${countText(ph.id).toLowerCase()}`;
+    ul.appendChild(li);
+  });
+  const es = $('#pkEsp'); es.innerHTML = ''; es.add(new Option('Todas as especialidades', 'all'));
+  const present = new Set(docMetas.map(espOf));
+  espList().filter(e => present.has(e)).forEach(e => es.add(new Option(e, e)));
+  if (present.has(NO_ESP)) es.add(new Option(NO_ESP, NO_ESP));
+  es.value = espView !== 'all' && present.has(espView) ? espView : 'all';
+  $('#pkMarks').checked = true;
+  packSummary();
+  $('#phasesDlg').close(); $('#pkDlg').showModal();
+}
+function packSelection(){
+  const pids = [...document.querySelectorAll('#pkPhases input:checked')].map(c => c.value);
+  const esp = $('#pkEsp').value;
+  const ds = docMetas.filter(d => pids.includes(d.phaseId) && (esp === 'all' || espOf(d) === esp));
+  const ids = new Set(ds.map(d => d.id));
+  const ms = $('#pkMarks').checked ? marks.filter(m => ids.has(m.docId)) : [];
+  return {pids: [...new Set(ds.map(d => d.phaseId))], ds, ms};
+}
+const mb = n => n < 1e6 ? Math.max(1, Math.round(n/1e3)) + ' KB' : (n/1e6).toFixed(n < 1e7 ? 1 : 0).replace('.', ',') + ' MB';
+function markBytes(m){ let s = (m.photo || '').length + (m.pano || '').length; if (m.dirs) Object.values(m.dirs).forEach(v => s += (v || '').length); return s * 0.75; }
+function packSummary(){
+  const {pids, ds, ms} = packSelection();
+  const size = ds.reduce((a,d) => a + (d.size || 0), 0) + ms.reduce((a,m) => a + markBytes(m), 0);
+  $('#pkSum').textContent = ds.length
+    ? `Vão ${pids.length} ${pids.length===1?'fase':'fases'}, ${ds.length} ${ds.length===1?'planta':'plantas'} e ${ms.length} ${ms.length===1?'marca':'marcas'}. Tamanho aproximado: ${mb(size)}.`
+    : 'Escolhe pelo menos uma fase com plantas.';
+  $('#pkGo').disabled = !ds.length;
+}
+$('#pkEsp').onchange = packSummary; $('#pkMarks').onchange = packSummary;
+$('#pkGo').onclick = async () => {
+  const {pids, ds, ms} = packSelection(); if (!ds.length) return;
+  $('#pkDlg').close(); toast('A preparar o pacote…', 120000);
+  try {
+    const parts = [], docs = []; let off = 0;
+    for (const d of ds){
+      const f = await getOne('files', d.id); if (!f) continue;
+      const len = f.data.byteLength;
+      docs.push({...d, off, len}); parts.push(f.data); off += len;
+    }
+    const head = {v: 1, criado: Date.now(), obra, esps: customEsps,
+      phases: phases.filter(p => pids.includes(p.id)), docs, marks: ms};
+    const json = new TextEncoder().encode(JSON.stringify(head));
+    const lenBuf = new ArrayBuffer(4); new DataView(lenBuf).setUint32(0, json.byteLength, true);
+    const blob = new Blob([new TextEncoder().encode(PKG_MAGIC), lenBuf, json, ...parts], {type: 'application/octet-stream'});
+    const dt = new Date(), ymd = dt.getFullYear() + '-' + String(dt.getMonth()+1).padStart(2,'0') + '-' + String(dt.getDate()).padStart(2,'0');
+    const fname = ('Pacote obra' + (obra ? ' ' + obra : '') + ' ' + ymd).replace(/[\\/:*?"<>|]+/g, '-').slice(0, 80) + '.ddnobra';
+    await deliver(blob, fname, 'application/octet-stream');
+  } catch(e){ console.error(e); toast('Não foi possível criar o pacote (' + (e && e.message || 'erro') + ').', 6000); }
+};
+
+function pickPack(){ $('#pkPicker').value = ''; $('#pkPicker').click(); }
+$('#pkPicker').addEventListener('change', async e => {
+  const f = e.target.files[0]; e.target.value = ''; if (!f) return;
+  toast('A ler o pacote…', 60000);
+  try {
+    const buf = await f.arrayBuffer();
+    const magic = new TextDecoder().decode(new Uint8Array(buf, 0, Math.min(8, buf.byteLength)));
+    if (magic !== PKG_MAGIC) throw new Error('Este ficheiro não é um pacote de plantas.');
+    const jl = new DataView(buf, 8, 4).getUint32(0, true);
+    const head = JSON.parse(new TextDecoder().decode(new Uint8Array(buf, 12, jl)));
+    pkPending = {buf, base: 12 + jl, head};
+    const h = head;
+    $('#ipSum').textContent = `Pacote${h.obra ? ' da obra ' + h.obra : ''}, criado a ${fmtDT(h.criado)}: ${h.phases.length} ${h.phases.length===1?'fase':'fases'}, ${h.docs.length} ${h.docs.length===1?'planta':'plantas'} e ${h.marks.length} ${h.marks.length===1?'marca':'marcas'}.`;
+    $('#ipReplace').hidden = !docMetas.length;
+    $('#toast').classList.remove('on');
+    closeAll(); $('#ipDlg').showModal();
+  } catch(err){ pkPending = null; toast(err.message || 'Não foi possível ler o pacote.', 6000); }
+});
+async function importPack(replaceAll){
+  const P = pkPending; if (!P) return; pkPending = null;
+  $('#ipDlg').close();
+  $('#pages').innerHTML = '<div class="status">A importar o pacote…</div>';
+  let nd = 0, nm = 0;
+  try {
+    if (replaceAll){
+      await run(['phases','docs','files','marks'], 'readwrite', t => ['phases','docs','files','marks'].forEach(s => t.objectStore(s).clear()));
+      phases = []; docMetas = []; marks = [];
+    }
+    const pmap = {};
+    for (const p of P.head.phases){
+      let local = phases.find(x => x.label.toLowerCase() === p.label.toLowerCase());
+      if (!local){ local = {...p}; if (phaseById(local.id)) local.id = uid('f_'); await putOne('phases', local); phases.push(local); }
+      pmap[p.id] = local.id;
+    }
+    const dmap = {};
+    for (const d of P.head.docs){
+      const pid = pmap[d.phaseId]; if (!pid) continue;
+      const id = pid + '::' + d.name;
+      const data = P.buf.slice(P.base + d.off, P.base + d.off + d.len);
+      const meta = {id, phaseId: pid, name: d.name, esp: d.esp || '', updatedAt: d.updatedAt, size: d.len};
+      await run(['docs','files'], 'readwrite', t => { t.objectStore('files').put({id, data}); t.objectStore('docs').put(meta); });
+      const ex = docMetas.find(x => x.id === id); if (ex) Object.assign(ex, meta); else docMetas.push(meta);
+      dmap[d.id] = id; nd++;
+    }
+    for (const m0 of P.head.marks){
+      const docId = dmap[m0.docId], pid = pmap[m0.phaseId]; if (!docId || !pid) continue;
+      const m = {...m0, docId, phaseId: pid};
+      const ex = marks.find(x => x.id === m.id);
+      if (!ex && marks.some(x => x.phaseId === pid && x.n === m.n)) m.n = marks.filter(x => x.phaseId === pid).reduce((a,x) => Math.max(a, x.n), 0) + 1;
+      await putOne('marks', m);
+      if (ex) Object.assign(ex, m); else marks.push(m);
+      nm++;
+    }
+    if (P.head.esps && P.head.esps.length){
+      P.head.esps.forEach(e => { if (!customEsps.includes(e)) customEsps.push(e); });
+      await putOne('meta', {key:'esps', value: customEsps});
+    }
+    if (!obra && P.head.obra){ obra = P.head.obra; await putOne('meta', {key:'obra', value: obra}); }
+    toast(`Pacote importado: ${nd} ${nd===1?'planta':'plantas'} e ${nm} ${nm===1?'marca':'marcas'}.`, 5000);
+  } catch(e){
+    console.error(e);
+    toast('A importação parou a meio (' + (e && e.message || 'erro') + '). O dispositivo pode estar sem espaço. O que já entrou ficou guardado.', 8000);
+  }
+  sortPhases(); view = 'all'; setView('all');
+}
+$('#ipMerge').onclick = () => importPack(false);
+$('#ipReplace').onclick = () => { if (confirm('Apagar todas as plantas e marcas deste aparelho e ficar só com as do pacote?')) importPack(true); };
+
+$('#pkOpen').onclick = openPack; $('#pkImport').onclick = pickPack;
 
 /* ================= arranque ================= */
 (async () => {

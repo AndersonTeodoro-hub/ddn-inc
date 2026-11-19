@@ -73,6 +73,8 @@ select:focus,input:focus,textarea:focus{outline:2px solid var(--accent);outline-
 .btn.icon{padding:0;width:40px}
 .btn[aria-pressed="true"]{background:var(--nc);border-color:var(--nc);color:#fff}
 .zoomval{font-variant-numeric:tabular-nums;min-width:58px;font-weight:500;color:var(--muted)}
+@media (max-width:900px){ .hide-md{display:none!important} .phasepick select{max-width:30vw} }
+.dochead span:not(.esp){overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
 @media (max-width:620px){
   .hide-sm{display:none!important}
   .logo{height:30px}
@@ -105,6 +107,7 @@ select:focus,input:focus,textarea:focus{outline:2px solid var(--accent);outline-
 .st-concluida{background:var(--st2-bg);color:var(--st2-ink)}
 .ph-empty{position:sticky;left:12px;color:var(--muted);font-size:14px;margin:4px 2px 10px}
 .dochead{position:sticky;left:12px;margin:14px 0 6px;font-size:13px;color:var(--muted);display:flex;gap:10px;align-items:baseline;min-width:0}
+.dochead .dh-ex{margin-left:auto;flex:0 0 auto}
 .dochead b{color:var(--ink);font-size:14px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .page{position:relative;background:#fff;margin:0 0 10px;box-shadow:0 0 0 1px var(--line-strong)}
 .page canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
@@ -224,10 +227,11 @@ dialog.full canvas{position:absolute;inset:0;width:100%;height:100%;display:bloc
   <label class="phasepick"><span class="hide-sm">Ver</span><select id="phaseSel" aria-label="Fase a ver"></select></label>
   <label class="phasepick"><select id="espSel" aria-label="Especialidade a ver"></select></label>
   <button class="btn" id="markBtn" aria-pressed="false">📍 Marcar</button>
+  <button class="btn" id="exHere" title="Exportar a planta que está no ecrã">Exportar planta</button>
   <span class="spacer"></span>
-  <button class="btn icon hide-sm" id="zoomOut" aria-label="Afastar">−</button>
+  <button class="btn icon hide-md" id="zoomOut" aria-label="Afastar">−</button>
   <button class="btn zoomval" id="zoomFit" title="Ver a planta inteira">100%</button>
-  <button class="btn icon hide-sm" id="zoomIn" aria-label="Aproximar">+</button>
+  <button class="btn icon hide-md" id="zoomIn" aria-label="Aproximar">+</button>
 </div>
 <div class="hintbar" id="hintbar" hidden><span>Toca no sítio da planta para criar uma marca.</span><button class="btn sm" id="markOff">Terminar</button></div>
 
@@ -355,6 +359,11 @@ dialog.full canvas{position:absolute;inset:0;width:100%;height:100%;display:bloc
   <div class="dlg-foot"><button class="btn primary" id="ipMerge">Juntar ao que tenho</button><button class="btn danger" id="ipReplace">Substituir tudo</button></div>
 </div></dialog>
 <input id="pkPicker" type="file" hidden>
+<dialog id="dlvDlg"><div class="dlg">
+  <div class="dlg-head"><h2>O ficheiro está pronto<span class="sub" id="dlvName"></span></h2><button class="btn sm" data-close>Fechar</button></div>
+  <div class="dlg-body"><p style="margin:0">Tamanho: <span id="dlvSize"></span>.</p><p class="note" id="dlvMsg"></p></div>
+  <div class="dlg-foot"><button class="btn primary" id="dlvSave">Guardar no aparelho</button><button class="btn" id="dlvShare" hidden>Partilhar</button></div>
+</div></dialog>
 
 <div id="toast" role="status"></div>
 
@@ -955,10 +964,11 @@ async function build(){
     if (!ds.length){ const e = document.createElement('p'); e.className = 'ph-empty'; e.textContent = espView === 'all' ? 'Ainda sem plantas nesta fase. Carrega-as com Atualizar.' : `Sem plantas de ${espView} nesta fase.`; frag.appendChild(e); }
     for (const d of ds){
       const h = document.createElement('div'); h.className = 'dochead';
-      h.innerHTML = '<b></b><span class="esp"></span><span></span>';
+      h.innerHTML = '<b></b><span class="esp"></span><span></span><button class="btn sm dh-ex">Exportar</button>';
+      h.querySelector('.dh-ex').onclick = () => openExport(d.phase, d.meta.id);
       h.firstChild.textContent = nice(d.meta.name);
       h.children[1].textContent = espOf(d.meta);
-      h.lastChild.textContent = `${d.pages.length} ${d.pages.length===1?'página':'páginas'}, atualizada a ${fmtDT(d.meta.updatedAt)}`;
+      h.children[2].textContent = `${d.pages.length} ${d.pages.length===1?'página':'páginas'}, atualizada a ${fmtDT(d.meta.updatedAt)}`;
       d.head = h; frag.appendChild(h);
       for (const p of d.pages){
         const el = document.createElement('div'); el.className = 'page'; el._p = p; p.el = el;
@@ -1151,6 +1161,11 @@ $('#markBtn').onclick = () => {
   setMarkMode(!markMode);
 };
 $('#markOff').onclick = () => setMarkMode(false);
+$('#exHere').onclick = () => {
+  if (!allPages.length){ toast('Carrega primeiro as plantas.'); return; }
+  const p = pageAt(viewer.scrollTop + viewer.clientHeight * 0.4);
+  openExport(p.d.phase, p.d.meta.id);
+};
 
 function drawMarks(p){
   p.layer.innerHTML = '';
@@ -1488,13 +1503,13 @@ document.querySelectorAll('#pdEstado button').forEach(b => b.onclick = () => {
 $('#pdView').onclick = () => { const id = curPhase.id; $('#phaseDlg').close(); setView(id); };
 $('#pdExport').onclick = () => openExport(curPhase);
 let exPhase = null, exFmt = 'pdf', busy = false;
-function openExport(ph){
+function openExport(ph, onlyDocId){
   exPhase = ph;
   $('#exTitle').textContent = 'Exportar ' + phaseTitle(ph);
   const ds = docsOf(ph.id);
   const inEsp = d => espView === 'all' || espOf(d) === espView;
   const withMarks = ds.filter(d => inEsp(d) && marks.some(m => m.docId === d.id));
-  const def = new Set((withMarks.length ? withMarks : ds.filter(inEsp)).map(d => d.id));
+  const def = onlyDocId ? new Set([onlyDocId]) : new Set((withMarks.length ? withMarks : ds.filter(inEsp)).map(d => d.id));
   const ul = $('#exList'); ul.innerHTML = '';
   if (!ds.length) ul.innerHTML = '<li><span class="none" style="display:block;padding:12px;color:var(--muted)">Esta fase ainda não tem plantas.</span></li>';
   ds.forEach(d => {
@@ -1508,7 +1523,7 @@ function openExport(ph){
   });
   const qe = $('#exQEsp'); qe.hidden = espView === 'all'; qe.textContent = 'Só ' + espView;
   setExFmt(exFmt); exSummary();
-  $('#phaseDlg').close(); $('#exDlg').showModal();
+  closeAll(); $('#exDlg').showModal();
 }
 function exChecked(){ return [...document.querySelectorAll('#exList input:checked')].map(c => c.value); }
 function exSummary(){
@@ -1887,18 +1902,33 @@ async function exportHtml(ph, ids){
     await deliver(new Blob([html], {type: 'text/html'}), fname, 'text/html');
   } catch(e){ console.error(e); toast('Não foi possível criar o HTML (' + (e && e.message || 'erro') + ').', 6000); }
 }
+/* Entrega do ficheiro: a criação pode demorar vários segundos, por isso guardar e partilhar
+   ficam em botões próprios, cada um com o seu toque, em vez de arrancarem sozinhos no fim. */
+let dlv = null;
 async function deliver(blob, filename, mime){
-  try {
-    const file = new File([blob], filename, {type: mime || 'application/pdf'});
-    if (isTouch() && navigator.canShare && navigator.canShare({files: [file]})){
-      await navigator.share({files: [file], title: filename}); return;
-    }
-  } catch(e){ if (e && e.name === 'AbortError') return; }
-  const url = URL.createObjectURL(blob), a = document.createElement('a');
-  a.href = url; a.download = filename; document.body.appendChild(a); a.click(); a.remove();
-  setTimeout(() => URL.revokeObjectURL(url), 60000);
-  toast('Ficheiro guardado: ' + filename + '. Vê a pasta de transferências.', 5000);
+  const file = new File([blob], filename, {type: mime || 'application/pdf'});
+  let canShare = false;
+  try { canShare = !!(navigator.canShare && navigator.canShare({files: [file]})); } catch(_){}
+  dlv = {blob, file, filename};
+  $('#dlvName').textContent = filename;
+  $('#dlvSize').textContent = mb(blob.size);
+  $('#dlvShare').hidden = !canShare;
+  $('#toast').classList.remove('on');
+  closeAll(); $('#dlvDlg').showModal();
 }
+$('#dlvSave').onclick = () => {
+  if (!dlv) return;
+  const url = URL.createObjectURL(dlv.blob), a = document.createElement('a');
+  a.href = url; a.download = dlv.filename; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 120000);
+  $('#dlvMsg').textContent = 'Se não apareceu nada, vê a pasta Transferências do aparelho.';
+};
+$('#dlvShare').onclick = async () => {
+  if (!dlv) return;
+  try { await navigator.share({files: [dlv.file], title: dlv.filename}); $('#dlvMsg').textContent = 'Enviado para partilhar.'; }
+  catch(e){ if (!e || e.name !== 'AbortError') $('#dlvMsg').textContent = 'A partilha não funcionou neste aparelho (' + (e && e.name || 'erro') + '). Usa Guardar no aparelho.'; }
+};
+$('#dlvDlg').addEventListener('close', () => { dlv = null; $('#dlvMsg').textContent = ''; });
 
 /* ================= pacote: levar tudo para outro aparelho ================= */
 const PKG_MAGIC = 'DDNOBRA1';

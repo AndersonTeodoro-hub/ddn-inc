@@ -73,6 +73,9 @@ select:focus,input:focus,textarea:focus{outline:2px solid var(--accent);outline-
 .btn.icon{padding:0;width:40px}
 .btn[aria-pressed="true"]{background:var(--nc);border-color:var(--nc);color:#fff}
 #okBtn[aria-pressed="true"]{background:#1f7a36;border-color:#1f7a36}
+#markBtn[aria-pressed="true"]{background:#e0a800;border-color:#e0a800;color:#1a1a1a}
+.hintbar.prod{background:#e0a800;color:#1a1a1a}
+.hintbar.prod button{color:#7a5b00}
 .hintbar.ok{background:#1f7a36}
 .hintbar.ok button{color:#1f7a36}
 .zoomval{font-variant-numeric:tabular-nums;min-width:58px;font-weight:500;color:var(--muted)}
@@ -110,6 +113,23 @@ select:focus,input:focus,textarea:focus{outline:2px solid var(--accent);outline-
 .st-concluida{background:var(--st2-bg);color:var(--st2-ink)}
 .ph-empty{position:sticky;left:12px;color:var(--muted);font-size:14px;margin:4px 2px 10px}
 .dochead{position:sticky;left:12px;margin:14px 0 6px;font-size:13px;color:var(--muted);display:flex;gap:10px;align-items:baseline;min-width:0}
+.etbar{position:sticky;left:12px;display:flex;flex-wrap:wrap;gap:6px;margin:0 0 8px;align-items:center}
+.ettab{appearance:none;border:1px solid var(--line-strong);background:var(--panel);color:var(--ink);font:inherit;font-size:13.5px;font-weight:500;border-radius:999px;padding:5px 12px;min-height:34px;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.ettab i{width:10px;height:10px;border-radius:50%;display:inline-block}
+.ettab[aria-pressed="true"]{background:var(--ink);color:var(--panel);border-color:var(--ink)}
+.ettab.add{border-style:dashed;color:var(--accent);font-weight:600}
+.ettab.gear{color:var(--muted)}
+.subbar{position:sticky;left:12px;display:flex;flex-wrap:wrap;gap:6px;margin:-2px 0 8px;padding-left:14px;border-left:3px solid var(--subc,var(--line-strong))}
+.subbar .ettab{font-size:13px;min-height:32px;padding:4px 11px}
+.subbar.flash{animation:etflash 1s ease-out 2}
+.etbar.flash{animation:etflash 1s ease-out 2}
+@keyframes etflash{0%{box-shadow:0 0 0 0 rgba(31,122,54,.6);border-radius:8px}100%{box-shadow:0 0 0 14px rgba(31,122,54,0)}}
+.fgrid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:10px}
+.fth{position:relative;appearance:none;border:1px solid var(--line-strong);border-radius:6px;padding:0;overflow:hidden;cursor:pointer;background:var(--bg);aspect-ratio:1}
+.fth img{width:100%;height:100%;object-fit:cover;display:block}
+.fth span{position:absolute;left:4px;top:4px;background:rgba(0,0,0,.65);color:#fff;font-size:11px;font-weight:700;padding:1px 6px;border-radius:4px}
+.fempty{grid-column:1/-1;margin:0;padding:18px;text-align:center;color:var(--muted);border:1px dashed var(--line-strong);border-radius:8px}
+.etsug{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
 .dochead .dh-ex{margin-left:auto;flex:0 0 auto}
 .dochead b{color:var(--ink);font-size:14px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .page{position:relative;background:#fff;margin:0 0 10px;box-shadow:0 0 0 1px var(--line-strong)}
@@ -124,7 +144,7 @@ select:focus,input:focus,textarea:focus{outline:2px solid var(--accent);outline-
 }
 .mk span{
   position:absolute; left:calc(100% - 3px); bottom:calc(100% - 5px);
-  min-width:22px; height:22px; padding:0 6px; border-radius:11px; background:var(--mkc,#d0021b); color:#fff;
+  min-width:22px; height:22px; padding:0 6px; border-radius:11px; background:var(--tagc,var(--mkc,#d0021b)); color:var(--tagt,#fff);
   font:700 12.5px/22px "IBM Plex Sans",system-ui,Arial,sans-serif; text-align:center; white-space:nowrap;
   box-shadow:0 0 0 1.5px #fff, 0 1px 3px rgba(0,0,0,.35);
 }
@@ -233,7 +253,7 @@ dialog.full canvas{position:absolute;inset:0;width:100%;height:100%;display:bloc
 <div class="toolbar">
   <label class="phasepick"><span class="hide-sm">Ver</span><select id="phaseSel" aria-label="Fase a ver"></select></label>
   <label class="phasepick"><select id="espSel" aria-label="Especialidade a ver"></select></label>
-  <button class="btn" id="markBtn" aria-pressed="false" title="Marcar não conformidade (círculo vermelho)">📍 Marcar</button>
+  <button class="btn" id="markBtn" aria-pressed="false" title="Marcar sítio em produção (círculo amarelo)">📍 Marcar</button>
   <button class="btn" id="okBtn" aria-pressed="false" title="Marcar sítio vistoriado e OK (círculo verde)">✓ OK</button>
   <button class="btn" id="exHere" title="Exportar a planta que está no ecrã">Exportar planta</button>
   <span class="spacer"></span>
@@ -295,10 +315,12 @@ dialog.full canvas{position:absolute;inset:0;width:100%;height:100%;display:bloc
     <label class="f">Tipo de registo</label>
     <div class="seg" id="mdTipo"><button data-v="foto">Foto</button><button data-v="360">360°</button><button data-v="grupo">Direções</button></div>
     <div id="mdMedia" style="margin-top:10px"></div>
+    <label class="f" for="mdEtapa">Etapa</label>
+    <select id="mdEtapa" style="width:100%"></select>
     <label class="f" for="mdNota">Nota</label>
     <textarea id="mdNota" rows="3" placeholder="O que viste neste sítio"></textarea>
     <label class="f">Estado</label>
-    <div class="seg" id="mdEstado"><button data-v="aberta">Aberta</button><button data-v="resolvida">Resolvida</button><button data-v="ok">OK</button></div>
+    <div class="seg" id="mdEstado"><button data-v="producao">Em produção</button><button data-v="ok">OK</button><button data-v="nc">Não conforme</button></div>
     <p class="stats" id="mdDates"></p>
   </div>
   <div class="dlg-foot">
@@ -332,6 +354,8 @@ dialog.full canvas{position:absolute;inset:0;width:100%;height:100%;display:bloc
     <p class="sect">Plantas a incluir</p>
     <div class="quick"><button class="btn sm" data-q="marks">Só as com marcas</button><button class="btn sm" data-q="esp" id="exQEsp" hidden></button><button class="btn sm" data-q="all">Todas</button><button class="btn sm" data-q="none">Nenhuma</button></div>
     <ul class="pick" id="exList"></ul>
+    <label class="f" for="exEtapa">Etapa</label>
+    <select id="exEtapa" style="width:100%"></select>
     <p class="note" id="exSum"></p>
   </div>
   <div class="dlg-foot"><button class="btn primary" id="exGo">Exportar</button><button class="btn" data-close>Cancelar</button></div>
@@ -367,6 +391,21 @@ dialog.full canvas{position:absolute;inset:0;width:100%;height:100%;display:bloc
   <div class="dlg-foot"><button class="btn primary" id="ipMerge">Juntar ao que tenho</button><button class="btn danger" id="ipReplace">Substituir tudo</button></div>
 </div></dialog>
 <input id="pkPicker" type="file" hidden>
+<dialog id="etNewDlg"><div class="dlg">
+  <div class="dlg-head"><h2>Nova etapa<span class="sub" id="etNewSub"></span></h2><button class="btn sm" data-close>Cancelar</button></div>
+  <div class="dlg-body">
+    <p class="sect" style="margin-top:0">Escolhe uma etapa</p>
+    <div class="etsug" id="etSug"></div>
+    <label class="f" for="etNome">Ou escreve outra</label>
+    <input type="text" id="etNome" placeholder="Ex.: Impermeabilização" autocomplete="off">
+    <ul class="pick" style="margin-top:14px"><li><label><input type="checkbox" id="etAll"><div><span class="t">Criar também nas outras plantas desta fase</span><span class="m">Só nas que ainda não têm uma etapa com este nome.</span></div></label></li></ul>
+  </div>
+  <div class="dlg-foot"><button class="btn primary" id="etCreate">Criar etapa</button></div>
+</div></dialog>
+<dialog id="etManDlg"><div class="dlg">
+  <div class="dlg-head"><h2>Etapas da planta<span class="sub" id="etManSub"></span></h2><button class="btn sm" data-close>Fechar</button></div>
+  <div class="dlg-body"><ul class="list" id="etManList"></ul></div>
+</div></dialog>
 <dialog id="dlvDlg"><div class="dlg">
   <div class="dlg-head"><h2>O ficheiro está pronto<span class="sub" id="dlvName"></span></h2><button class="btn sm" data-close>Fechar</button></div>
   <div class="dlg-body"><p style="margin:0">Tamanho: <span id="dlvSize"></span>.</p><p class="note" id="dlvMsg"></p></div>
@@ -399,7 +438,7 @@ header .logo{height:36px;width:auto;flex:0 0 auto}
 .pg{position:relative;background:#fff;margin:0 0 10px;box-shadow:0 0 0 1px var(--line-strong)}
 .pg img{position:absolute;inset:0;width:100%;height:100%;display:block;user-select:none;-webkit-user-drag:none}
 .mk{position:absolute;transform:translate(-50%,-50%);width:24px;height:24px;border-radius:50%;padding:0;background:transparent;border:2.5px solid var(--mkc,#d0021b);box-shadow:0 0 0 1.5px rgba(255,255,255,.95),inset 0 0 0 1.5px rgba(255,255,255,.95);cursor:pointer}
-.mk span{position:absolute;left:calc(100% - 3px);bottom:calc(100% - 5px);min-width:22px;height:22px;padding:0 6px;border-radius:11px;background:var(--mkc,#d0021b);color:#fff;font:700 12.5px/22px system-ui,Arial,sans-serif;text-align:center;white-space:nowrap;box-shadow:0 0 0 1.5px #fff,0 1px 3px rgba(0,0,0,.35)}
+.mk span{position:absolute;left:calc(100% - 3px);bottom:calc(100% - 5px);min-width:22px;height:22px;padding:0 6px;border-radius:11px;background:var(--tagc,var(--mkc,#d0021b));color:var(--tagt,#fff);font:700 12.5px/22px system-ui,Arial,sans-serif;text-align:center;white-space:nowrap;box-shadow:0 0 0 1.5px #fff,0 1px 3px rgba(0,0,0,.35)}
 .mk.on{outline:3px solid #ffb400;outline-offset:3px}
 #panel{position:fixed;right:12px;top:120px;bottom:12px;width:min(380px,calc(100vw - 24px));background:var(--panel);border:1px solid var(--line);border-radius:12px;box-shadow:0 12px 40px rgba(0,0,0,.3);display:flex;flex-direction:column;overflow:hidden;z-index:5}
 @media (min-width:701px){body.po #viewer{margin-right:404px}}
@@ -409,6 +448,13 @@ header .logo{height:36px;width:auto;flex:0 0 auto}
 .badge{min-width:28px;height:28px;padding:0 6px;border-radius:14px;background:var(--nc);color:#fff;font-weight:700;font-size:14px;display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto}
 .badge.r{background:#1f7a36}
 .pb{overflow:auto;flex:1}
+.etf{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.etc{appearance:none;border:1px solid var(--line-strong);background:var(--panel);color:var(--ink);font:inherit;font-size:13px;font-weight:500;border-radius:999px;padding:5px 11px;min-height:34px;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.etc i{width:10px;height:10px;border-radius:50%;display:inline-block}
+.etf .sep{width:1px;height:22px;background:var(--line-strong);margin:0 2px}
+.etc.sub{font-size:12.5px;min-height:30px;padding:4px 10px}
+.etc[aria-pressed="true"]{background:var(--ink);color:var(--panel);border-color:var(--ink)}
+.mk.off{display:none}
 .zbox{position:relative;overflow:hidden;background:#000;touch-action:pan-y}
 .zbox.zoomed{touch-action:none}
 .pimg{display:block;width:100%;height:auto;cursor:zoom-in;user-select:none;-webkit-user-drag:none}
@@ -442,7 +488,7 @@ dialog::backdrop{background:rgba(12,15,19,.55)}
 @media (max-width:560px){.hs{display:none!important}header .logo{height:28px}}
 </style>
 <header>__LOGO__<div class="ttl"><b id="t1"></b><span id="t2"></span></div></header>
-<div class="bar"><button class="btn" id="listBtn">Marcas</button><span class="sp"></span><button class="btn hs" id="zo" aria-label="Afastar">−</button><button class="btn zv" id="zf" title="Ver a planta inteira">100%</button><button class="btn hs" id="zi" aria-label="Aproximar">+</button></div>
+<div class="bar"><button class="btn" id="listBtn">Marcas</button><div class="etf" id="etf"></div><span class="sp"></span><button class="btn hs" id="zo" aria-label="Afastar">−</button><button class="btn zv" id="zf" title="Ver a planta inteira">100%</button><button class="btn hs" id="zi" aria-label="Aproximar">+</button></div>
 <main id="viewer"><div id="pages"></div></main>
 <aside id="panel" hidden aria-live="polite"><div class="ph"><span class="badge" id="pBadge"></span><div><b id="pT"></b><small id="pW"></small></div><button class="btn" id="pClose" aria-label="Fechar">✕</button></div>
 <div class="pb"><div id="pMedia"></div><div class="tx" id="pTx"></div><div class="dt" id="pDt"></div></div>
@@ -532,16 +578,16 @@ function Pano(canvas){
 const viewer = $('#viewer'), pagesEl = $('#pages');
 const PAD = 12, MINZ = 1, MAXZ = 8;
 let zoom = 1, fitW = 0, pages = [], open = null;
-const EC = {aberta:'#d0021b', resolvida:'#1f5fbf', ok:'#1f7a36'}, EL = {aberta:'Aberta', resolvida:'Resolvida', ok:'OK'};
+const EC = {producao:'#e0a800', ok:'#1f7a36', nc:'#d0021b'}, EL = {producao:'Em produção', ok:'OK', nc:'Não conforme'}, ETX = {producao:'#1a1a1a', ok:'#fff', nc:'#fff'};
 const cnt = k => D.marks.filter(m => m.e === k).length;
-const cntTxt = [[cnt('aberta'),'aberta','abertas'],[cnt('resolvida'),'resolvida','resolvidas'],[cnt('ok'),'OK','OK']].filter(x => x[0]).map(x => x[0] + ' ' + (x[0] === 1 ? x[1] : x[2])).join(', ');
+const cntTxt = [[cnt('producao'),'em produção','em produção'],[cnt('ok'),'OK','OK'],[cnt('nc'),'não conforme','não conformes']].filter(x => x[0]).map(x => x[0] + ' ' + (x[0] === 1 ? x[1] : x[2])).join(', ');
 $('#t1').textContent = 'Fase ' + D.fase + (D.nome ? ' ' + D.nome : '');
 $('#t2').textContent = [D.obra, D.estado, D.marks.length ? cntTxt : 'sem marcas', 'gerado a ' + D.gerado].filter(Boolean).join(', ');
 $('#listBtn').textContent = 'Marcas (' + D.marks.length + ')';
 const frag = document.createDocumentFragment();
 const info = document.createElement('div'); info.className = 'info';
 info.innerHTML = '<b></b><p></p>';
-info.firstChild.textContent = 'Estado da fase: ' + D.estado + '. Especialidades: ' + [...new Set(D.plans.map(p => p.esp))].join(', ') + '.';
+info.firstChild.textContent = 'Estado da fase: ' + D.estado + '. Especialidades: ' + [...new Set(D.plans.map(p => p.esp))].join(', ') + '.' + (D.etapaSel && D.etapaSel !== 'all' ? ' Etapa: ' + D.etapaSel + '.' : ((D.etapas || []).length ? ' Etapas: ' + D.etapas.map(e => e.nome).join(', ') + '.' + ((D.etapas || []).length > 1 ? ' Em “Todas”, a cor do círculo é a etapa e a cor do número é o estado (amarelo em produção, verde OK, vermelho não conforme).' : '') : ''));
 if (D.nota) info.lastChild.textContent = D.nota; else info.lastChild.remove();
 frag.appendChild(info);
 D.plans.forEach((pl, pi) => {
@@ -553,11 +599,11 @@ D.plans.forEach((pl, pi) => {
     const im = document.createElement('img'); im.src = p.img; im.alt = pl.name + ', página ' + (i+1); im.loading = 'lazy'; im.decoding = 'async';
     el.appendChild(im);
     p.marks.forEach(m => {
-      const b = document.createElement('button'); b.className = 'mk'; b.dataset.n = m.n; b.style.setProperty('--mkc', EC[m.e] || EC.aberta);
+      const b = document.createElement('button'); b.className = 'mk'; b.dataset.id = m.id; b.dataset.et = m.et || ''; b.dataset.sb = m.sb || ''; b.dataset.ec = m.ec || ''; b.style.setProperty('--tagc', EC[m.e] || EC.producao); b.style.setProperty('--tagt', ETX[m.e] || '#fff');
       const sp = document.createElement('span'); sp.textContent = m.n; b.appendChild(sp);
       b.style.left = (m.x*100) + '%'; b.style.top = (m.y*100) + '%';
-      b.setAttribute('aria-label', 'Marca ' + m.n);
-      b.onclick = e => { e.stopPropagation(); if (open === m.n) close(); else show(m.n); };
+      b.setAttribute('aria-label', 'Marca ' + m.n + (m.et ? ', ' + m.et + (m.sb ? ' › ' + m.sb : '') : ''));
+      b.onclick = e => { e.stopPropagation(); if (open === m.id) close(); else show(m.id); };
       b.ondblclick = e => e.stopPropagation();
       el.appendChild(b);
     });
@@ -565,6 +611,32 @@ D.plans.forEach((pl, pi) => {
   });
 });
 pagesEl.appendChild(frag);
+let etF = 'all', sbF = '';
+const multiEt = (D.etapas || []).length > 1;
+const passes = m => (etF === 'all' || m.et === etF) && (!sbF || m.sb === sbF);
+function paintMarks(){
+  document.querySelectorAll('.mk').forEach(b => {
+    const m = byId(b.dataset.id);
+    b.classList.toggle('off', !passes(m));
+    b.style.setProperty('--mkc', etF === 'all' && multiEt && b.dataset.ec ? b.dataset.ec : (EC[m.e] || EC.producao));
+  });
+  const f = $('#etf'); f.innerHTML = '';
+  const etapas = D.etapas || [];
+  const curE = etapas.find(e => e.nome === etF), subs = curE ? (curE.subs || []) : [];
+  if (!multiEt && !(etapas.length === 1 && (etapas[0].subs || []).length)) return;
+  const chip = (label, cor, on, fn, cls) => { const c = document.createElement('button'); c.className = 'etc' + (cls ? ' ' + cls : ''); c.setAttribute('aria-pressed', String(on));
+    if (cor){ const i = document.createElement('i'); i.style.background = cor; c.appendChild(i); }
+    c.append(label); c.onclick = () => { fn(); if (open && !passes(byId(open))) close(); paintMarks(); }; return c; };
+  if (multiEt) f.appendChild(chip('Todas', null, etF === 'all', () => { etF = 'all'; sbF = ''; }));
+  etapas.forEach(e => f.appendChild(chip(e.nome, e.cor, etF === e.nome, () => { etF = e.nome; sbF = ''; })));
+  const s2 = etapas.length === 1 && !curE ? (etapas[0].subs || []) : subs;
+  if (s2.length){
+    if (etapas.length === 1 && !curE){ etF = etapas[0].nome; }
+    const sp = document.createElement('span'); sp.className = 'sep'; f.appendChild(sp);
+    f.appendChild(chip('Todas de ' + etF.toLowerCase(), null, !sbF, () => { sbF = ''; }, 'sub'));
+    s2.forEach(s => f.appendChild(chip(s, null, sbF === s, () => { sbF = s; }, 'sub')));
+  }
+}
 function layout(){
   fitW = Math.max(200, viewer.clientWidth - PAD*2);
   const w = fitW * zoom;
@@ -598,30 +670,33 @@ function endPinch(){ if (!pinch) return; const {s,fx,fy} = pinch; pinch = null; 
 viewer.addEventListener('touchend', e => { if (e.touches.length < 2) endPinch(); });
 viewer.addEventListener('touchcancel', endPinch);
 let rt = 0; window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => { const z = zoom; zoom = 0; setZoom(z); layout(); }, 150); });
-const byN = n => D.marks.find(m => m.n === n);
-function show(n){
-  const m = byN(n); if (!m) return; open = n;
+const byId = id => D.marks.find(m => m.id === id);
+function show(id){
+  const m = byId(id); if (!m) return; open = id; const n = m.n;
   $('#panel').hidden = false;
   if (!document.body.classList.contains('po')){ document.body.classList.add('po'); relayout(); }
-  $('#pBadge').textContent = n; $('#pBadge').style.background = EC[m.e] || EC.aberta;
-  $('#pT').textContent = 'Marca ' + n + ', ' + (EL[m.e] || 'Aberta');
-  $('#pW').textContent = m.plan + ', página ' + m.page + ' (' + m.esp + ')';
+  $('#pBadge').textContent = n; $('#pBadge').style.background = EC[m.e] || EC.producao; $('#pBadge').style.color = ETX[m.e] || '#fff';
+  $('#pT').textContent = 'Marca ' + n + ', ' + (EL[m.e] || 'Em produção');
+  $('#pW').textContent = m.plan + ', página ' + m.page + (m.et ? '. Etapa: ' + m.et + (m.sb ? ' › ' + m.sb : '') : '') + ' (' + m.esp + ')';
   media(m);
   const tx = $('#pTx'); tx.textContent = m.nota || 'Sem nota.'; tx.className = 'tx' + (m.nota ? '' : ' e');
   $('#pDt').textContent = m.datas;
-  document.querySelectorAll('.mk').forEach(b => b.classList.toggle('on', +b.dataset.n === n));
+  document.querySelectorAll('.mk').forEach(b => b.classList.toggle('on', b.dataset.id === id));
 }
 function relayout(){ const p = pageAt(viewer.scrollTop + viewer.clientHeight/2); const ry = p ? (viewer.scrollTop + viewer.clientHeight/2 - p.el.offsetTop)/p.el.offsetHeight : 0; layout(); if (p) viewer.scrollTop = p.el.offsetTop + ry*p.el.offsetHeight - viewer.clientHeight/2; }
 function close(){ open = null; killPv(); $('#panel').hidden = true; if (document.body.classList.contains('po')){ document.body.classList.remove('po'); relayout(); } document.querySelectorAll('.mk.on').forEach(b => b.classList.remove('on')); }
-function goTo(n){
-  const b = document.querySelector(`.mk[data-n="${n}"]`); if (!b) return;
-  const el = b.parentElement, m = byN(n);
-  const pm = D.plans.flatMap(p => p.pages).find(p => p.marks.some(q => q.n === n)).marks.find(q => q.n === n);
+function goTo(id){
+  const m = byId(id); if (!m) return;
+  if (!passes(m)){ etF = multiEt ? 'all' : etF; sbF = ''; paintMarks(); }
+  const b = document.querySelector(`.mk[data-id="${id}"]`); if (!b) return;
+  const el = b.parentElement;
+  const pm = D.plans.flatMap(p => p.pages).find(p => p.marks.some(q => q.id === id)).marks.find(q => q.id === id);
   viewer.scrollTop = el.offsetTop + pm.y*el.offsetHeight - viewer.clientHeight/3;
   viewer.scrollLeft = el.offsetLeft + pm.x*el.offsetWidth - viewer.clientWidth/2;
-  show(n);
+  show(id);
 }
-function step(d){ if (open === null) return; const i = D.marks.findIndex(m => m.n === open); goTo(D.marks[(i + d + D.marks.length) % D.marks.length].n); }
+function visibleMarks(){ return D.marks.filter(passes); }
+function step(d){ if (open === null) return; const vm = visibleMarks(); if (!vm.length) return; const i = vm.findIndex(m => m.id === open); goTo(vm[(i + d + vm.length) % vm.length].id); }
 $('#pClose').onclick = close; $('#pPrev').onclick = () => step(-1); $('#pNext').onclick = () => step(1);
 /* Zoom de fotos: roda do rato (para cima amplia, para baixo reduz), arrastar quando ampliada,
    pinça no tablet, duplo clique alterna entre 1x e 2,5x. */
@@ -686,14 +761,26 @@ function media(m){
     const bar = document.createElement('div'); bar.className = 'mbar';
     bar.innerHTML = '<span></span>'; bar.firstChild.textContent = m.dirs.map(d => d.l).join(', ') + '. Toca para ver em sequência.';
     box.append(st, bar);
-  } else if (m.photo){
+  } else if (m.photos && m.photos.length){
+    let cur = 0, zObj = null;
+    const items = m.photos.map((src, i) => ({l: 'Foto ' + (i+1), src}));
     const zb = document.createElement('div'); zb.className = 'zbox';
-    const im = document.createElement('img'); im.src = m.photo; im.className = 'pimg'; im.alt = 'Foto da marca ' + m.n;
+    const im = document.createElement('img'); im.src = m.photos[0]; im.className = 'pimg'; im.alt = 'Foto 1 da marca ' + m.n;
     const fsb = document.createElement('button'); fsb.className = 'zfs'; fsb.textContent = '⤢ Ecrã inteiro';
-    fsb.onclick = () => fullSeq([{l: 'Marca ' + m.n, src: m.photo}], 0, '');
+    fsb.onclick = () => fullSeq(items, cur, 'Marca ' + m.n);
+    if (m.photos.length > 1){
+      const st = document.createElement('div'); st.className = 'strip';
+      m.photos.forEach((src, i) => {
+        const b = document.createElement('button'); b.className = 'th';
+        b.innerHTML = '<img alt=""><span></span>'; b.querySelector('img').src = src; b.querySelector('span').textContent = 'Foto ' + (i+1);
+        b.onclick = () => { cur = i; if (zObj) zObj.reset(); im.src = src; im.alt = 'Foto ' + (i+1) + ' da marca ' + m.n; };
+        st.appendChild(b);
+      });
+      box.appendChild(st);
+    }
     const hint = document.createElement('span'); hint.className = 'zhint'; hint.textContent = touchDev ? 'Pinça para ampliar' : 'Roda o rato para ampliar';
-    zb.append(im, fsb, hint); Zoomable(zb, im);
-    box.appendChild(zb);
+    zb.append(im, fsb, hint); zObj = Zoomable(zb, im);
+    box.insertBefore(zb, box.firstChild);
   }
 }
 function fullSeq(items, i, title){
@@ -727,10 +814,10 @@ $('#listBtn').onclick = () => {
   if (!D.marks.length) ul.innerHTML = '<li style="padding:12px;color:var(--muted)">Sem marcas.</li>';
   D.marks.forEach(m => {
     const li = document.createElement('li'); const b = document.createElement('button');
-    b.innerHTML = `<span class="badge"></span><div><b></b><small></small></div>`; b.querySelector('.badge').style.background = EC[m.e] || EC.aberta;
-    b.querySelector('.badge').textContent = m.n; b.querySelector('b').textContent = m.nota || (m.photo || m.pano || (m.dirs && m.dirs.length) ? 'Com fotos, sem nota' : 'Sem nota');
-    b.querySelector('small').textContent = (EL[m.e] || 'Aberta') + ', ' + m.plan + ', pág. ' + m.page;
-    b.onclick = () => { $('#listDlg').close(); goTo(m.n); };
+    b.innerHTML = `<span class="badge"></span><div><b></b><small></small></div>`; b.querySelector('.badge').style.background = EC[m.e] || EC.producao; b.querySelector('.badge').style.color = ETX[m.e] || '#fff';
+    b.querySelector('.badge').textContent = m.n; b.querySelector('b').textContent = m.nota || ((m.photos && m.photos.length) || m.pano || (m.dirs && m.dirs.length) ? 'Com fotos, sem nota' : 'Sem nota');
+    b.querySelector('small').textContent = (EL[m.e] || 'Em produção') + ', ' + m.plan + (m.et ? ', ' + m.et + (m.sb ? ' › ' + m.sb : '') : '') + ', pág. ' + m.page;
+    b.onclick = () => { $('#listDlg').close(); goTo(m.id); };
     li.appendChild(b); ul.appendChild(li);
   });
   $('#listDlg').showModal();
@@ -741,7 +828,7 @@ document.addEventListener('keydown', e => {
   if (e.key === 'Escape'){ if (fo) fullClose(); else close(); }
   if (e.key === 'ArrowRight') fo ? fullStep(1) : step(1); if (e.key === 'ArrowLeft') fo ? fullStep(-1) : step(-1);
 });
-layout();
+layout(); paintMarks();
 })();
 </script></template>
 
@@ -946,22 +1033,24 @@ const phaseTitle = p => 'Fase ' + p.label + (p.nome ? ' ' + p.nome : '');
 const sortPhases = () => phases.sort((a,b) => collator.compare(a.label, b.label));
 const docsOf = pid => docMetas.filter(d => d.phaseId === pid).sort((a,b) => collator.compare(a.name, b.name));
 const marksOf = pid => marks.filter(m => m.phaseId === pid).sort((a,b) => a.n - b.n);
-const EST = {aberta: {l:'Aberta', c:'#d0021b'}, resolvida: {l:'Resolvida', c:'#1f5fbf'}, ok: {l:'OK', c:'#1f7a36'}};
-const estOf = m => EST[m.estado] ? m.estado : 'aberta';
+const EST = {producao: {l:'Em produção', c:'#e0a800', t:'#1a1a1a'}, ok: {l:'OK', c:'#1f7a36', t:'#ffffff'}, nc: {l:'Não conforme', c:'#d0021b', t:'#ffffff'}};
+const LEGACY_EST = {aberta: 'nc', resolvida: 'ok'};
+const estOf = m => EST[m.estado] ? m.estado : (LEGACY_EST[m.estado] || 'producao');
+const estText = m => EST[estOf(m)].t;
 const estColor = m => EST[estOf(m)].c;
 const estLabel = m => EST[estOf(m)].l;
 function countList(ms){
-  const a = ms.filter(m => estOf(m) === 'aberta').length, r = ms.filter(m => estOf(m) === 'resolvida').length, o = ms.filter(m => estOf(m) === 'ok').length;
+  const c = k => ms.filter(m => estOf(m) === k).length, pr = c('producao'), o = c('ok'), n = c('nc');
   const parts = [];
-  if (a) parts.push(`${a} ${a===1?'aberta':'abertas'}`);
-  if (r) parts.push(`${r} ${r===1?'resolvida':'resolvidas'}`);
+  if (pr) parts.push(`${pr} em produção`);
   if (o) parts.push(`${o} OK`);
+  if (n) parts.push(`${n} ${n===1?'não conforme':'não conformes'}`);
   return parts.join(', ');
 }
 function countText(pid){ const ms = marksOf(pid); return ms.length ? countList(ms) : 'Sem marcas'; }
 function datesText(m){
   const k = estOf(m), d = m.resolvedAt ? fmtDT(m.resolvedAt) : '';
-  return 'Registada a ' + fmtDT(m.createdAt) + (d && k === 'resolvida' ? '. Resolvida a ' + d : d && k === 'ok' ? '. Vistoriada OK a ' + d : '') + '.';
+  return 'Registada a ' + fmtDT(m.createdAt) + (d && k === 'ok' ? '. Vistoriada OK a ' + d : d && k === 'nc' ? '. Vistoriada não conforme a ' + d : '') + '.';
 }
 function toast(msg, ms){
   const t = $('#toast'); t.textContent = msg; t.classList.add('on');
@@ -970,9 +1059,39 @@ function toast(msg, ms){
 function closeAll(){ document.querySelectorAll('dialog[open]').forEach(d => d.close()); }
 document.querySelectorAll('[data-close]').forEach(b => b.addEventListener('click', () => b.closest('dialog').close()));
 
+const ETAPA_SUG = ['Escavação e betão de limpeza','Armaduras','Cofragem','Negativos e redes embebidas','Redes enterradas','Betonagem'];
+const ETAPA_COR = ['#7c3aed','#ea580c','#0891b2','#db2777','#92400e','#4338ca','#475569','#0f766e','#9333ea','#1d4ed8'];
+const SUBS_ARM = ['Punçoamento','Armaduras inferiores','Armaduras superiores'];
+const isArm = nome => /^armaduras?$/i.test((nome || '').trim());
+const subsOf = e => (e && e.subs) || [];
+let curSub = {};
+function etapaLabel(m){ const e = etapaOfMark(m); return e ? e.nome + (m.sub ? ' › ' + m.sub : '') : ''; }
+const MAXF = 10;
+const etapasOf = d => (d && d.etapas) || [];
+const etapaById = (d, id) => etapasOf(d).find(e => e.id === id);
+const etapaOfMark = m => etapaById(docMetas.find(d => d.id === m.docId), m.etapaId);
+const photosOf = m => m.photos || (m.photo ? [m.photo] : []);
+let curEtapa = {};
 async function loadMeta(){
   [phases, docMetas, marks] = await Promise.all([getAll('phases'), getAll('docs'), getAll('marks')]);
   sortPhases();
+  for (const m of marks){
+    if (LEGACY_EST[m.estado]){ m.estado = LEGACY_EST[m.estado]; try { await putOne('marks', m); } catch(_){} }
+  }
+  for (const d of docMetas){
+    let ch = false;
+    etapasOf(d).forEach(e => { if (isArm(e.nome) && !e.subs){ e.subs = SUBS_ARM.slice(); ch = true; } });
+    if (ch) try { await putOne('docs', d); } catch(_){}
+  }
+  for (const d of docMetas){
+    const orphan = marks.filter(m => m.docId === d.id && !etapaById(d, m.etapaId));
+    if (!orphan.length) continue;
+    d.etapas = d.etapas || [];
+    let g = d.etapas.find(e => e.nome === 'Geral');
+    if (!g){ g = {id: uid('e_'), nome: 'Geral', cor: '#475569', createdAt: Math.min(...orphan.map(m => m.createdAt || Date.now()))}; d.etapas.unshift(g); }
+    orphan.forEach(m => m.etapaId = g.id);
+    try { await putOne('docs', d); for (const m of orphan) await putOne('marks', m); } catch(_){}
+  }
   const o = await getOne('meta', 'obra'); obra = o ? o.value : '';
   const v = await getOne('meta', 'view'); view = v && (v.value === 'all' || phaseById(v.value)) ? v.value : 'all';
   const ce = await getOne('meta', 'esps'); customEsps = ce ? ce.value : [];
@@ -1048,6 +1167,7 @@ async function build(){
       h.children[1].textContent = espOf(d.meta);
       h.children[2].textContent = `${d.pages.length} ${d.pages.length===1?'página':'páginas'}, atualizada a ${fmtDT(d.meta.updatedAt)}`;
       d.head = h; frag.appendChild(h);
+      const eb = document.createElement('div'); eb.className = 'etbar'; d.ebar = eb; frag.appendChild(eb); renderEtapaBar(d);
       for (const p of d.pages){
         const el = document.createElement('div'); el.className = 'page'; el._p = p; p.el = el;
         const layer = document.createElement('div'); layer.className = 'mklayer'; p.layer = layer; el.appendChild(layer);
@@ -1097,7 +1217,7 @@ function measureFit(){ fitW = Math.max(200, $('#viewer').clientWidth - PAD*2); }
 function layout(){
   const w = fitW * zoom;
   $('#pages').style.width = (w + PAD*2) + 'px';
-  document.querySelectorAll('.phasehead,.dochead,.ph-empty').forEach(e => e.style.width = fitW + 'px');
+  document.querySelectorAll('.phasehead,.dochead,.ph-empty,.etbar,.subbar').forEach(e => e.style.width = fitW + 'px');
   for (const p of allPages){ p.el.style.width = w + 'px'; p.el.style.height = (w * p.h / p.w) + 'px'; }
   $('#zoomFit').textContent = Math.round(zoom*100) + '%';
 }
@@ -1222,7 +1342,7 @@ function updateWhere(){
   }
   const p = pageAt(viewer.scrollTop + viewer.clientHeight * 0.4), d = p.d;
   $('#whereName').textContent = 'Fase ' + d.phase.label + ', ' + nice(d.meta.name) + (d.meta.esp ? ' (' + d.meta.esp + ')' : '');
-  $('#wherePage').textContent = (d.pages.length > 1 ? `Página ${p.num} de ${d.pages.length}. ` : '') + ESTADOS[d.phase.estado] + ', ' + countText(d.phase.id).toLowerCase();
+  $('#wherePage').textContent = (d.pages.length > 1 ? `Página ${p.num} de ${d.pages.length}. ` : '') + ESTADOS[d.phase.estado] + ', ' + countText(d.phase.id).replace(/^S/, 's');
 }
 let whereRaf = 0;
 viewer.addEventListener('scroll', () => { if (!whereRaf) whereRaf = requestAnimationFrame(() => { whereRaf = 0; updateWhere(); }); }, {passive:true});
@@ -1234,9 +1354,10 @@ function setMarkMode(mode){
   $('#okBtn').setAttribute('aria-pressed', String(markMode === 'ok'));
   $('#hintbar').hidden = !markMode;
   $('#hintbar').classList.toggle('ok', markMode === 'ok');
+  $('#hintbar').classList.toggle('prod', markMode === 'nc');
   $('#hintTxt').textContent = markMode === 'ok'
     ? 'Toca nos sítios vistoriados que estão OK. Cada toque deixa um círculo verde.'
-    : 'Toca no sítio da planta para marcar uma não conformidade.';
+    : 'Toca no sítio da planta para marcar em produção (amarelo). Na vistoria passas a OK ou Não conforme.';
   pagesEl.classList.toggle('marking', !!markMode);
 }
 $('#markBtn').onclick = () => {
@@ -1254,32 +1375,91 @@ $('#exHere').onclick = () => {
   openExport(p.d.phase, p.d.meta.id);
 };
 
+function renderEtapaBar(d){
+  const eb = d.ebar; if (!eb) return; eb.innerHTML = '';
+  const id = d.meta.id, et = etapasOf(d.meta), cur0 = curEtapa[id] || 'all';
+  const cur = cur0 === 'all' && et.length === 1 ? et[0].id : cur0;
+  const ms = marks.filter(m => m.docId === id);
+  const tab = (label, val, cor, n) => {
+    const b = document.createElement('button'); b.className = 'ettab'; b.setAttribute('aria-pressed', String(cur === val));
+    if (cor){ const dot = document.createElement('i'); dot.style.background = cor; b.appendChild(dot); }
+    b.append(label + ` (${n})`);
+    b.onclick = () => { curEtapa[id] = val; curSub[id] = ''; renderEtapaBar(d); d.pages.forEach(drawMarks); };
+    return b;
+  };
+  if (et.length > 1) eb.appendChild(tab('Todas', 'all', null, ms.length));
+  et.forEach(e => eb.appendChild(tab(e.nome, e.id, e.cor, ms.filter(m => m.etapaId === e.id).length)));
+  const add = document.createElement('button'); add.className = 'ettab add'; add.textContent = '+ Etapa'; add.onclick = () => openEtapaNew(d.meta); eb.appendChild(add);
+  if (et.length){ const g = document.createElement('button'); g.className = 'ettab gear'; g.textContent = 'Gerir etapas'; g.onclick = () => openEtapaMan(d.meta); eb.appendChild(g); }
+  // sub-etapas (ex.: Armaduras: Punçoamento, inferiores, superiores)
+  let sb = d.sbar;
+  if (!sb){ sb = document.createElement('div'); sb.className = 'subbar'; d.sbar = sb; eb.after(sb); }
+  sb.innerHTML = '';
+  const ce = cur !== 'all' ? etapaById(d.meta, cur) : null, subs = subsOf(ce);
+  sb.hidden = !subs.length;
+  if (subs.length){
+    sb.style.setProperty('--subc', ce.cor);
+    sb.style.width = fitW + 'px';
+    const cs = curSub[id] || '';
+    const em = ms.filter(m => m.etapaId === ce.id);
+    const st = (label, val, n) => { const b = document.createElement('button'); b.className = 'ettab'; b.setAttribute('aria-pressed', String(cs === val));
+      b.append(label + ` (${n})`); b.onclick = () => { curSub[id] = val; renderEtapaBar(d); d.pages.forEach(drawMarks); }; return b; };
+    sb.appendChild(st('Todas de ' + ce.nome.toLowerCase(), '', em.length));
+    subs.forEach(s => sb.appendChild(st(s, s, em.filter(m => m.sub === s).length)));
+    const add = document.createElement('button'); add.className = 'ettab add'; add.textContent = '+';
+    add.title = 'Acrescentar sub-etapa'; add.setAttribute('aria-label', 'Acrescentar sub-etapa');
+    add.onclick = async () => {
+      const v = prompt('Nome da nova sub-etapa de ' + ce.nome); if (v == null || !v.trim()) return;
+      if (!subsOf(ce).some(x => x.toLowerCase() === v.trim().toLowerCase())){ ce.subs = [...subsOf(ce), v.trim()]; await putOne('docs', d.meta); }
+      curSub[id] = v.trim(); renderEtapaBar(d); d.pages.forEach(drawMarks);
+    };
+    sb.appendChild(add);
+  }
+}
+function refreshDoc(docId){ const d = shown.find(x => x.meta.id === docId); if (d){ renderEtapaBar(d); d.pages.forEach(drawMarks); } }
 function drawMarks(p){
   p.layer.innerHTML = '';
-  marks.filter(m => m.docId === p.d.meta.id && m.page === p.num).forEach(m => {
+  const id = p.d.meta.id, multi = etapasOf(p.d.meta).length > 1;
+  const cur = (curEtapa[id] || 'all') === 'all' && etapasOf(p.d.meta).length === 1 ? etapasOf(p.d.meta)[0].id : (curEtapa[id] || 'all');
+  const cs = cur !== 'all' ? (curSub[id] || '') : '';
+  marks.filter(m => m.docId === id && m.page === p.num && (cur === 'all' || m.etapaId === cur) && (!cs || m.sub === cs)).forEach(m => {
     const b = document.createElement('button');
     b.className = 'mk'; b.dataset.id = m.id;
     b.style.left = (m.x*100) + '%'; b.style.top = (m.y*100) + '%';
-    b.style.setProperty('--mkc', estColor(m));
+    const et = etapaById(p.d.meta, m.etapaId);
+    b.style.setProperty('--mkc', cur === 'all' && multi && et ? et.cor : estColor(m));
+    b.style.setProperty('--tagc', estColor(m)); b.style.setProperty('--tagt', estText(m));
     const s = document.createElement('span'); s.textContent = m.n; b.appendChild(s);
-    b.setAttribute('aria-label', `Marca ${m.n}, ${estLabel(m)}${m.nota ? ': ' + m.nota : ''}`);
+    b.setAttribute('aria-label', `Marca ${m.n}, ${et ? etapaLabel(m) + ', ' : ''}${estLabel(m)}${m.nota ? ': ' + m.nota : ''}`);
     b.addEventListener('click', e => { e.stopPropagation(); openMark(m.id); });
     b.addEventListener('dblclick', e => e.stopPropagation());
     p.layer.appendChild(b);
   });
 }
-function redrawMarksFor(m){ const p = pageMap.get(m.docId + '|' + m.page); if (p) drawMarks(p); }
+function redrawMarksFor(m){ const p = pageMap.get(m.docId + '|' + m.page); if (p) drawMarks(p); const d = shown.find(x => x.meta.id === m.docId); if (d) renderEtapaBar(d); }
 async function onPageClick(e, p){
   if (!markMode || e.target.closest('.mk')) return;
   const r = p.el.getBoundingClientRect();
   const x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height;
   if (x < 0 || x > 1 || y < 0 || y > 1) return;
-  const ph = p.d.phase;
-  const n = marksOf(ph.id).reduce((a,m) => Math.max(a, m.n), 0) + 1;
+  const ph = p.d.phase, dm = p.d.meta, et = etapasOf(dm), cur = curEtapa[dm.id] || 'all';
+  const etapaId = cur !== 'all' ? cur : (et.length === 1 ? et[0].id : null);
+  if (!etapaId){
+    if (!et.length){ toast('Cria primeiro a etapa desta planta.', 3500); openEtapaNew(dm); }
+    else { toast('Escolhe a etapa nos separadores por cima da planta antes de marcar.', 4000); p.d.ebar.classList.remove('flash'); void p.d.ebar.offsetWidth; p.d.ebar.classList.add('flash'); }
+    return;
+  }
+  const etObj = etapaById(dm, etapaId), sub = curSub[dm.id] || '';
+  if (subsOf(etObj).length && !sub){
+    toast(`Escolhe em ${etObj.nome} a sub-etapa (${subsOf(etObj).join(', ')}) antes de marcar.`, 4500);
+    if (p.d.sbar){ p.d.sbar.classList.remove('flash'); void p.d.sbar.offsetWidth; p.d.sbar.classList.add('flash'); }
+    return;
+  }
+  const n = marks.filter(m => m.docId === dm.id).reduce((a,m) => Math.max(a, m.n), 0) + 1;
   const isOk = markMode === 'ok', now = Date.now();
-  const m = {id: uid('m_'), phaseId: ph.id, docId: p.d.meta.id, page: p.num, x, y, n, nota:'', estado: isOk ? 'ok' : 'aberta', photo:null, createdAt: now, resolvedAt: isOk ? now : null};
+  const m = {id: uid('m_'), phaseId: ph.id, docId: dm.id, etapaId, sub, page: p.num, x, y, n, nota:'', estado: isOk ? 'ok' : 'producao', photos: [], createdAt: now, resolvedAt: isOk ? now : null};
   try { await putOne('marks', m); } catch(err){ toast('Não foi possível guardar a marca. O dispositivo pode estar sem espaço.'); return; }
-  marks.push(m); drawMarks(p); refreshHeads();
+  marks.push(m); drawMarks(p); renderEtapaBar(p.d); refreshHeads();
   if (isOk) toast(`Marca ${n} OK. Toca no círculo se quiseres juntar foto ou nota.`, 2500);
   else openMark(m.id);
 }
@@ -1289,16 +1469,95 @@ function openMark(id){
   const m = marks.find(q => q.id === id); if (!m) return;
   curMark = m;
   const ph = phaseById(m.phaseId), dm = docMetas.find(d => d.id === m.docId);
-  $('#mdBadge').textContent = m.n; $('#mdBadge').className = 'badge'; $('#mdBadge').style.background = estColor(m);
+  $('#mdBadge').textContent = m.n; $('#mdBadge').className = 'badge'; $('#mdBadge').style.background = estColor(m); $('#mdBadge').style.color = estText(m);
   $('#mdTitle').firstChild.textContent = 'Marca ' + m.n;
-  $('#mdWhere').textContent = `Fase ${ph.label}, ${dm ? nice(dm.name) : 'planta removida'}, página ${m.page}`;
+  $('#mdWhere').textContent = `Fase ${ph.label}, ${dm ? nice(dm.name) : 'planta removida'}, página ${m.page}` + (etapaLabel(m) ? `, ${etapaLabel(m)}` : '');
+  const es = $('#mdEtapa'); es.innerHTML = '';
+  etapasOf(dm).forEach(e => {
+    if (!subsOf(e).length) es.add(new Option(e.nome, e.id + '|'));
+    else subsOf(e).forEach(s => es.add(new Option(e.nome + ' › ' + s, e.id + '|' + s)));
+  });
+  es.value = (m.etapaId || '') + '|' + (m.sub || '');
+  if (es.selectedIndex < 0 && m.etapaId){ const e0 = etapaById(dm, m.etapaId); es.add(new Option((e0 ? e0.nome : 'Etapa') + ' (sem sub-etapa)', m.etapaId + '|'), 0); es.value = m.etapaId + '|'; }
+  es.disabled = es.options.length < 2;
   $('#mdNota').value = m.nota || '';
   fillMarkMedia(m); fillMarkEstado(m);
   if (!$('#markDlg').open) $('#markDlg').showModal();
 }
 function fillMarkEstado(m){
-  document.querySelectorAll('#mdEstado button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.v === m.estado)));
+  document.querySelectorAll('#mdEstado button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.v === estOf(m))));
   $('#mdDates').textContent = datesText(m);
+}
+$('#mdEtapa').addEventListener('change', () => {
+  const m = curMark; if (!m) return; const [eid, sub] = $('#mdEtapa').value.split('|'); m.etapaId = eid; m.sub = sub || ''; saveMark(m); refreshDoc(m.docId);
+  const dm = docMetas.find(d => d.id === m.docId), ph = phaseById(m.phaseId);
+  $('#mdWhere').textContent = `Fase ${ph.label}, ${dm ? nice(dm.name) : ''}, página ${m.page}` + (etapaLabel(m) ? `, ${etapaLabel(m)}` : '');
+});
+let etDoc = null, etPick = '';
+function nextCor(dm){ const used = new Set(etapasOf(dm).map(e => e.cor)); return ETAPA_COR.find(c => !used.has(c)) || ETAPA_COR[etapasOf(dm).length % ETAPA_COR.length]; }
+function openEtapaNew(dm){
+  etDoc = dm; etPick = '';
+  $('#etNewSub').textContent = nice(dm.name);
+  const have = new Set(etapasOf(dm).map(e => e.nome.toLowerCase()));
+  const box = $('#etSug'); box.innerHTML = '';
+  ETAPA_SUG.filter(s => !have.has(s.toLowerCase())).forEach(s => {
+    const b = document.createElement('button'); b.className = 'ettab'; b.textContent = s; b.setAttribute('aria-pressed', 'false');
+    b.onclick = () => { etPick = s; $('#etNome').value = ''; box.querySelectorAll('.ettab').forEach(x => x.setAttribute('aria-pressed', String(x === b))); };
+    box.appendChild(b);
+  });
+  if (!box.children.length) box.innerHTML = '<p class="note" style="margin:0">As etapas sugeridas já existem nesta planta. Escreve outra em baixo.</p>';
+  $('#etNome').value = ''; $('#etAll').checked = false;
+  closeAll(); $('#etNewDlg').showModal();
+}
+$('#etNome').addEventListener('input', () => { if ($('#etNome').value.trim()){ etPick = ''; $('#etSug').querySelectorAll('.ettab').forEach(x => x.setAttribute('aria-pressed', 'false')); } });
+function addEtapaTo(dm, nome){
+  const ex = etapasOf(dm).find(e => e.nome.toLowerCase() === nome.toLowerCase());
+  if (ex) return ex;
+  const e = {id: uid('e_'), nome, cor: nextCor(dm), createdAt: Date.now()};
+  if (isArm(nome)) e.subs = SUBS_ARM.slice();
+  dm.etapas = [...etapasOf(dm), e];
+  return e;
+}
+$('#etCreate').onclick = async () => {
+  const nome = ($('#etNome').value.trim() || etPick).trim();
+  if (!nome){ toast('Escolhe ou escreve o nome da etapa.'); return; }
+  const dm = etDoc; if (!dm) return;
+  const e = addEtapaTo(dm, nome);
+  const targets = [dm];
+  if ($('#etAll').checked) docsOf(dm.phaseId).forEach(d => { if (d !== dm){ addEtapaTo(d, nome); targets.push(d); } });
+  try { for (const d of targets) await putOne('docs', d); } catch(_){ toast('Não foi possível guardar a etapa.'); return; }
+  curEtapa[dm.id] = e.id;
+  targets.forEach(d => { if (d !== dm && !curEtapa[d.id]) { const x = etapasOf(d).find(q => q.nome === nome); if (x && etapasOf(d).length === 1) curEtapa[d.id] = x.id; } refreshDoc(d.id); });
+  $('#etNewDlg').close();
+  toast(`Etapa “${nome}” criada` + (targets.length > 1 ? ` em ${targets.length} plantas.` : '. Já podes marcar.'), 3500);
+};
+function openEtapaMan(dm){
+  etDoc = dm; $('#etManSub').textContent = nice(dm.name) + '. Pela ordem em que foram criadas.';
+  const ul = $('#etManList'); ul.innerHTML = '';
+  etapasOf(dm).forEach(e => {
+    const n = marks.filter(m => m.docId === dm.id && m.etapaId === e.id).length;
+    const li = document.createElement('li');
+    const go = document.createElement('div'); go.className = 'go'; go.style.cursor = 'default';
+    go.innerHTML = '<span class="badge" style="min-width:14px;height:14px;padding:0"></span><div><span class="t"></span><span class="m"></span></div>';
+    go.querySelector('.badge').style.background = e.cor; go.querySelector('.t').textContent = e.nome;
+    go.querySelector('.m').textContent = `${n} ${n===1?'marca':'marcas'}, criada a ${fmtD(e.createdAt)}` + (subsOf(e).length ? `. Sub-etapas: ${subsOf(e).join(', ')}` : '');
+    const rn = document.createElement('button'); rn.className = 'btn sm'; rn.textContent = 'Mudar nome';
+    rn.onclick = async () => {
+      const v = prompt('Novo nome da etapa', e.nome); if (v == null || !v.trim()) return;
+      e.nome = v.trim(); await putOne('docs', dm); openEtapaMan(dm); refreshDoc(dm.id);
+    };
+    const rm = document.createElement('button'); rm.className = 'btn sm danger'; rm.textContent = 'Apagar';
+    rm.onclick = async () => {
+      if (!confirm(`Apagar a etapa “${e.nome}”` + (n ? ` e as ${n} marcas dela, com as fotos?` : '?'))) return;
+      const gone = marks.filter(m => m.docId === dm.id && m.etapaId === e.id);
+      await run(['docs','marks'], 'readwrite', t => { dm.etapas = etapasOf(dm).filter(x => x !== e); t.objectStore('docs').put(dm); gone.forEach(m => t.objectStore('marks').delete(m.id)); });
+      marks = marks.filter(m => !gone.includes(m));
+      if (curEtapa[dm.id] === e.id) curEtapa[dm.id] = 'all';
+      openEtapaMan(dm); refreshDoc(dm.id); refreshHeads();
+    };
+    li.append(go, rn, rm); ul.appendChild(li);
+  });
+  closeAll(); $('#etManDlg').showModal();
 }
 async function saveMark(m){ try { await putOne('marks', m); } catch(e){ toast('Não foi possível guardar. O dispositivo pode estar sem espaço.'); } }
 $('#mdNota').addEventListener('input', () => {
@@ -1308,9 +1567,9 @@ $('#mdNota').addEventListener('input', () => {
 $('#markDlg').addEventListener('close', () => { if (curMark){ clearTimeout(notaT); saveMark(curMark); redrawMarksFor(curMark); } });
 document.querySelectorAll('#mdEstado button').forEach(b => b.onclick = () => {
   const m = curMark; if (!m || m.estado === b.dataset.v) return;
-  m.estado = b.dataset.v; m.resolvedAt = m.estado === 'aberta' ? null : Date.now();
+  m.estado = b.dataset.v; m.resolvedAt = m.estado === 'producao' ? null : Date.now();
   saveMark(m); fillMarkEstado(m); redrawMarksFor(m); refreshHeads();
-  $('#mdBadge').style.background = estColor(m);
+  $('#mdBadge').style.background = estColor(m); $('#mdBadge').style.color = estText(m);
 });
 $('#mdDel').onclick = async () => {
   const m = curMark; if (!m || !confirm(`Apagar a marca ${m.n} e a foto dela?`)) return;
@@ -1320,18 +1579,20 @@ $('#mdDel').onclick = async () => {
 $('#mdGo').onclick = () => { const m = curMark; $('#markDlg').close(); goToMark(m); };
 const DIRS = [['N','Norte'],['L','Leste'],['S','Sul'],['O','Oeste'],['T','Teto']];
 const tipoOf = m => m.tipo || 'foto';
-function hasMedia(m){ const k = tipoOf(m); return k === 'foto' ? !!m.photo : k === '360' ? !!m.pano : DIRS.some(([d]) => m.dirs && m.dirs[d]); }
+function hasMedia(m){ const k = tipoOf(m); return k === 'foto' ? photosOf(m).length > 0 : k === '360' ? !!m.pano : DIRS.some(([d]) => m.dirs && m.dirs[d]); }
 function mediaText(m){
   if (!hasMedia(m)) return ''; const k = tipoOf(m);
-  if (k === 'foto') return 'foto'; if (k === '360') return 'foto 360°';
+  if (k === 'foto'){ const n = photosOf(m).length; return n === 1 ? 'foto' : n + ' fotos'; } if (k === '360') return 'foto 360°';
   const n = DIRS.filter(([d]) => m.dirs[d]).length; return `${n} ${n===1?'direção':'direções'}`;
 }
+const fotoItems = m => { const ph = photosOf(m); return ph.map((src, i) => ({k: i, label: 'Foto ' + (i+1), src})); };
 const dirItems = m => DIRS.filter(([d]) => m.dirs && m.dirs[d]).map(([d, l]) => ({k: d, label: l, src: m.dirs[d]}));
 function isTouch(){ try { return matchMedia('(pointer:coarse)').matches; } catch(_){ return false; } }
 let pickTarget = null;
 function pick(target, how){
   pickTarget = target;
   const inp = how === 'cam' && isTouch() ? $('#cameraPicker') : $('#photoPicker');
+  inp.multiple = how === 'galm';
   inp.value = ''; inp.click();
 }
 function fillMarkMedia(m){
@@ -1341,12 +1602,23 @@ function fillMarkMedia(m){
   const btn = (txt, cls, fn) => { const b = document.createElement('button'); b.className = 'btn ' + (cls || ''); b.textContent = txt; b.onclick = fn; return b; };
   const row = document.createElement('div'); row.className = 'row';
   if (k === 'foto'){
-    const ph = document.createElement('div'); ph.className = 'photo';
-    if (m.photo){ const i = document.createElement('img'); i.src = m.photo; i.alt = 'Foto da marca ' + m.n; i.onclick = () => openSeq([{label: 'Marca ' + m.n, src: m.photo}], 0); ph.appendChild(i); }
-    else ph.innerHTML = '<p>Sem foto</p>';
-    row.append(btn(m.photo ? '📷 Trocar foto' : '📷 Tirar foto', 'primary', () => pick({kind:'foto'}, 'cam')), btn('Galeria', '', () => pick({kind:'foto'}, 'gal')));
-    if (m.photo) row.append(btn('Retirar', 'danger', () => { if (!confirm('Retirar a foto desta marca?')) return; m.photo = null; saveMark(m); fillMarkMedia(m); }));
-    box.append(ph, row);
+    const ph = photosOf(m);
+    const grid = document.createElement('div'); grid.className = 'fgrid';
+    ph.forEach((src, i) => {
+      const b = document.createElement('button'); b.className = 'fth'; b.setAttribute('aria-label', 'Ver foto ' + (i+1));
+      const im = document.createElement('img'); im.src = src; im.alt = ''; b.appendChild(im);
+      const s = document.createElement('span'); s.textContent = i + 1; b.appendChild(s);
+      b.onclick = () => openSeq(fotoItems(m), i, m, 'foto');
+      grid.appendChild(b);
+    });
+    if (!ph.length) grid.innerHTML = '<p class="fempty">Sem fotos</p>';
+    if (ph.length < MAXF){
+      row.append(btn(`📷 Tirar foto (${ph.length}/${MAXF})`, 'primary', () => pick({kind:'foto'}, 'cam')), btn('Galeria', '', () => pick({kind:'foto'}, 'galm')));
+    }
+    if (ph.length) row.append(btn('Ver em sequência', ph.length < MAXF ? '' : 'primary', () => openSeq(fotoItems(m), 0, m, 'foto')));
+    const note = document.createElement('p'); note.className = 'note';
+    note.textContent = ph.length >= MAXF ? `Chegaste às ${MAXF} fotos desta marca. Para trocar ou apagar uma, toca nela.` : `Até ${MAXF} fotos por marca. Na Galeria podes escolher várias de uma vez.`;
+    box.append(grid, row, note);
   } else if (k === '360'){
     const ph = document.createElement('div'); ph.className = 'photo';
     if (m.pano){
@@ -1393,20 +1665,32 @@ document.querySelectorAll('#mdTipo button').forEach(b => b.onclick = () => {
   m.tipo = b.dataset.v; saveMark(m); fillMarkMedia(m);
 });
 ['#cameraPicker','#photoPicker'].forEach(s => $(s).addEventListener('change', async e => {
-  const f = e.target.files[0], m = curMark, tg = pickTarget; if (!f || !m || !tg) return;
+  const files = [...e.target.files], m = curMark, tg = pickTarget; if (!files.length || !m || !tg) return;
   try {
-    if (tg.kind === 'foto'){ m.photo = await fileToJpeg(f); toast('Foto guardada na marca ' + m.n); }
-    else if (tg.kind === 'pano'){ m.pano = await fileToPano(f); toast('Foto 360° guardada na marca ' + m.n); }
-    else { m.dirs = m.dirs || {}; m.dirs[tg.k] = await fileToJpeg(f); const l = DIRS.find(x => x[0] === tg.k)[1]; toast(l + ' guardada na marca ' + m.n); }
+    if (tg.kind === 'foto'){
+      const cur = photosOf(m).slice();
+      if (tg.idx != null){ cur[tg.idx] = await fileToJpeg(files[0]); toast('Foto ' + (tg.idx+1) + ' trocada'); }
+      else {
+        const room = MAXF - cur.length;
+        for (const f of files.slice(0, room)) cur.push(await fileToJpeg(f));
+        toast(files.length > room ? `Só cabem ${MAXF} fotos por marca. Entraram ${room}.` : (Math.min(files.length, room) === 1 ? 'Foto guardada na marca ' + m.n : Math.min(files.length, room) + ' fotos guardadas na marca ' + m.n), 3500);
+      }
+      m.photos = cur; delete m.photo;
+    }
+    else if (tg.kind === 'pano'){ m.pano = await fileToPano(files[0]); toast('Foto 360° guardada na marca ' + m.n); }
+    else { m.dirs = m.dirs || {}; m.dirs[tg.k] = await fileToJpeg(files[0]); const l = DIRS.find(x => x[0] === tg.k)[1]; toast(l + ' guardada na marca ' + m.n); }
     await saveMark(m); fillMarkMedia(m);
-    if ($('#full').open && seq && seq.mark === m){ seq.items = dirItems(m); seqI = Math.max(0, seq.items.findIndex(x => x.k === tg.k)); showSeq(); }
+    if ($('#full').open && seq && seq.mark === m){
+      seq.items = seq.kind === 'foto' ? fotoItems(m) : dirItems(m);
+      seqI = Math.max(0, seq.items.findIndex(x => x.k === (tg.kind === 'foto' ? tg.idx : tg.k))); showSeq();
+    }
   } catch(err){ toast(err.message, 5000); }
 }));
 
 /* ---- ecrã inteiro: fotos em sequência e 360° ---- */
 let seq = null, seqI = 0, pano = null;
-function openSeq(items, i, mark){
-  seq = {items, mark: mark || null}; seqI = Math.max(0, i || 0);
+function openSeq(items, i, mark, kind){
+  seq = {items, mark: mark || null, kind: kind || 'dir'}; seqI = Math.max(0, i || 0);
   if (!$('#full').open) $('#full').showModal();
   showSeq();
 }
@@ -1441,11 +1725,13 @@ $('#full').addEventListener('keydown', e => { if (e.key === 'ArrowRight') seqSte
 let swX = null;
 $('#fullImg').addEventListener('pointerdown', e => { swX = e.clientX; });
 $('#fullImg').addEventListener('pointerup', e => { if (swX == null) return; const dx = e.clientX - swX; swX = null; if (Math.abs(dx) > 50) seqStep(dx < 0 ? 1 : -1); });
-$('#fSwap').onclick = () => { const it = seq && seq.items[seqI]; if (it) pick({kind:'dir', k: it.k}, 'cam'); };
+$('#fSwap').onclick = () => { const it = seq && seq.items[seqI]; if (!it) return; if (seq.kind === 'foto') pick({kind:'foto', idx: it.k}, 'cam'); else pick({kind:'dir', k: it.k}, 'cam'); };
 $('#fDel').onclick = () => {
   const m = seq && seq.mark, it = seq && seq.items[seqI]; if (!m || !it || !confirm(`Apagar a foto ${it.label} desta marca?`)) return;
-  delete m.dirs[it.k]; saveMark(m); fillMarkMedia(m);
-  seq.items = dirItems(m);
+  if (seq.kind === 'foto'){ const cur = photosOf(m).slice(); cur.splice(it.k, 1); m.photos = cur; delete m.photo; }
+  else delete m.dirs[it.k];
+  saveMark(m); fillMarkMedia(m);
+  seq.items = seq.kind === 'foto' ? fotoItems(m) : dirItems(m);
   if (!seq.items.length){ $('#full').close(); return; }
   seqI = Math.min(seqI, seq.items.length - 1); showSeq();
 };
@@ -1519,7 +1805,7 @@ function renderPhasesDlg(){
     go.innerHTML = '<div><span class="t"></span><span class="m"></span></div>';
     go.querySelector('.t').textContent = phaseTitle(ph);
     const nd = docsOf(ph.id).length;
-    go.querySelector('.m').textContent = `${nd} ${nd===1?'planta':'plantas'}, ${countText(ph.id).toLowerCase()}`;
+    go.querySelector('.m').textContent = `${nd} ${nd===1?'planta':'plantas'}, ${countText(ph.id).replace(/^S/, 's')}`;
     go.onclick = () => { $('#phasesDlg').close(); openPhase(ph.id); };
     const chip = document.createElement('span'); chip.className = 'chip st-' + ph.estado; chip.textContent = ESTADOS[ph.estado];
     li.append(go, chip); ul.appendChild(li);
@@ -1571,7 +1857,8 @@ function renderPhaseLists(ph){
     go.querySelector('.badge').textContent = m.n;
     go.querySelector('.t').textContent = m.nota ? m.nota : (hasMedia(m) ? 'Com ' + mediaText(m) + ', sem nota' : 'Sem nota');
     const dm = docMetas.find(d => d.id === m.docId);
-    go.querySelector('.m').textContent = `${estLabel(m)}, ${dm ? nice(dm.name) : ''}, pág. ${m.page}`;
+    go.querySelector('.m').textContent = `${estLabel(m)}, ${dm ? nice(dm.name) : ''}` + (etapaLabel(m) ? `, ${etapaLabel(m)}` : '') + `, pág. ${m.page}`;
+    go.querySelector('.badge').style.color = estText(m);
     go.onclick = async () => { $('#phaseDlg').close(); await goToMark(m); openMark(m.id); };
     li.appendChild(go); um.appendChild(li);
   });
@@ -1613,12 +1900,30 @@ function openExport(ph, onlyDocId){
     ul.appendChild(li);
   });
   const qe = $('#exQEsp'); qe.hidden = espView === 'all'; qe.textContent = 'Só ' + espView;
+  const names = [];
+  ds.flatMap(d => etapasOf(d)).sort((a,b) => (a.createdAt||0) - (b.createdAt||0)).forEach(e => { if (!names.includes(e.nome)) names.push(e.nome); });
+  const es = $('#exEtapa'); es.innerHTML = ''; es.add(new Option('Todas as etapas', 'all'));
+  names.forEach(n => {
+    es.add(new Option(n, n));
+    const subs = []; ds.flatMap(d => etapasOf(d)).filter(e => e.nome === n).forEach(e => subsOf(e).forEach(s => { if (!subs.includes(s)) subs.push(s); }));
+    subs.forEach(s => es.add(new Option(n + ' › ' + s, n + ' › ' + s)));
+  });
+  const curE = onlyDocId && curEtapa[onlyDocId] && curEtapa[onlyDocId] !== 'all' ? etapaById(docMetas.find(d => d.id === onlyDocId), curEtapa[onlyDocId]) : null;
+  const curS = onlyDocId ? (curSub[onlyDocId] || '') : '';
+  es.value = curE ? curE.nome + (curS ? ' › ' + curS : '') : 'all'; if (es.selectedIndex < 0) es.value = 'all'; es.onchange = exSummary;
   setExFmt(exFmt); exSummary();
   closeAll(); $('#exDlg').showModal();
 }
 function exChecked(){ return [...document.querySelectorAll('#exList input:checked')].map(c => c.value); }
+function inEtapa(m, sel){
+  if (sel === 'all') return true;
+  const e = etapaOfMark(m); if (!e) return false;
+  const [n, s] = sel.split(' › ');
+  return e.nome === n && (!s || m.sub === s);
+}
 function exSummary(){
-  const ids = exChecked(), ms = marks.filter(m => ids.includes(m.docId)), nf = ms.filter(hasMedia).length;
+  const en = $('#exEtapa').value || 'all';
+  const ids = exChecked(), ms = marks.filter(m => ids.includes(m.docId) && inEtapa(m, en)), nf = ms.filter(hasMedia).length;
   $('#exSum').textContent = ids.length
     ? `Vão ${ids.length} ${ids.length===1?'planta':'plantas'} e ${ms.length} ${ms.length===1?'marca':'marcas'} (${nf} com fotos).`
     : 'Escolhe pelo menos uma planta.';
@@ -1644,7 +1949,8 @@ document.querySelectorAll('#exDlg [data-q]').forEach(b => b.onclick = () => {
 $('#exGo').onclick = async () => {
   const ids = exChecked(); if (!ids.length || busy) return;
   $('#exDlg').close(); busy = true;
-  try { if (exFmt === 'pdf') await exportPhase(exPhase, ids); else await exportHtml(exPhase, ids); }
+  const en = $('#exEtapa').value || 'all';
+  try { if (exFmt === 'pdf') await exportPhase(exPhase, ids, en); else await exportHtml(exPhase, ids, en); }
   finally { busy = false; }
 };
 $('#pdDelete').onclick = async () => {
@@ -1778,7 +2084,7 @@ $('#upSave').onclick = async () => {
       if (!String.fromCharCode.apply(null, head).includes('%PDF')){ toast(`“${item.file.name}” não é um PDF válido e ficou de fora.`); continue; }
       const id = item.phaseId + '::' + item.file.name;
       const ex = docMetas.find(d => d.id === id);
-      const meta = {id, phaseId: item.phaseId, name: item.file.name, esp: item.esp || '', updatedAt: now, size: data.byteLength};
+      const meta = {id, phaseId: item.phaseId, name: item.file.name, esp: item.esp || '', updatedAt: now, size: data.byteLength, etapas: ex ? etapasOf(ex) : []};
       if (item.esp) lastEsp = item.esp;
       await run(['docs','files'], 'readwrite', t => { t.objectStore('files').put({id, data}); t.objectStore('docs').put(meta); });
       if (ex){ Object.assign(ex, meta); trocadas++; } else { docMetas.push(meta); novas++; }
@@ -1794,7 +2100,8 @@ $('#upSave').onclick = async () => {
 };
 
 /* ================= exportar PDF da fase ================= */
-async function exportPhase(ph, ids){
+async function exportPhase(ph, ids, etapaNome){
+  etapaNome = etapaNome || 'all';
   toast('A preparar o PDF…', 120000);
   try {
     const {PDFDocument, StandardFonts, rgb, degrees} = PDFLib;
@@ -1808,8 +2115,11 @@ async function exportPhase(ph, ids){
     const INK = rgb(.07,.09,.11), MUTED = rgb(.35,.39,.45), LINE = rgb(.85,.87,.9);
     const WHITE = rgb(1,1,1);
     const hexRgb = h => rgb(parseInt(h.slice(1,3),16)/255, parseInt(h.slice(3,5),16)/255, parseInt(h.slice(5,7),16)/255);
-    const ds = docsOf(ph.id).filter(d => ids.includes(d.id)), ms = marksOf(ph.id).filter(m => ids.includes(m.docId));
+    const ds = docsOf(ph.id).filter(d => ids.includes(d.id));
+    const ms = marksOf(ph.id).filter(m => ids.includes(m.docId) && inEtapa(m, etapaNome)).sort((a,b) => a.docId === b.docId ? a.n - b.n : ds.findIndex(d => d.id === a.docId) - ds.findIndex(d => d.id === b.docId));
     const esps = [...new Set(ds.map(espOf))];
+    const etList = []; ms.forEach(m => { const e = etapaOfMark(m); if (e && !etList.some(x => x.nome === e.nome)) etList.push(e); });
+    const useEtCor = etapaNome === 'all' && etList.length > 1;
     const docName = id => { const d = docMetas.find(x => x.id === id); return d ? nice(d.name) : 'planta removida'; };
 
     /* ---- relatório em A4 ---- */
@@ -1845,6 +2155,7 @@ async function exportPhase(ph, ids){
     [['Estado da fase', ESTADOS[ph.estado]],
      ['Relatório de', fmtDT(Date.now())],
      [esps.length === 1 ? 'Especialidade' : 'Especialidades', esps.join(', ')],
+     [etapaNome !== 'all' ? 'Etapa' : 'Etapas', etapaNome !== 'all' ? etapaNome : (etList.length ? etList.map(e => e.nome).join(', ') : 'nenhuma')],
      ['Plantas', ds.length ? ds.map(d => nice(d.name) + (esps.length > 1 ? ' (' + espOf(d) + ')' : '')).join('; ') : 'nenhuma'],
      ['Marcas', ms.length ? `${ms.length} (${countList(ms)})` : 'nenhuma']
     ].forEach(([k, v]) => {
@@ -1856,6 +2167,17 @@ async function exportPhase(ph, ids){
         pg.drawText(l, {x: M + kw, y: y - 11, size: 11, font, color: INK}); y -= 16;
       });
     });
+    if (useEtCor){
+      y -= 6; para(S('Nas plantas, a cor do círculo é a etapa e a cor do número é o estado (amarelo em produção, verde OK, vermelho não conforme).'), 9.5, font, MUTED);
+      let lx = M; const ly = y - 10;
+      for (const e of etList){
+        const nm = S(e.nome), w = font.widthOfTextAtSize(nm, 10) + 26;
+        if (lx + w > M + W){ lx = M; y -= 16; }
+        pg.drawCircle({x: lx + 6, y: y - 10 + 3.5, size: 5, borderColor: hexRgb(e.cor), borderWidth: 2});
+        pg.drawText(nm, {x: lx + 16, y: y - 10, size: 10, font, color: INK}); lx += w;
+      }
+      y -= 20;
+    }
     if (ph.nota && ph.nota.trim()){ y -= 6; para(SB('Notas da fase'), 11, bold, INK); para(S(ph.nota.trim()), 11, font, INK); }
     y -= 10; pg.drawLine({start:{x:M, y}, end:{x:M+W, y}, thickness:.8, color: LINE}); y -= 16;
 
@@ -1870,12 +2192,13 @@ async function exportPhase(ph, ids){
       } catch(_){}
     };
     for (const m of ms){
-      const col = hexRgb(estColor(m)), tipo = tipoOf(m);
-      const side = tipo === 'foto' && !!m.photo;
+      const col = hexRgb(estColor(m)), colT = hexRgb(estText(m)), colL = estOf(m) === 'producao' ? hexRgb('#8a6500') : col, tipo = tipoOf(m);
+      const fotos = tipo === 'foto' ? photosOf(m) : [];
+      const side = fotos.length === 1;
       const tx = side ? TX : M + 40, tw = side ? TW : W - 40;
       const lines = [
-        [SB(`Marca ${m.n}, ${estLabel(m)}`), bold, 12, col],
-        [S(`${docName(m.docId)}, página ${m.page}`), font, 10.5, MUTED],
+        [SB(`Marca ${m.n}, ${estLabel(m)}`), bold, 12, colL],
+        [S(`${docName(m.docId)}, página ${m.page}` + (etapaLabel(m) ? `. Etapa: ${etapaLabel(m)}` : '')), font, 10.5, MUTED],
         [S(datesText(m)), font, 10.5, MUTED]
       ];
       const notaLines = m.nota && m.nota.trim() ? wrap(font, S(m.nota.trim()), 11, tw) : [];
@@ -1887,17 +2210,27 @@ async function exportPhase(ph, ids){
       let mediaH = 0;
       if (tipo === '360' && m.pano) mediaH = 10 + PANH + 16;
       if (dirs.length) mediaH = 10 + BH + 16;
+      const FW = (W - 40 - GAP*4) / 5, FH = FW * 0.75, frows = fotos.length > 1 ? Math.ceil(fotos.length / 5) : 0;
+      if (frows) mediaH = 10 + frows * (FH + 16);
       const h = (side ? Math.max(PH, textH) : textH + mediaH) + 18;
       if (y - h < M) newPage();
       const top = y;
       pg.drawCircle({x: M + 14, y: top - 14, size: 13, color: col});
       const ns = String(m.n), nfs = ns.length > 2 ? 10 : 12;
-      pg.drawText(ns, {x: M + 14 - bold.widthOfTextAtSize(ns, nfs)/2, y: top - 14 - nfs*0.36, size: nfs, font: bold, color: WHITE});
-      if (side) await fitImg(m.photo, M + 40, top, PW, PH);
+      pg.drawText(ns, {x: M + 14 - bold.widthOfTextAtSize(ns, nfs)/2, y: top - 14 - nfs*0.36, size: nfs, font: bold, color: colT});
+      if (side) await fitImg(fotos[0], M + 40, top, PW, PH);
       let ty = top;
       for (const [t,f,s,c] of lines){ for (const l of wrap(f, t, s, tw)){ pg.drawText(l, {x: tx, y: ty - s, size: s, font: f, color: c}); ty -= s*1.4; } }
       if (notaLines.length){ ty -= 4; for (const l of notaLines){ pg.drawText(l, {x: tx, y: ty - 11, size: 11, font, color: INK}); ty -= 15.4; } }
       const my = top - textH - 10;
+      if (frows){
+        for (let i = 0; i < fotos.length; i++){
+          const x = M + 40 + (i % 5) * (FW + GAP), yy = my - Math.floor(i / 5) * (FH + 16);
+          await fitImg(fotos[i], x, yy, FW, FH);
+          const lb = SB('Foto ' + (i+1)), lw = bold.widthOfTextAtSize(lb, 8.5);
+          pg.drawText(lb, {x: x + (FW - lw)/2, y: yy - FH - 11, size: 8.5, font: bold, color: MUTED});
+        }
+      }
       if (tipo === '360' && m.pano){
         await fitImg(m.pano, M + 40, my, PANW, PANH);
         pg.drawText(S('Foto 360° em vista plana. No HTML interativo dá para olhar à volta.'), {x: M + 40, y: my - PANH - 12, size: 9, font, color: MUTED});
@@ -1933,7 +2266,8 @@ async function exportPhase(ph, ids){
         const a = rot * Math.PI / 180, cos = Math.cos(a), sin = Math.sin(a);
         for (const m of pm){
           const [px, py] = vp.convertToPdfPoint(m.x * vp.width, m.y * vp.height);
-          const col = hexRgb(estColor(m));
+          const tagCol = hexRgb(estColor(m)), etm = etapaOfMark(m);
+          const col = useEtCor && etm ? hexRgb(etm.cor) : tagCol;
           const R = rr * 1.02;
           page.drawCircle({x: px, y: py, size: R + rr*0.08, borderColor: WHITE, borderWidth: rr*0.32});
           page.drawCircle({x: px, y: py, size: R, borderColor: col, borderWidth: rr*0.2});
@@ -1943,28 +2277,31 @@ async function exportPhase(ph, ids){
           const [cx, cy] = rot2(R*0.78 + bw/2 - rr*0.15, R*0.78 + bh/2 - rr*0.15);
           const bx = px + cx, by = py + cy;
           const [rx0, ry0] = rot2(-bw/2, -bh/2);
-          page.drawRectangle({x: bx + rx0, y: by + ry0, width: bw, height: bh, color: col, borderColor: WHITE, borderWidth: rr*0.12, rotate: degrees(rot)});
+          page.drawRectangle({x: bx + rx0, y: by + ry0, width: bw, height: bh, color: tagCol, borderColor: WHITE, borderWidth: rr*0.12, rotate: degrees(rot)});
           const [tx0, ty0] = rot2(-tw/2, -fs*0.36);
-          page.drawText(ns, {x: bx + tx0, y: by + ty0, size: fs, font: bold, color: WHITE, rotate: degrees(rot)});
+          page.drawText(ns, {x: bx + tx0, y: by + ty0, size: fs, font: bold, color: hexRgb(estText(m)), rotate: degrees(rot)});
         }
       }
       jsdoc.destroy();
     }
     const nPlans = out.getPageCount() - nReport;
     for (let i = 0; i < nPlans; i++){ const pg2 = out.getPage(nReport + i); out.removePage(nReport + i); out.insertPage(i, pg2); }
-    out.setTitle('Acompanhamento fase ' + ph.label); out.setCreator('DDN-INC');
+    out.setTitle('Acompanhamento fase ' + ph.label + (etapaNome !== 'all' ? ' ' + etapaNome : '')); out.setCreator('DDN-INC');
     const bytes = await out.save();
     const d = new Date(), ymd = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
-    const fname = ('Acompanhamento fase ' + ph.label + (ph.nome ? ' ' + ph.nome : '') + (esps.length === 1 && esps[0] !== NO_ESP ? ' ' + esps[0] : '') + ' ' + ymd).replace(/[\\/:*?"<>|]+/g, '-').slice(0, 90) + '.pdf';
+    const fname = ('Acompanhamento fase ' + ph.label + (ph.nome ? ' ' + ph.nome : '') + (esps.length === 1 && esps[0] !== NO_ESP ? ' ' + esps[0] : '') + (etapaNome !== 'all' ? ' ' + etapaNome : '') + ' ' + ymd).replace(/\s*›\s*/g, ' - ').replace(/[\\/:*?"<>|]+/g, '-').slice(0, 90) + '.pdf';
     await deliver(new Blob([bytes], {type: 'application/pdf'}), fname);
     if (falhas.length) toast('PDF criado, mas estas plantas não entraram: ' + falhas.join(', '), 6000);
   } catch(e){
     console.error(e); toast('Não foi possível criar o PDF (' + (e && e.message || 'erro') + ').', 6000);
   }
 }
-async function exportHtml(ph, ids){
+async function exportHtml(ph, ids, etapaNome){
+  etapaNome = etapaNome || 'all';
   try {
-    const ds = docsOf(ph.id).filter(d => ids.includes(d.id)), ms = marksOf(ph.id).filter(m => ids.includes(m.docId));
+    const ds = docsOf(ph.id).filter(d => ids.includes(d.id));
+    const ms = marksOf(ph.id).filter(m => ids.includes(m.docId) && inEtapa(m, etapaNome)).sort((a,b) => a.docId === b.docId ? a.n - b.n : ds.findIndex(d => d.id === a.docId) - ds.findIndex(d => d.id === b.docId));
+    const etList = []; ms.forEach(m => { const e = etapaOfMark(m); if (!e) return; let x = etList.find(q => q.nome === e.nome); if (!x){ x = {nome: e.nome, cor: e.cor, subs: []}; etList.push(x); } if (m.sub && !x.subs.includes(m.sub)) x.subs.push(m.sub); });
     const plans = []; let k = 0;
     for (const d of ds){
       k++;
@@ -1982,25 +2319,26 @@ async function exportHtml(ph, ids){
         await pg.render({canvasContext: cx, viewport: vp}).promise;
         const img = c.toDataURL('image/jpeg', 0.82); c.width = c.height = 0;
         pages.push({img, w: vp.width, h: vp.height,
-          marks: ms.filter(m => m.docId === d.id && m.page === i).map(m => ({n: m.n, x: m.x, y: m.y, e: estOf(m)}))});
+          marks: ms.filter(m => m.docId === d.id && m.page === i).map(m => ({id: m.id, n: m.n, x: m.x, y: m.y, e: estOf(m), et: (etapaOfMark(m) || {}).nome || '', sb: m.sub || '', ec: (etapaOfMark(m) || {}).cor || ''}))});
       }
       jsdoc.destroy();
       plans.push({name: nice(d.name), esp: espOf(d), pages});
     }
     const data = {obra, fase: ph.label, nome: ph.nome || '', estado: ESTADOS[ph.estado], nota: (ph.nota || '').trim(), gerado: fmtDT(Date.now()),
-      plans, marks: ms.map(m => { const d = docMetas.find(x => x.id === m.docId);
-        return {n: m.n, plan: d ? nice(d.name) : '', esp: espOf(d), page: m.page, e: estOf(m), nota: (m.nota || '').trim(), tipo: tipoOf(m),
-          photo: tipoOf(m) === 'foto' ? (m.photo || null) : null, pano: tipoOf(m) === '360' ? (m.pano || null) : null,
+      etapas: etList, etapaSel: etapaNome,
+      plans, marks: ms.map(m => { const d = docMetas.find(x => x.id === m.docId), etm = etapaOfMark(m);
+        return {id: m.id, n: m.n, et: etm ? etm.nome : '', sb: m.sub || '', ec: etm ? etm.cor : '', plan: d ? nice(d.name) : '', esp: espOf(d), page: m.page, e: estOf(m), nota: (m.nota || '').trim(), tipo: tipoOf(m),
+          photos: tipoOf(m) === 'foto' ? photosOf(m) : [], pano: tipoOf(m) === '360' ? (m.pano || null) : null,
           dirs: tipoOf(m) === 'grupo' ? dirItems(m).map(x => ({l: x.label, src: x.src})) : [],
           criada: fmtDT(m.createdAt), datas: datesText(m)}; })};
     const json = JSON.stringify(data).replace(/</g, '\\u003c').replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029');
     const esps = [...new Set(ds.map(espOf))];
-    const title = 'Acompanhamento fase ' + ph.label + (ph.nome ? ' ' + ph.nome : '') + (esps.length === 1 && esps[0] !== NO_ESP ? ' ' + esps[0] : '');
+    const title = 'Acompanhamento fase ' + ph.label + (ph.nome ? ' ' + ph.nome : '') + (esps.length === 1 && esps[0] !== NO_ESP ? ' ' + esps[0] : '') + (etapaNome !== 'all' ? ' ' + etapaNome : '');
     const logo = document.querySelector('header.top .logo').outerHTML;
     const body = document.getElementById('viewerTpl').innerHTML.replace('__LOGO__', () => logo).replace('__DATA__', () => json);
     const html = '<!DOCTYPE html>\n<html lang="pt-PT">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">\n<title>' + escHtml(title) + '</title>\n</head>\n<body>\n' + body + '\n</body>\n</html>\n';
     const dt = new Date(), ymd = dt.getFullYear() + '-' + String(dt.getMonth()+1).padStart(2,'0') + '-' + String(dt.getDate()).padStart(2,'0');
-    const fname = (title + ' ' + ymd).replace(/[\\/:*?"<>|]+/g, '-').slice(0, 90) + '.html';
+    const fname = (title + ' ' + ymd).replace(/\s*›\s*/g, ' - ').replace(/[\\/:*?"<>|]+/g, '-').slice(0, 90) + '.html';
     await deliver(new Blob([html], {type: 'text/html'}), fname, 'text/html');
   } catch(e){ console.error(e); toast('Não foi possível criar o HTML (' + (e && e.message || 'erro') + ').', 6000); }
 }
@@ -2044,7 +2382,7 @@ function openPack(){
     li.innerHTML = '<label><input type="checkbox" checked><div><span class="t"></span><span class="m"></span></div></label>';
     li.querySelector('input').value = ph.id; li.querySelector('input').onchange = packSummary;
     li.querySelector('.t').textContent = phaseTitle(ph);
-    li.querySelector('.m').textContent = `${nd} ${nd===1?'planta':'plantas'}, ${countText(ph.id).toLowerCase()}`;
+    li.querySelector('.m').textContent = `${nd} ${nd===1?'planta':'plantas'}, ${countText(ph.id).replace(/^S/, 's')}`;
     ul.appendChild(li);
   });
   const es = $('#pkEsp'); es.innerHTML = ''; es.add(new Option('Todas as especialidades', 'all'));
@@ -2065,7 +2403,7 @@ function packSelection(){
   return {pids: [...new Set(ds.map(d => d.phaseId))], ds, ms};
 }
 const mb = n => n < 1e6 ? Math.max(1, Math.round(n/1e3)) + ' KB' : (n/1e6).toFixed(n < 1e7 ? 1 : 0).replace('.', ',') + ' MB';
-function markBytes(m){ let s = (m.photo || '').length + (m.pano || '').length; if (m.dirs) Object.values(m.dirs).forEach(v => s += (v || '').length); return s * 0.75; }
+function markBytes(m){ let s = photosOf(m).reduce((a,x) => a + x.length, 0) + (m.pano || '').length; if (m.dirs) Object.values(m.dirs).forEach(v => s += (v || '').length); return s * 0.75; }
 function packSummary(){
   const {pids, ds, ms} = packSelection();
   const size = ds.reduce((a,d) => a + (d.size || 0), 0) + ms.reduce((a,m) => a + markBytes(m), 0);
@@ -2091,7 +2429,7 @@ $('#pkGo').onclick = async () => {
     const lenBuf = new ArrayBuffer(4); new DataView(lenBuf).setUint32(0, json.byteLength, true);
     const blob = new Blob([new TextEncoder().encode(PKG_MAGIC), lenBuf, json, ...parts], {type: 'application/octet-stream'});
     const dt = new Date(), ymd = dt.getFullYear() + '-' + String(dt.getMonth()+1).padStart(2,'0') + '-' + String(dt.getDate()).padStart(2,'0');
-    const fname = ('Pacote obra' + (obra ? ' ' + obra : '') + ' ' + ymd).replace(/[\\/:*?"<>|]+/g, '-').slice(0, 80) + '.ddnobra';
+    const fname = ('Pacote obra' + (obra ? ' ' + obra : '') + ' ' + ymd).replace(/\s*›\s*/g, ' - ').replace(/[\\/:*?"<>|]+/g, '-').slice(0, 80) + '.ddnobra';
     await deliver(blob, fname, 'application/octet-stream');
   } catch(e){ console.error(e); toast('Não foi possível criar o pacote (' + (e && e.message || 'erro') + ').', 6000); }
 };
@@ -2135,7 +2473,9 @@ async function importPack(replaceAll){
       const pid = pmap[d.phaseId]; if (!pid) continue;
       const id = pid + '::' + d.name;
       const data = P.buf.slice(P.base + d.off, P.base + d.off + d.len);
-      const meta = {id, phaseId: pid, name: d.name, esp: d.esp || '', updatedAt: d.updatedAt, size: d.len};
+      const exd = docMetas.find(x => x.id === id), etm = etapasOf(exd).slice();
+      etapasOf(d).forEach(e => { const x = etm.find(q => q.id === e.id); if (!x) etm.push(e); else subsOf(e).forEach(s => { if (!subsOf(x).includes(s)) x.subs = [...subsOf(x), s]; }); });
+      const meta = {id, phaseId: pid, name: d.name, esp: d.esp || '', updatedAt: d.updatedAt, size: d.len, etapas: etm};
       await run(['docs','files'], 'readwrite', t => { t.objectStore('files').put({id, data}); t.objectStore('docs').put(meta); });
       const ex = docMetas.find(x => x.id === id); if (ex) Object.assign(ex, meta); else docMetas.push(meta);
       dmap[d.id] = id; nd++;
@@ -2144,7 +2484,7 @@ async function importPack(replaceAll){
       const docId = dmap[m0.docId], pid = pmap[m0.phaseId]; if (!docId || !pid) continue;
       const m = {...m0, docId, phaseId: pid};
       const ex = marks.find(x => x.id === m.id);
-      if (!ex && marks.some(x => x.phaseId === pid && x.n === m.n)) m.n = marks.filter(x => x.phaseId === pid).reduce((a,x) => Math.max(a, x.n), 0) + 1;
+      if (!ex && marks.some(x => x.docId === docId && x.n === m.n)) m.n = marks.filter(x => x.docId === docId).reduce((a,x) => Math.max(a, x.n), 0) + 1;
       await putOne('marks', m);
       if (ex) Object.assign(ex, m); else marks.push(m);
       nm++;

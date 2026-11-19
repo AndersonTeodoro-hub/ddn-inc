@@ -76,6 +76,18 @@ select:focus,input:focus,textarea:focus{outline:2px solid var(--accent);outline-
 #markBtn[aria-pressed="true"]{background:#e0a800;border-color:#e0a800;color:#1a1a1a}
 .hintbar.prod{background:#e0a800;color:#1a1a1a}
 .hintbar.prod button{color:#7a5b00}
+#adjBtn[aria-pressed="true"]{background:#1d4ed8;border-color:#1d4ed8;color:#fff}
+.hintbar.adjm{background:#1d4ed8}
+.hintbar.adjm button{color:#1d4ed8}
+.marking.adjmode .page{cursor:default}
+.mk.adj{outline:2px dashed #1d4ed8;outline-offset:4px;touch-action:none;cursor:move;z-index:3}
+.mk .adjh{position:absolute;right:-12px;bottom:-12px;width:22px;height:22px;border-radius:50%;background:#1d4ed8;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.4);cursor:nwse-resize;touch-action:none}
+#adjPanel{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom,0px) + 14px);z-index:30;background:var(--panel);border:1px solid var(--line);border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.3);padding:10px 12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:center;max-width:calc(100vw - 20px)}
+#adjPanel b{font-size:14px}
+#adjPanel .grp{display:flex;align-items:center;gap:4px}
+#adjPanel .btn{min-width:44px;min-height:44px;padding:0 10px;font-size:18px}
+#adjPanel .btn.txt{font-size:14px}
+#adjInfo{font-size:12.5px;color:var(--muted)}
 .hintbar.ok{background:#1f7a36}
 .hintbar.ok button{color:#1f7a36}
 .zoomval{font-variant-numeric:tabular-nums;min-width:58px;font-weight:500;color:var(--muted)}
@@ -143,7 +155,7 @@ select:focus,input:focus,textarea:focus{outline:2px solid var(--accent);outline-
   box-shadow:0 0 0 1.5px rgba(255,255,255,.95), inset 0 0 0 1.5px rgba(255,255,255,.95);
 }
 .mk span{
-  position:absolute; left:calc(100% - 3px); bottom:calc(100% - 5px);
+  position:absolute; left:calc(85.36% - 4px); bottom:calc(85.36% - 6px);
   min-width:22px; height:22px; padding:0 6px; border-radius:11px; background:var(--tagc,var(--mkc,#d0021b)); color:var(--tagt,#fff);
   font:700 12.5px/22px "IBM Plex Sans",system-ui,Arial,sans-serif; text-align:center; white-space:nowrap;
   box-shadow:0 0 0 1.5px #fff, 0 1px 3px rgba(0,0,0,.35);
@@ -255,6 +267,7 @@ dialog.full canvas{position:absolute;inset:0;width:100%;height:100%;display:bloc
   <label class="phasepick"><select id="espSel" aria-label="Especialidade a ver"></select></label>
   <button class="btn" id="markBtn" aria-pressed="false" title="Marcar sítio em produção (círculo amarelo)">📍 Marcar</button>
   <button class="btn" id="okBtn" aria-pressed="false" title="Marcar sítio vistoriado e OK (círculo verde)">✓ OK</button>
+  <button class="btn" id="adjBtn" aria-pressed="false" title="Mover ou mudar o tamanho de uma marca">⤧ Ajustar</button>
   <button class="btn" id="exHere" title="Exportar a planta que está no ecrã">Exportar planta</button>
   <span class="spacer"></span>
   <button class="btn icon hide-md" id="zoomOut" aria-label="Afastar">−</button>
@@ -412,6 +425,12 @@ dialog.full canvas{position:absolute;inset:0;width:100%;height:100%;display:bloc
   <div class="dlg-foot"><button class="btn primary" id="dlvSave">Guardar no aparelho</button><button class="btn" id="dlvShare" hidden>Partilhar</button></div>
 </div></dialog>
 
+<div id="adjPanel" hidden role="group" aria-label="Ajustar marca">
+  <div><b id="adjLbl">Marca</b><div id="adjInfo"></div></div>
+  <div class="grp"><button class="btn" data-mv="-1,0" aria-label="Mover para a esquerda">←</button><button class="btn" data-mv="0,-1" aria-label="Mover para cima">↑</button><button class="btn" data-mv="0,1" aria-label="Mover para baixo">↓</button><button class="btn" data-mv="1,0" aria-label="Mover para a direita">→</button></div>
+  <div class="grp"><button class="btn" id="adjMinus" aria-label="Diminuir">−</button><button class="btn" id="adjPlus" aria-label="Aumentar">+</button><button class="btn txt" id="adjReset">Repor tamanho</button></div>
+  <button class="btn primary txt" id="adjDone">Concluir</button>
+</div>
 <div id="toast" role="status"></div>
 
 <template id="viewerTpl"><style>
@@ -438,7 +457,7 @@ header .logo{height:36px;width:auto;flex:0 0 auto}
 .pg{position:relative;background:#fff;margin:0 0 10px;box-shadow:0 0 0 1px var(--line-strong)}
 .pg img{position:absolute;inset:0;width:100%;height:100%;display:block;user-select:none;-webkit-user-drag:none}
 .mk{position:absolute;transform:translate(-50%,-50%);width:24px;height:24px;border-radius:50%;padding:0;background:transparent;border:2.5px solid var(--mkc,#d0021b);box-shadow:0 0 0 1.5px rgba(255,255,255,.95),inset 0 0 0 1.5px rgba(255,255,255,.95);cursor:pointer}
-.mk span{position:absolute;left:calc(100% - 3px);bottom:calc(100% - 5px);min-width:22px;height:22px;padding:0 6px;border-radius:11px;background:var(--tagc,var(--mkc,#d0021b));color:var(--tagt,#fff);font:700 12.5px/22px system-ui,Arial,sans-serif;text-align:center;white-space:nowrap;box-shadow:0 0 0 1.5px #fff,0 1px 3px rgba(0,0,0,.35)}
+.mk span{position:absolute;left:calc(85.36% - 4px);bottom:calc(85.36% - 6px);min-width:22px;height:22px;padding:0 6px;border-radius:11px;background:var(--tagc,var(--mkc,#d0021b));color:var(--tagt,#fff);font:700 12.5px/22px system-ui,Arial,sans-serif;text-align:center;white-space:nowrap;box-shadow:0 0 0 1.5px #fff,0 1px 3px rgba(0,0,0,.35)}
 .mk.on{outline:3px solid #ffb400;outline-offset:3px}
 #panel{position:fixed;right:12px;top:120px;bottom:12px;width:min(380px,calc(100vw - 24px));background:var(--panel);border:1px solid var(--line);border-radius:12px;box-shadow:0 12px 40px rgba(0,0,0,.3);display:flex;flex-direction:column;overflow:hidden;z-index:5}
 @media (min-width:701px){body.po #viewer{margin-right:404px}}
@@ -602,6 +621,7 @@ D.plans.forEach((pl, pi) => {
       const b = document.createElement('button'); b.className = 'mk'; b.dataset.id = m.id; b.dataset.et = m.et || ''; b.dataset.sb = m.sb || ''; b.dataset.ec = m.ec || ''; b.style.setProperty('--tagc', EC[m.e] || EC.producao); b.style.setProperty('--tagt', ETX[m.e] || '#fff');
       const sp = document.createElement('span'); sp.textContent = m.n; b.appendChild(sp);
       b.style.left = (m.x*100) + '%'; b.style.top = (m.y*100) + '%';
+      if (m.rs){ b.style.width = (m.rs*100) + '%'; b.style.height = 'auto'; b.style.aspectRatio = '1'; }
       b.setAttribute('aria-label', 'Marca ' + m.n + (m.et ? ', ' + m.et + (m.sb ? ' › ' + m.sb : '') : ''));
       b.onclick = e => { e.stopPropagation(); if (open === m.id) close(); else show(m.id); };
       b.ondblclick = e => e.stopPropagation();
@@ -1352,10 +1372,16 @@ function setMarkMode(mode){
   markMode = mode || false;
   $('#markBtn').setAttribute('aria-pressed', String(markMode === 'nc'));
   $('#okBtn').setAttribute('aria-pressed', String(markMode === 'ok'));
+  $('#adjBtn').setAttribute('aria-pressed', String(markMode === 'adj'));
+  if (markMode !== 'adj' && typeof adjClear === 'function') adjClear();
   $('#hintbar').hidden = !markMode;
+  $('#hintbar').classList.toggle('adjm', markMode === 'adj');
+  pagesEl.classList.toggle('adjmode', markMode === 'adj');
   $('#hintbar').classList.toggle('ok', markMode === 'ok');
   $('#hintbar').classList.toggle('prod', markMode === 'nc');
-  $('#hintTxt').textContent = markMode === 'ok'
+  $('#hintTxt').textContent = markMode === 'adj'
+    ? 'Toca numa marca para a ajustar. Arrasta-a para mover e usa a pega azul ou os botões para o tamanho.'
+    : markMode === 'ok'
     ? 'Toca nos sítios vistoriados que estão OK. Cada toque deixa um círculo verde.'
     : 'Toca no sítio da planta para marcar em produção (amarelo). Na vistoria passas a OK ou Não conforme.';
   pagesEl.classList.toggle('marking', !!markMode);
@@ -1369,6 +1395,90 @@ $('#okBtn').onclick = () => {
   setMarkMode(markMode === 'ok' ? false : 'ok');
 };
 $('#markOff').onclick = () => setMarkMode(false);
+/* ---- ajustar marca: mover e mudar o tamanho ---- */
+let adj = null, adjSaveT = 0;
+const DEF_PX = 24;
+function markPagePx(m){ const p = pageMap.get(m.docId + '|' + m.page); return p ? {p, w: p.el.offsetWidth, h: p.el.offsetHeight} : null; }
+function applyMarkGeom(b, m){
+  b.style.left = (m.x*100) + '%'; b.style.top = (m.y*100) + '%';
+  if (m.rs){ b.style.width = (m.rs*100) + '%'; b.style.height = 'auto'; b.style.aspectRatio = '1'; }
+  else { b.style.width = ''; b.style.height = ''; b.style.aspectRatio = ''; }
+}
+function adjSelect(m, b){
+  adjClear(false);
+  adj = {m, b};
+  b.classList.add('adj');
+  const h = document.createElement('i'); h.className = 'adjh'; h.setAttribute('aria-hidden', 'true'); b.appendChild(h);
+  h.addEventListener('pointerdown', adjResizeStart);
+  b.addEventListener('pointerdown', adjMoveStart);
+  $('#adjPanel').hidden = false;
+  $('#adjLbl').textContent = 'Marca ' + m.n;
+  $('#adjInfo').textContent = m.rs ? 'Tamanho próprio' : 'Tamanho normal';
+}
+function adjClear(hidePanel = true){
+  if (adj){ const b = adj.b; b.classList.remove('adj'); const h = b.querySelector('.adjh'); if (h) h.remove(); b.removeEventListener('pointerdown', adjMoveStart); }
+  adj = null; if (hidePanel) $('#adjPanel').hidden = true;
+}
+function adjChanged(){
+  const {m, b} = adj; applyMarkGeom(b, m);
+  $('#adjInfo').textContent = m.rs ? 'Tamanho próprio' : 'Tamanho normal';
+  clearTimeout(adjSaveT); adjSaveT = setTimeout(() => saveMark(m), 300);
+}
+function adjMoveStart(e){
+  if (!adj || e.target.classList.contains('adjh')) return;
+  e.preventDefault(); e.stopPropagation();
+  const {m, b} = adj, g = markPagePx(m); if (!g) return;
+  b.setPointerCapture(e.pointerId);
+  const sx = e.clientX, sy = e.clientY, x0 = m.x, y0 = m.y;
+  const mv = ev => { m.x = Math.min(1, Math.max(0, x0 + (ev.clientX - sx) / g.w)); m.y = Math.min(1, Math.max(0, y0 + (ev.clientY - sy) / g.h)); adjChanged(); };
+  const up = () => { b.removeEventListener('pointermove', mv); b.removeEventListener('pointerup', up); b.removeEventListener('pointercancel', up); };
+  b.addEventListener('pointermove', mv); b.addEventListener('pointerup', up); b.addEventListener('pointercancel', up);
+}
+function adjResizeStart(e){
+  if (!adj) return;
+  e.preventDefault(); e.stopPropagation();
+  const {m, b} = adj, g = markPagePx(m); if (!g) return;
+  const h = e.currentTarget; h.setPointerCapture(e.pointerId);
+  const r = g.p.el.getBoundingClientRect(), cx = r.left + m.x * r.width, cy = r.top + m.y * r.height;
+  const mv = ev => {
+    const d = 2 * Math.hypot(ev.clientX - cx, ev.clientY - cy) / Math.SQRT2;
+    m.rs = Math.max(12, d) / r.width; adjChanged();
+  };
+  const up = () => { h.removeEventListener('pointermove', mv); h.removeEventListener('pointerup', up); h.removeEventListener('pointercancel', up); };
+  h.addEventListener('pointermove', mv); h.addEventListener('pointerup', up); h.addEventListener('pointercancel', up);
+}
+function adjNudge(dx, dy){
+  if (!adj) return; const g = markPagePx(adj.m); if (!g) return;
+  adj.m.x = Math.min(1, Math.max(0, adj.m.x + dx * 3 / g.w)); adj.m.y = Math.min(1, Math.max(0, adj.m.y + dy * 3 / g.h)); adjChanged();
+}
+function adjSize(f){
+  if (!adj) return; const g = markPagePx(adj.m); if (!g) return;
+  const cur = adj.m.rs ? adj.m.rs * g.w : DEF_PX;
+  adj.m.rs = Math.max(12, cur * f) / g.w; adjChanged();
+}
+$('#adjBtn').onclick = () => {
+  if (!allPages.length){ toast('Carrega primeiro as plantas.'); return; }
+  setMarkMode(markMode === 'adj' ? false : 'adj');
+};
+document.querySelectorAll('#adjPanel [data-mv]').forEach(b => {
+  const [dx, dy] = b.dataset.mv.split(',').map(Number);
+  let rep = 0;
+  const go = () => adjNudge(dx, dy);
+  b.addEventListener('pointerdown', e => { e.preventDefault(); go(); rep = setInterval(go, 90); });
+  ['pointerup','pointerleave','pointercancel'].forEach(ev => b.addEventListener(ev, () => clearInterval(rep)));
+  b.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); } });
+});
+$('#adjMinus').onclick = () => adjSize(1/1.2);
+$('#adjPlus').onclick = () => adjSize(1.2);
+$('#adjReset').onclick = () => { if (!adj) return; delete adj.m.rs; adjChanged(); };
+$('#adjDone').onclick = () => { if (adj) saveMark(adj.m); adjClear(); };
+window.addEventListener('keydown', e => {
+  if (!adj || document.querySelector('dialog[open]') || /INPUT|TEXTAREA|SELECT/.test(e.target.tagName)) return;
+  const k = {ArrowUp:[0,-1], ArrowDown:[0,1], ArrowLeft:[-1,0], ArrowRight:[1,0]}[e.key];
+  if (k){ e.preventDefault(); adjNudge(k[0], k[1]); }
+});
+
+
 $('#exHere').onclick = () => {
   if (!allPages.length){ toast('Carrega primeiro as plantas.'); return; }
   const p = pageAt(viewer.scrollTop + viewer.clientHeight * 0.4);
@@ -1425,13 +1535,14 @@ function drawMarks(p){
   marks.filter(m => m.docId === id && m.page === p.num && (cur === 'all' || m.etapaId === cur) && (!cs || m.sub === cs)).forEach(m => {
     const b = document.createElement('button');
     b.className = 'mk'; b.dataset.id = m.id;
-    b.style.left = (m.x*100) + '%'; b.style.top = (m.y*100) + '%';
+    applyMarkGeom(b, m);
     const et = etapaById(p.d.meta, m.etapaId);
     b.style.setProperty('--mkc', cur === 'all' && multi && et ? et.cor : estColor(m));
     b.style.setProperty('--tagc', estColor(m)); b.style.setProperty('--tagt', estText(m));
     const s = document.createElement('span'); s.textContent = m.n; b.appendChild(s);
     b.setAttribute('aria-label', `Marca ${m.n}, ${et ? etapaLabel(m) + ', ' : ''}${estLabel(m)}${m.nota ? ': ' + m.nota : ''}`);
-    b.addEventListener('click', e => { e.stopPropagation(); openMark(m.id); });
+    b.addEventListener('click', e => { e.stopPropagation(); if (markMode === 'adj'){ if (!adj || adj.m !== m) adjSelect(m, b); } else openMark(m.id); });
+    if (adj && adj.m === m) setTimeout(() => adjSelect(m, b));
     b.addEventListener('dblclick', e => e.stopPropagation());
     p.layer.appendChild(b);
   });
@@ -1439,6 +1550,7 @@ function drawMarks(p){
 function redrawMarksFor(m){ const p = pageMap.get(m.docId + '|' + m.page); if (p) drawMarks(p); const d = shown.find(x => x.meta.id === m.docId); if (d) renderEtapaBar(d); }
 async function onPageClick(e, p){
   if (!markMode || e.target.closest('.mk')) return;
+  if (markMode === 'adj'){ adjClear(); return; }
   const r = p.el.getBoundingClientRect();
   const x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height;
   if (x < 0 || x > 1 || y < 0 || y > 1) return;
@@ -2268,7 +2380,7 @@ async function exportPhase(ph, ids, etapaNome){
           const [px, py] = vp.convertToPdfPoint(m.x * vp.width, m.y * vp.height);
           const tagCol = hexRgb(estColor(m)), etm = etapaOfMark(m);
           const col = useEtCor && etm ? hexRgb(etm.cor) : tagCol;
-          const R = rr * 1.02;
+          const R = m.rs ? Math.max(rr * 0.8, m.rs * vp.width / 2) : rr * 1.02;
           page.drawCircle({x: px, y: py, size: R + rr*0.08, borderColor: WHITE, borderWidth: rr*0.32});
           page.drawCircle({x: px, y: py, size: R, borderColor: col, borderWidth: rr*0.2});
           const ns = String(m.n), fs = rr * 1.0, tw = bold.widthOfTextAtSize(ns, fs);
@@ -2319,7 +2431,7 @@ async function exportHtml(ph, ids, etapaNome){
         await pg.render({canvasContext: cx, viewport: vp}).promise;
         const img = c.toDataURL('image/jpeg', 0.82); c.width = c.height = 0;
         pages.push({img, w: vp.width, h: vp.height,
-          marks: ms.filter(m => m.docId === d.id && m.page === i).map(m => ({id: m.id, n: m.n, x: m.x, y: m.y, e: estOf(m), et: (etapaOfMark(m) || {}).nome || '', sb: m.sub || '', ec: (etapaOfMark(m) || {}).cor || ''}))});
+          marks: ms.filter(m => m.docId === d.id && m.page === i).map(m => ({id: m.id, n: m.n, x: m.x, y: m.y, rs: m.rs || 0, e: estOf(m), et: (etapaOfMark(m) || {}).nome || '', sb: m.sub || '', ec: (etapaOfMark(m) || {}).cor || ''}))});
       }
       jsdoc.destroy();
       plans.push({name: nice(d.name), esp: espOf(d), pages});

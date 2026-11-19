@@ -118,12 +118,12 @@ select:focus,input:focus,textarea:focus{outline:2px solid var(--accent);outline-
 .mklayer{position:absolute;inset:0;pointer-events:none}
 .mk{
   position:absolute; transform:translate(-50%,-50%); pointer-events:auto; padding:0; cursor:pointer;
-  width:40px; height:40px; border-radius:50%; background:transparent;
-  border:3px solid var(--mkc,#d0021b);
+  width:24px; height:24px; border-radius:50%; background:transparent;
+  border:2.5px solid var(--mkc,#d0021b);
   box-shadow:0 0 0 1.5px rgba(255,255,255,.95), inset 0 0 0 1.5px rgba(255,255,255,.95);
 }
 .mk span{
-  position:absolute; left:calc(100% - 6px); bottom:calc(100% - 8px);
+  position:absolute; left:calc(100% - 3px); bottom:calc(100% - 5px);
   min-width:22px; height:22px; padding:0 6px; border-radius:11px; background:var(--mkc,#d0021b); color:#fff;
   font:700 12.5px/22px "IBM Plex Sans",system-ui,Arial,sans-serif; text-align:center; white-space:nowrap;
   box-shadow:0 0 0 1.5px #fff, 0 1px 3px rgba(0,0,0,.35);
@@ -398,8 +398,8 @@ header .logo{height:36px;width:auto;flex:0 0 auto}
 .esp{font-size:12px;font-weight:600;padding:2px 8px;border-radius:4px;background:var(--chip);color:var(--chip-ink);white-space:nowrap}
 .pg{position:relative;background:#fff;margin:0 0 10px;box-shadow:0 0 0 1px var(--line-strong)}
 .pg img{position:absolute;inset:0;width:100%;height:100%;display:block;user-select:none;-webkit-user-drag:none}
-.mk{position:absolute;transform:translate(-50%,-50%);width:40px;height:40px;border-radius:50%;padding:0;background:transparent;border:3px solid var(--mkc,#d0021b);box-shadow:0 0 0 1.5px rgba(255,255,255,.95),inset 0 0 0 1.5px rgba(255,255,255,.95);cursor:pointer}
-.mk span{position:absolute;left:calc(100% - 6px);bottom:calc(100% - 8px);min-width:22px;height:22px;padding:0 6px;border-radius:11px;background:var(--mkc,#d0021b);color:#fff;font:700 12.5px/22px system-ui,Arial,sans-serif;text-align:center;white-space:nowrap;box-shadow:0 0 0 1.5px #fff,0 1px 3px rgba(0,0,0,.35)}
+.mk{position:absolute;transform:translate(-50%,-50%);width:24px;height:24px;border-radius:50%;padding:0;background:transparent;border:2.5px solid var(--mkc,#d0021b);box-shadow:0 0 0 1.5px rgba(255,255,255,.95),inset 0 0 0 1.5px rgba(255,255,255,.95);cursor:pointer}
+.mk span{position:absolute;left:calc(100% - 3px);bottom:calc(100% - 5px);min-width:22px;height:22px;padding:0 6px;border-radius:11px;background:var(--mkc,#d0021b);color:#fff;font:700 12.5px/22px system-ui,Arial,sans-serif;text-align:center;white-space:nowrap;box-shadow:0 0 0 1.5px #fff,0 1px 3px rgba(0,0,0,.35)}
 .mk.on{outline:3px solid #ffb400;outline-offset:3px}
 #panel{position:fixed;right:12px;top:120px;bottom:12px;width:min(380px,calc(100vw - 24px));background:var(--panel);border:1px solid var(--line);border-radius:12px;box-shadow:0 12px 40px rgba(0,0,0,.3);display:flex;flex-direction:column;overflow:hidden;z-index:5}
 @media (min-width:701px){body.po #viewer{margin-right:404px}}
@@ -1934,13 +1934,13 @@ async function exportPhase(ph, ids){
         for (const m of pm){
           const [px, py] = vp.convertToPdfPoint(m.x * vp.width, m.y * vp.height);
           const col = hexRgb(estColor(m));
-          const R = rr * 1.7;
-          page.drawCircle({x: px, y: py, size: R + rr*0.12, borderColor: WHITE, borderWidth: rr*0.42});
-          page.drawCircle({x: px, y: py, size: R, borderColor: col, borderWidth: rr*0.26});
+          const R = rr * 1.02;
+          page.drawCircle({x: px, y: py, size: R + rr*0.08, borderColor: WHITE, borderWidth: rr*0.32});
+          page.drawCircle({x: px, y: py, size: R, borderColor: col, borderWidth: rr*0.2});
           const ns = String(m.n), fs = rr * 1.0, tw = bold.widthOfTextAtSize(ns, fs);
           const bh = fs * 1.5, bw = Math.max(bh, tw + fs*0.8);
           const rot2 = (dx, dy) => [dx*cos - dy*sin, dx*sin + dy*cos];
-          const [cx, cy] = rot2(R*0.78 + bw/2 - rr*0.3, R*0.78 + bh/2 - rr*0.3);
+          const [cx, cy] = rot2(R*0.78 + bw/2 - rr*0.15, R*0.78 + bh/2 - rr*0.15);
           const bx = px + cx, by = py + cy;
           const [rx0, ry0] = rot2(-bw/2, -bh/2);
           page.drawRectangle({x: bx + rx0, y: by + ry0, width: bw, height: bh, color: col, borderColor: WHITE, borderWidth: rr*0.12, rotate: degrees(rot)});

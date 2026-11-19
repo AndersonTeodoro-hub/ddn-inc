@@ -409,7 +409,13 @@ header .logo{height:36px;width:auto;flex:0 0 auto}
 .badge{min-width:28px;height:28px;padding:0 6px;border-radius:14px;background:var(--nc);color:#fff;font-weight:700;font-size:14px;display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto}
 .badge.r{background:#1f7a36}
 .pb{overflow:auto;flex:1}
-.pimg{display:block;width:100%;height:auto;background:#000;cursor:zoom-in}
+.zbox{position:relative;overflow:hidden;background:#000;touch-action:pan-y}
+.zbox.zoomed{touch-action:none}
+.pimg{display:block;width:100%;height:auto;cursor:zoom-in;user-select:none;-webkit-user-drag:none}
+.zbox.zoomed .pimg,.full.zoomed img{cursor:grab}
+.zfs{position:absolute;right:8px;top:8px;z-index:2;background:rgba(255,255,255,.95);color:#12161c;border:0;border-radius:6px;font:600 13px/1 system-ui,Arial,sans-serif;padding:8px 10px;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.3)}
+.zhint{position:absolute;left:8px;bottom:8px;z-index:2;background:rgba(0,0,0,.6);color:#fff;font-size:12px;padding:3px 8px;border-radius:4px;pointer-events:none}
+.fhint{position:absolute;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 14px);transform:translateX(-50%);background:rgba(0,0,0,.6);color:#fff;font-size:13px;padding:5px 12px;border-radius:6px;pointer-events:none;z-index:2;white-space:nowrap}
 .pcv{display:block;width:100%;height:280px;background:#000}
 .mbar{display:flex;align-items:center;gap:8px;padding:8px 14px;font-size:13px;color:var(--muted)}.mbar span{flex:1}
 .strip{display:flex;gap:6px;overflow-x:auto;padding:12px 14px 4px}
@@ -425,8 +431,8 @@ dialog::backdrop{background:rgba(12,15,19,.55)}
 .dl li button{width:100%;display:flex;align-items:center;gap:10px;text-align:left;background:none;border:0;border-top:1px solid var(--line);padding:10px 8px;font:inherit;color:inherit;cursor:pointer}
 .dl li:first-child button{border-top:0}.dl li div{min-width:0}
 .dl li b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.dl li small{display:block;color:var(--muted);font-size:12.5px}
-.full{position:fixed;inset:0;z-index:50;background:#0b0d10;display:flex;align-items:center;justify-content:center;color:#fff}
-.full img{max-width:100%;max-height:100%;object-fit:contain;touch-action:pan-y;user-select:none}
+.full{position:fixed;inset:0;z-index:50;background:#0b0d10;display:flex;align-items:center;justify-content:center;color:#fff;overflow:hidden;touch-action:none}
+.full img{max-width:100%;max-height:100%;object-fit:contain;touch-action:none;user-select:none;-webkit-user-drag:none}
 .full canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
 .fbar{position:absolute;top:0;left:0;right:0;display:flex;align-items:center;gap:8px;padding:calc(env(safe-area-inset-top,0px) + 10px) 12px 18px;background:linear-gradient(rgba(0,0,0,.7),transparent);z-index:2}
 .fbar span{flex:1;font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -442,7 +448,7 @@ dialog::backdrop{background:rgba(12,15,19,.55)}
 <div class="pb"><div id="pMedia"></div><div class="tx" id="pTx"></div><div class="dt" id="pDt"></div></div>
 <div class="pn"><button class="btn" id="pPrev">← Anterior</button><button class="btn" id="pNext">Seguinte →</button></div></aside>
 <dialog id="listDlg"><div class="dl"><div class="ph"><h2>Marcas</h2><button class="btn" id="lClose">Fechar</button></div><ul id="lUl"></ul></div></dialog>
-<div class="full" id="full" hidden><div class="fbar"><span id="fLbl"></span><button class="btn" id="fX">Fechar</button></div><img id="fImg" alt=""><button class="fnav prev" id="fP" aria-label="Anterior">‹</button><button class="fnav next" id="fN" aria-label="Seguinte">›</button></div>
+<div class="full" id="full" hidden><div class="fbar"><span id="fLbl"></span><button class="btn" id="fX">Fechar</button></div><img id="fImg" alt=""><span class="fhint" id="fHint">Roda o rato para ampliar. Duplo clique para voltar.</span><button class="fnav prev" id="fP" aria-label="Anterior">‹</button><button class="fnav next" id="fN" aria-label="Seguinte">›</button></div>
 <script>
 (function(){
 'use strict';
@@ -617,6 +623,45 @@ function goTo(n){
 }
 function step(d){ if (open === null) return; const i = D.marks.findIndex(m => m.n === open); goTo(D.marks[(i + d + D.marks.length) % D.marks.length].n); }
 $('#pClose').onclick = close; $('#pPrev').onclick = () => step(-1); $('#pNext').onclick = () => step(1);
+/* Zoom de fotos: roda do rato (para cima amplia, para baixo reduz), arrastar quando ampliada,
+   pinça no tablet, duplo clique alterna entre 1x e 2,5x. */
+function Zoomable(box, img){
+  let s = 1, tx = 0, ty = 0; const pts = new Map(); let ld = 0, lp = null;
+  img.style.transformOrigin = '0 0'; img.draggable = false;
+  const apply = () => { img.style.transform = s > 1.001 ? `translate(${tx}px,${ty}px) scale(${s})` : ''; box.classList.toggle('zoomed', s > 1.001); };
+  const clamp = () => {
+    const w = img.offsetWidth, h = img.offsetHeight;
+    tx = Math.min(0, Math.max(w - w*s, tx)); ty = Math.min(0, Math.max(h - h*s, ty));
+    if (s <= 1.001){ s = 1; tx = 0; ty = 0; }
+  };
+  function zoomAt(ns, cx, cy){
+    ns = Math.min(6, Math.max(1, ns));
+    const r = img.getBoundingClientRect(), x0 = r.left - tx, y0 = r.top - ty;
+    const px = cx - x0, py = cy - y0;
+    tx = px - (px - tx) * (ns / s); ty = py - (py - ty) * (ns / s); s = ns;
+    clamp(); apply();
+  }
+  box.addEventListener('wheel', e => {
+    if (img.hidden) return;
+    e.preventDefault(); zoomAt(s * Math.exp(-e.deltaY * 0.0015), e.clientX, e.clientY);
+  }, {passive:false});
+  img.addEventListener('dblclick', e => { e.preventDefault(); e.stopPropagation(); zoomAt(s > 1.05 ? 1 : 2.5, e.clientX, e.clientY); });
+  img.addEventListener('pointerdown', e => { pts.set(e.pointerId, {x:e.clientX, y:e.clientY}); ld = 0; lp = {x:e.clientX, y:e.clientY}; if (s > 1.001 || pts.size > 1) img.setPointerCapture(e.pointerId); });
+  img.addEventListener('pointermove', e => {
+    if (!pts.has(e.pointerId)) return;
+    pts.set(e.pointerId, {x:e.clientX, y:e.clientY});
+    if (pts.size === 2){
+      const [a, b] = [...pts.values()], d = Math.hypot(a.x-b.x, a.y-b.y);
+      if (ld) zoomAt(s * d / ld, (a.x+b.x)/2, (a.y+b.y)/2); ld = d;
+    } else if (pts.size === 1 && s > 1.001 && lp){
+      tx += e.clientX - lp.x; ty += e.clientY - lp.y; clamp(); apply();
+    }
+    lp = {x:e.clientX, y:e.clientY};
+  });
+  const up = e => { pts.delete(e.pointerId); if (pts.size < 2) ld = 0; lp = null; };
+  img.addEventListener('pointerup', up); img.addEventListener('pointercancel', up);
+  return { reset(){ s = 1; tx = 0; ty = 0; apply(); }, zoomed: () => s > 1.001 };
+}
 let pv = null, fs = null, fsI = 0, fpv = null;
 function killPv(){ if (pv){ pv.destroy(); pv = null; } }
 function media(m){
@@ -642,14 +687,23 @@ function media(m){
     bar.innerHTML = '<span></span>'; bar.firstChild.textContent = m.dirs.map(d => d.l).join(', ') + '. Toca para ver em sequência.';
     box.append(st, bar);
   } else if (m.photo){
+    const zb = document.createElement('div'); zb.className = 'zbox';
     const im = document.createElement('img'); im.src = m.photo; im.className = 'pimg'; im.alt = 'Foto da marca ' + m.n;
-    im.onclick = () => fullSeq([{l: 'Marca ' + m.n, src: m.photo}], 0, ''); box.appendChild(im);
+    const fsb = document.createElement('button'); fsb.className = 'zfs'; fsb.textContent = '⤢ Ecrã inteiro';
+    fsb.onclick = () => fullSeq([{l: 'Marca ' + m.n, src: m.photo}], 0, '');
+    const hint = document.createElement('span'); hint.className = 'zhint'; hint.textContent = touchDev ? 'Pinça para ampliar' : 'Roda o rato para ampliar';
+    zb.append(im, fsb, hint); Zoomable(zb, im);
+    box.appendChild(zb);
   }
 }
 function fullSeq(items, i, title){
   fs = {items, title}; fsI = i; $('#full').hidden = false; fullShow();
 }
+const touchDev = (() => { try { return matchMedia('(pointer:coarse)').matches; } catch(_){ return false; } })();
+const fz = Zoomable($('#full'), $('#fImg'));
+$('#fHint').textContent = touchDev ? 'Pinça para ampliar. Toque duplo para voltar.' : 'Roda o rato para ampliar. Duplo clique para voltar.';
 function fullShow(){
+  fz.reset(); $('#fHint').hidden = false;
   if (fpv){ fpv.destroy(); fpv = null; } const c = $('#full canvas'); if (c) c.remove();
   const it = fs.items[fsI], im = $('#fImg'); im.hidden = false; im.src = it.src; im.alt = it.l;
   $('#fLbl').textContent = (fs.title ? fs.title + ', ' : '') + it.l + (fs.items.length > 1 ? ` (${fsI+1} de ${fs.items.length})` : '');
@@ -662,11 +716,11 @@ function fullPano(m){
   const cv = document.createElement('canvas'); $('#full').insertBefore(cv, $('#fP'));
   try { fpv = Pano(cv); fpv.load(m.pano); } catch(e){ fullClose(); }
 }
-function fullClose(){ $('#full').hidden = true; $('#fImg').removeAttribute('src'); if (fpv){ fpv.destroy(); fpv = null; } const c = $('#full canvas'); if (c) c.remove(); fs = null; }
+function fullClose(){ fz.reset(); $('#full').hidden = true; $('#fImg').removeAttribute('src'); if (fpv){ fpv.destroy(); fpv = null; } const c = $('#full canvas'); if (c) c.remove(); fs = null; }
 $('#fX').onclick = fullClose; $('#fP').onclick = () => fullStep(-1); $('#fN').onclick = () => fullStep(1);
 let sx = null;
 $('#fImg').addEventListener('pointerdown', e => { sx = e.clientX; });
-$('#fImg').addEventListener('pointerup', e => { if (sx == null) return; const dx = e.clientX - sx; sx = null; if (Math.abs(dx) > 50) fullStep(dx < 0 ? 1 : -1); });
+$('#fImg').addEventListener('pointerup', e => { if (sx == null) return; const dx = e.clientX - sx; sx = null; if (!fz.zoomed() && Math.abs(dx) > 50) fullStep(dx < 0 ? 1 : -1); });
 
 $('#listBtn').onclick = () => {
   const ul = $('#lUl'); ul.innerHTML = '';

@@ -229,6 +229,62 @@ dialog.full.zoomed img{cursor:grab}
 #editBtn[aria-pressed="true"]{background:#12161c;border-color:#12161c;color:#fff}
 .hintbar.edm{background:#12161c}
 .hintbar.edm button{color:#12161c}
+body:not(.mode-marcas) .m-only{display:none!important}
+body:not(.mode-avanco) .a-only{display:none!important}
+body.mode-avanco .mklayer{display:none}
+body.mode-diario #viewer, body.mode-diario .toolbar, body.mode-diario #hintbar, body.mode-diario #vpanel{display:none!important}
+body:not(.mode-diario) #diario{display:none!important}
+.modenav{flex:0 0 auto}
+.modenav button{padding:8px 12px;white-space:nowrap}
+@media (max-width:760px){.modenav button span{display:none}}
+.zlayer{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.zlabels{position:absolute;inset:0;pointer-events:none}
+.zlab{position:absolute;transform:translate(-50%,-50%);pointer-events:auto;cursor:pointer;background:rgba(255,255,255,.92);color:#12161c;border:2px solid #475569;border-radius:6px;font:600 12px/1.2 "IBM Plex Sans",system-ui,Arial,sans-serif;padding:3px 7px;white-space:nowrap;box-shadow:0 1px 3px rgba(0,0,0,.25)}
+.zpt{position:absolute;width:12px;height:12px;margin:-6px 0 0 -6px;border-radius:50%;background:#1d4ed8;border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.4);pointer-events:none}
+.avsum{position:sticky;left:12px;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:8px 12px;margin:0 0 8px;font-size:13px;color:var(--muted)}
+.avrow{display:grid;grid-template-columns:minmax(120px,26%) 1fr auto;gap:10px;align-items:center;padding:3px 0;color:var(--ink)}
+.avn{display:flex;align-items:center;gap:6px;font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.avn i{width:10px;height:10px;border-radius:50%;flex:0 0 auto}
+.avbar{height:10px;border-radius:5px;background:var(--st0-bg);overflow:hidden;display:flex}
+.avbar b{display:block;height:100%}.avbar .c{background:#1f7a36}.avbar .u{background:#e0a800}
+.avp{font-size:12.5px;color:var(--muted);white-space:nowrap}
+#zBrush{flex:0 0 auto}
+#zBrush button{padding:7px 10px;font-size:13.5px;white-space:nowrap}
+#zBrush button[aria-pressed="true"]{color:#fff}
+#zBrush button[data-v="concl"][aria-pressed="true"]{background:#1f7a36}
+#zBrush button[data-v="curso"][aria-pressed="true"]{background:#e0a800;color:#1a1a1a}
+#zBrush button[data-v="por"][aria-pressed="true"]{background:#64748b}
+#zDraw[aria-pressed="true"]{background:#1d4ed8;border-color:#1d4ed8;color:#fff}
+.chleg{display:flex;flex-wrap:wrap;gap:12px;margin-top:8px;font-size:13.5px}
+.chleg i{display:inline-block;width:12px;height:3px;margin-right:6px;vertical-align:middle}
+#diario{flex:1 1 auto;display:grid;grid-template-columns:280px 1fr;min-height:0;background:var(--bg)}
+@media (max-width:760px){#diario{grid-template-columns:1fr;overflow:auto}.dside{max-height:none;border-right:0;border-bottom:1px solid var(--line)}}
+.dside{border-right:1px solid var(--line);background:var(--panel);padding:12px;overflow:auto;min-height:0}
+.dside .btn.primary{width:100%}
+#diaList{list-style:none;margin:10px 0 0;padding:0}
+.dday{width:100%;text-align:left;background:none;border:0;border-top:1px solid var(--line);padding:9px 6px;cursor:pointer;font:inherit;color:inherit;display:grid;grid-template-columns:1fr auto;gap:2px 8px}
+.dday.on{background:var(--accent-soft);border-radius:6px}
+.dday small{grid-column:1;color:var(--muted);font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dday .dsig{grid-row:1 / span 2;grid-column:2;align-self:center;font-size:11.5px;font-weight:600;padding:2px 8px;border-radius:999px;background:var(--st1-bg);color:var(--st1-ink)}
+.dday .dsig.ok{background:var(--st2-bg);color:var(--st2-ink)}
+.dnone{color:var(--muted);font-size:14px;padding:10px 4px}
+.dmain{overflow:auto;padding:16px max(16px,env(safe-area-inset-right,0px)) 40px 16px;min-height:0}
+#diaForm{max-width:860px}
+#diaForm h2{font-size:20px;margin:0 0 4px}
+#diario input:disabled,#diario textarea:disabled{background:var(--bg);color:var(--ink);opacity:.85}
+#diaForm h3{font-size:14px;margin:22px 0 8px;padding-top:12px;border-top:1px solid var(--line)}
+.dsigok{color:var(--st2-ink)!important;font-weight:600}
+.mgrid{display:grid;grid-template-columns:2fr repeat(4,1fr);gap:8px}
+@media (max-width:620px){.mgrid{grid-template-columns:1fr 1fr}}
+.mgrid label{font-size:12.5px;color:var(--muted);display:flex;flex-direction:column;gap:3px}
+.drow{display:grid;grid-template-columns:2fr 1.4fr 80px 40px;gap:6px;margin-bottom:6px}
+#dEq .drow{grid-template-columns:2fr 80px 1.6fr 40px}
+@media (max-width:620px){.drow,#dEq .drow{grid-template-columns:1fr 70px 40px}.drow input:nth-child(2){grid-column:1 / -1;order:3}}
+.drow input{width:100%}
+.dfotos{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-bottom:10px}
+.dfoto{display:flex;flex-direction:column;gap:4px}
+.dfoto .fth{aspect-ratio:4/3}
+#sigPad{width:100%;height:190px;border:1px solid var(--line-strong);border-radius:8px;background:#fff;touch-action:none;display:block}
 #vpanel{position:fixed;right:12px;top:150px;bottom:12px;width:min(400px,calc(100vw - 24px));background:var(--panel);border:1px solid var(--line);border-radius:12px;box-shadow:0 12px 40px rgba(0,0,0,.3);display:flex;flex-direction:column;overflow:hidden;z-index:20}
 @media (min-width:701px){body.vpo #viewer{margin-right:424px}}
 @media (max-width:700px){#vpanel{left:0;right:0;top:auto;bottom:0;width:auto;max-height:64%;border-radius:12px 12px 0 0;padding-bottom:env(safe-area-inset-bottom,0px)}}
@@ -279,7 +335,7 @@ dialog.full canvas{position:absolute;inset:0;width:100%;height:100%;display:bloc
 @media (prefers-reduced-motion:reduce){#toast{transition:none}}
 </style>
 </head>
-<body>
+<body class="mode-marcas">
 <header class="top">
   <svg class="logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 46" role="img" aria-label="DDN-INC">
     <defs><radialGradient id="lgS" cx="38%" cy="32%" r="70%"><stop offset="0" stop-color="#c9f5a8"/><stop offset=".35" stop-color="#6fd34f"/><stop offset=".75" stop-color="#2f9e2c"/><stop offset="1" stop-color="#1c6e1d"/></radialGradient></defs>
@@ -289,25 +345,71 @@ dialog.full canvas{position:absolute;inset:0;width:100%;height:100%;display:bloc
     <text x="55" y="42" font-family="Arial,Helvetica,sans-serif" font-size="13" letter-spacing="3.2" fill="var(--logo-b,#8b9197)">INC</text>
   </svg>
   <div class="where" aria-live="polite"><b id="whereName">Acompanhamento de obra</b><span id="wherePage">Sem plantas carregadas</span></div>
+  <div class="seg modenav" id="modeNav" role="group" aria-label="Módulo"><button data-m="marcas" aria-pressed="true">📍<span> Marcas</span></button><button data-m="avanco" aria-pressed="false">▦<span> Avanço</span></button><button data-m="diario" aria-pressed="false">📓<span> Diário</span></button></div>
   <button class="btn" id="openPhases">Fases</button>
   <button class="btn primary" id="updateBtn">Atualizar</button>
 </header>
 <div class="toolbar">
   <label class="phasepick"><span class="hide-sm">Ver</span><select id="phaseSel" aria-label="Fase a ver"></select></label>
   <label class="phasepick"><select id="espSel" aria-label="Especialidade a ver"></select></label>
-  <button class="btn" id="markBtn" aria-pressed="false" title="Marcar sítio em produção (círculo amarelo)">📍 Marcar</button>
-  <button class="btn" id="okBtn" aria-pressed="false" title="Marcar sítio vistoriado e OK (círculo verde)">✓ OK</button>
-  <button class="btn" id="adjBtn" aria-pressed="false" title="Mover ou mudar o tamanho de uma marca">⤧ Ajustar</button>
-  <button class="btn" id="editBtn" aria-pressed="false" title="Tocar numa marca abre o cartão de edição">✎ Editar</button>
-  <button class="btn" id="exHere" title="Exportar a planta que está no ecrã">Exportar planta</button>
+  <button class="btn m-only" id="markBtn" aria-pressed="false" title="Marcar sítio em produção (círculo amarelo)">📍 Marcar</button>
+  <button class="btn m-only" id="okBtn" aria-pressed="false" title="Marcar sítio vistoriado e OK (círculo verde)">✓ OK</button>
+  <button class="btn m-only" id="adjBtn" aria-pressed="false" title="Mover ou mudar o tamanho de uma marca">⤧ Ajustar</button>
+  <button class="btn m-only" id="editBtn" aria-pressed="false" title="Tocar numa marca abre o cartão de edição">✎ Editar</button>
+  <button class="btn m-only" id="exHere" title="Exportar a planta que está no ecrã">Exportar planta</button>
+  <button class="btn a-only" id="zDraw" aria-pressed="false" title="Desenhar uma zona na planta">✏ Nova zona</button>
+  <div class="seg a-only" id="zBrush" role="group" aria-label="Pintar zonas"><button data-v="por" aria-pressed="false">Por executar</button><button data-v="curso" aria-pressed="false">Em curso</button><button data-v="concl" aria-pressed="false">Concluída</button></div>
+  <button class="btn a-only" id="zChart">📈 Evolução</button>
+  <button class="btn a-only" id="zReport">Relatório de avanço</button>
   <span class="spacer"></span>
   <button class="btn icon hide-md" id="zoomOut" aria-label="Afastar">−</button>
   <button class="btn zoomval" id="zoomFit" title="Ver a planta inteira">100%</button>
   <button class="btn icon hide-md" id="zoomIn" aria-label="Aproximar">+</button>
 </div>
-<div class="hintbar" id="hintbar" hidden><span id="hintTxt">Toca no sítio da planta para criar uma marca.</span><button class="btn sm" id="markOff">Terminar</button></div>
+<div class="hintbar" id="hintbar" hidden><span id="hintTxt">Toca no sítio da planta para criar uma marca.</span><button class="btn sm" id="zFinish" hidden>Fechar zona</button><button class="btn sm" id="markOff">Terminar</button></div>
 
 <main id="viewer" tabindex="0"><div id="pages"></div></main>
+<section id="diario" aria-label="Diário de obra">
+  <div class="dside">
+    <button class="btn primary" id="diaNew">+ Novo dia</button>
+    <p class="note">Local da obra para a meteorologia: <b id="diaLoc"></b><br><button class="btn sm" id="diaLocBtn" style="margin-top:6px">Definir local da obra</button></p>
+    <ul id="diaList"></ul>
+  </div>
+  <div class="dmain">
+    <div class="empty" id="diaEmpty" style="margin-top:8vh"><h1>Diário de obra</h1><p>Um registo por dia: meteorologia, mão-de-obra, equipamentos, trabalhos, ocorrências e fotos. No fim, a fiscalização assina e sai o PDF do dia.</p><p>Começa por “+ Novo dia”.</p></div>
+    <div id="diaForm" hidden>
+      <h2 id="dTitle"></h2>
+      <p class="note" id="dSigState"></p>
+      <div class="row" style="margin-top:8px"><button class="btn primary" id="dSign">✍ Assinar (fiscalização)</button><button class="btn" id="dUnsign" hidden>Retirar assinatura</button><button class="btn" id="dPdf">PDF do dia</button><button class="btn danger" id="dDel">Apagar dia</button></div>
+      <h3>Meteorologia</h3>
+      <div class="mgrid">
+        <label>Céu<input type="text" id="mCeu" placeholder="Ex.: Céu limpo"></label>
+        <label>Máx. °C<input type="text" id="mTmax" inputmode="decimal"></label>
+        <label>Mín. °C<input type="text" id="mTmin" inputmode="decimal"></label>
+        <label>Chuva mm<input type="text" id="mChuva" inputmode="decimal"></label>
+        <label>Vento km/h<input type="text" id="mVento" inputmode="decimal"></label>
+      </div>
+      <div class="row" style="margin-top:8px;align-items:center"><button class="btn sm" id="mFetch">↻ Obter da internet</button><label style="display:flex;gap:8px;align-items:center;font-size:14px"><input type="checkbox" id="mAfetou"> As condições afetaram os trabalhos</label></div>
+      <textarea id="mNota" rows="2" placeholder="Observações sobre a meteorologia (opcional)" style="margin-top:8px"></textarea>
+      <p class="note" id="mFonte"></p>
+      <h3>Mão-de-obra</h3>
+      <div id="dMo" class="drowhost"></div>
+      <p class="note" id="moTot"></p>
+      <button class="btn sm" id="dCopy">Copiar mão-de-obra e equipamentos do dia anterior</button>
+      <h3>Equipamentos</h3>
+      <div id="dEq" class="drowhost"></div>
+      <h3>Trabalhos executados</h3>
+      <textarea id="dTrab" rows="4" placeholder="O que foi feito hoje, por zona ou elemento"></textarea>
+      <h3>Ocorrências</h3>
+      <textarea id="dOcor" rows="3" placeholder="Acidentes, paragens, visitas, entregas, não conformidades"></textarea>
+      <h3>Fotos</h3>
+      <div id="dFotos" class="dfotos"></div>
+      <button class="btn" id="dFotoAdd">+ Fotos</button>
+    </div>
+  </div>
+</section>
+<datalist id="dlEnt"></datalist><datalist id="dlEq"></datalist>
+<input id="diaPicker" type="file" accept="image/*" multiple hidden>
 
 <input id="pdfPicker" type="file" accept="application/pdf,.pdf" multiple hidden>
 <input id="cameraPicker" type="file" accept="image/*" capture="environment" hidden>
@@ -418,7 +520,8 @@ dialog.full canvas{position:absolute;inset:0;width:100%;height:100%;display:bloc
     <ul class="pick" id="pkPhases"></ul>
     <label class="f" for="pkEsp">Especialidade</label>
     <select id="pkEsp" style="width:100%"></select>
-    <ul class="pick" style="margin-top:14px"><li><label><input type="checkbox" id="pkMarks" checked><div><span class="t">Incluir as minhas marcas e fotos</span><span class="m">Desliga para enviar só as plantas.</span></div></label></li></ul>
+    <ul class="pick" style="margin-top:14px"><li><label><input type="checkbox" id="pkDia" checked><div><span class="t">Incluir o diário de obra</span><span class="m" id="pkDiaM">Todos os dias registados neste aparelho.</span></div></label></li></ul>
+    <ul class="pick" style="margin-top:8px"><li><label><input type="checkbox" id="pkMarks" checked><div><span class="t">Incluir as minhas marcas e fotos</span><span class="m">Desliga para enviar só as plantas.</span></div></label></li></ul>
     <p class="note" id="pkSum"></p>
     <p class="note">Envia o ficheiro por WhatsApp, email, Drive ou cabo. No outro aparelho, abre o link da ferramenta, vai a Fases e toca em Importar pacote.</p>
   </div>
@@ -461,6 +564,20 @@ dialog.full canvas{position:absolute;inset:0;width:100%;height:100%;display:bloc
   <div class="vpb"><div id="vpMedia"></div><p id="vpTx"></p><p id="vpDt"></p></div>
   <div class="vpf"><button class="btn" id="vpPrev" aria-label="Marca anterior">←</button><button class="btn primary" id="vpEdit">✎ Editar</button><button class="btn" id="vpNext" aria-label="Marca seguinte">→</button><span id="vpPos"></span></div>
 </aside>
+<dialog id="zDlg"><div class="dlg">
+  <div class="dlg-head"><h2><span id="zTitle"></span><span class="sub" id="zSub"></span></h2><button class="btn sm" data-close>Fechar</button></div>
+  <div class="dlg-body"><p class="sect" style="margin-top:0">Estado por etapa</p><ul class="list" id="zEtapas"></ul><p class="note" id="zHist"></p></div>
+  <div class="dlg-foot"><button class="btn" id="zRename">Mudar nome</button><button class="btn danger" id="zDelete">Apagar zona</button></div>
+</div></dialog>
+<dialog id="chDlg"><div class="dlg">
+  <div class="dlg-head"><h2>Evolução do avanço</h2><button class="btn sm" data-close>Fechar</button></div>
+  <div class="dlg-body"><label class="f" for="chPlan">Planta</label><select id="chPlan" style="width:100%"></select><div id="chBox" style="margin-top:12px"></div></div>
+</div></dialog>
+<dialog id="sigDlg"><div class="dlg">
+  <div class="dlg-head"><h2>Assinatura da fiscalização</h2><button class="btn sm" data-close>Cancelar</button></div>
+  <div class="dlg-body"><label class="f" for="sigNome">Nome</label><input type="text" id="sigNome" autocomplete="name"><label class="f">Assinatura</label><canvas id="sigPad"></canvas><div class="row" style="margin-top:6px"><button class="btn sm" id="sigClear">Limpar</button></div><p class="note">Depois de assinado, o dia fica bloqueado. Para alterar, é preciso retirar a assinatura.</p></div>
+  <div class="dlg-foot"><button class="btn primary" id="sigOk">Assinar</button></div>
+</div></dialog>
 <div id="adjPanel" hidden role="group" aria-label="Ajustar marca">
   <div><b id="adjLbl">Marca</b><div id="adjInfo"></div></div>
   <div class="grp"><button class="btn" data-mv="-1,0" aria-label="Mover para a esquerda">←</button><button class="btn" data-mv="0,-1" aria-label="Mover para cima">↑</button><button class="btn" data-mv="0,1" aria-label="Mover para baixo">↓</button><button class="btn" data-mv="1,0" aria-label="Mover para a direita">→</button></div>
@@ -1228,7 +1345,7 @@ async function build(){
         const el = document.createElement('div'); el.className = 'page'; el._p = p; p.el = el;
         const layer = document.createElement('div'); layer.className = 'mklayer'; p.layer = layer; el.appendChild(layer);
         if (d.pages.length > 1){ const s = document.createElement('div'); s.className = 'num'; s.textContent = `${p.num}/${d.pages.length}`; el.appendChild(s); }
-        el.addEventListener('click', e => onPageClick(e, p));
+        el.addEventListener('click', e => { if (appMode === 'avanco') avPageClick(e, p); else onPageClick(e, p); });
         frag.appendChild(el);
         allPages.push(p); pageMap.set(d.meta.id + '|' + p.num, p);
         drawMarks(p);
@@ -1273,7 +1390,7 @@ function measureFit(){ fitW = Math.max(200, $('#viewer').clientWidth - PAD*2); }
 function layout(){
   const w = fitW * zoom;
   $('#pages').style.width = (w + PAD*2) + 'px';
-  document.querySelectorAll('.phasehead,.dochead,.ph-empty,.etbar,.subbar').forEach(e => e.style.width = fitW + 'px');
+  document.querySelectorAll('.phasehead,.dochead,.ph-empty,.etbar,.subbar,.avsum').forEach(e => e.style.width = fitW + 'px');
   for (const p of allPages){ p.el.style.width = w + 'px'; p.el.style.height = (w * p.h / p.w) + 'px'; }
   $('#zoomFit').textContent = Math.round(zoom*100) + '%';
 }
@@ -1341,6 +1458,7 @@ viewer.addEventListener('wheel', e => {
   setZoom(zoom * Math.exp(-e.deltaY * 0.01), e.clientX - r.left, e.clientY - r.top);
 }, {passive:false});
 viewer.addEventListener('dblclick', e => {
+  if (avTool) return;
   if (markMode || !allPages.length || e.target.closest('.mk')) return;
   const r = viewer.getBoundingClientRect();
   setZoom(zoom > 1.05 ? 1 : 2.5, e.clientX - r.left, e.clientY - r.top);
@@ -1434,7 +1552,7 @@ $('#okBtn').onclick = () => {
   if (!allPages.length){ toast('Carrega primeiro as plantas.'); return; }
   setMarkMode(markMode === 'ok' ? false : 'ok');
 };
-$('#markOff').onclick = () => setMarkMode(false);
+$('#markOff').onclick = () => { if (appMode === 'avanco') setAvTool(null); else setMarkMode(false); };
 /* ---- painel lateral de consulta da marca (toque na marca) ---- */
 let vpMark = null, vpPano = null, vpZ = null;
 function vpList(m){
@@ -1673,6 +1791,7 @@ function renderEtapaBar(d){
     };
     sb.appendChild(add);
   }
+  if (typeof renderAvSum === 'function') renderAvSum(d);
 }
 function refreshDoc(docId){ const d = shown.find(x => x.meta.id === docId); if (d){ renderEtapaBar(d); d.pages.forEach(drawMarks); } }
 function drawMarks(p){
@@ -1695,6 +1814,7 @@ function drawMarks(p){
     b.addEventListener('dblclick', e => e.stopPropagation());
     p.layer.appendChild(b);
   });
+  if (typeof drawZones === 'function') drawZones(p);
 }
 function redrawMarksFor(m){ const p = pageMap.get(m.docId + '|' + m.page); if (p) drawMarks(p); const d = shown.find(x => x.meta.id === m.docId); if (d) renderEtapaBar(d); }
 async function onPageClick(e, p){
@@ -2389,7 +2509,7 @@ $('#upSave').onclick = async () => {
       if (!String.fromCharCode.apply(null, head).includes('%PDF')){ toast(`“${item.file.name}” não é um PDF válido e ficou de fora.`); continue; }
       const id = item.phaseId + '::' + item.file.name;
       const ex = docMetas.find(d => d.id === id);
-      const meta = {id, phaseId: item.phaseId, name: item.file.name, esp: item.esp || '', updatedAt: now, size: data.byteLength, etapas: ex ? etapasOf(ex) : []};
+      const meta = {...(ex || {}), id, phaseId: item.phaseId, name: item.file.name, esp: item.esp || '', updatedAt: now, size: data.byteLength, etapas: ex ? etapasOf(ex) : []};
       if (item.esp) lastEsp = item.esp;
       await run(['docs','files'], 'readwrite', t => { t.objectStore('files').put({id, data}); t.objectStore('docs').put(meta); });
       if (ex){ Object.assign(ex, meta); trocadas++; } else { docMetas.push(meta); novas++; }
@@ -2675,6 +2795,601 @@ $('#dlvShare').onclick = async () => {
 };
 $('#dlvDlg').addEventListener('close', () => { dlv = null; $('#dlvMsg').textContent = ''; });
 
+/* ================= mapa de avanço: zonas por planta, estado por etapa ================= */
+const ZST = {por: {l:'Por executar', c:'#94a3b8', f:0.10}, curso: {l:'Em curso', c:'#e0a800', f:0.32}, concl: {l:'Concluída', c:'#1f7a36', f:0.34}};
+let appMode = 'marcas', avTool = null, avBrush = 'concl', avDraft = null;
+const zonasOf = d => (d && d.zonas) || [];
+const curEtapaOf = dm => { const et = etapasOf(dm), c = curEtapa[dm.id] || 'all'; return c === 'all' && et.length === 1 ? et[0].id : c; };
+function zoneArea(z){ let a = 0; const P = z.pts, W = z.pw || 1, H = z.ph || 1; for (let i = 0; i < P.length; i++){ const [x1,y1] = P[i], [x2,y2] = P[(i+1) % P.length]; a += x1*W*y2*H - x2*W*y1*H; } return Math.abs(a) / 2; }
+function zoneCentroid(z){ let x = 0, y = 0; z.pts.forEach(p => { x += p[0]; y += p[1]; }); return [x / z.pts.length, y / z.pts.length]; }
+function inPoly(x, y, P){ let c = false; for (let i = 0, j = P.length - 1; i < P.length; j = i++){ const [xi, yi] = P[i], [xj, yj] = P[j]; if (((yi > y) !== (yj > y)) && (x < (xj - xi) * (y - yi) / (yj - yi) + xi)) c = !c; } return c; }
+function zState(z, etapaId){ return (z.est && z.est[etapaId]) || 'por'; }
+function avPct(dm, etapaId){
+  const zs = zonasOf(dm); const A = zs.reduce((a, z) => a + zoneArea(z), 0);
+  if (!A) return null;
+  const sum = k => zs.filter(z => zState(z, etapaId) === k).reduce((a, z) => a + zoneArea(z), 0);
+  return {concl: sum('concl') / A, curso: sum('curso') / A, n: zs.length};
+}
+const pctTxt = v => Math.round(v * 100) + '%';
+async function saveDoc(dm){ try { await putOne('docs', dm); } catch(e){ toast('Não foi possível guardar. O dispositivo pode estar sem espaço.'); } }
+function avLog(dm, ev){ dm.avLog = [...(dm.avLog || []), {t: Date.now(), ...ev}]; }
+
+function drawZones(p){
+  if (!p.zl){
+    const ns = 'http://www.w3.org/2000/svg';
+    const svg = document.createElementNS(ns, 'svg'); svg.setAttribute('class', 'zlayer'); svg.setAttribute('viewBox', '0 0 1 1'); svg.setAttribute('preserveAspectRatio', 'none');
+    const lab = document.createElement('div'); lab.className = 'zlabels';
+    p.el.insertBefore(lab, p.layer); p.el.insertBefore(svg, lab); p.zl = svg; p.zlab = lab;
+  }
+  const svg = p.zl, lab = p.zlab; svg.innerHTML = ''; lab.innerHTML = '';
+  if (appMode !== 'avanco') return;
+  const dm = p.d.meta, eid = curEtapaOf(dm), ns = 'http://www.w3.org/2000/svg';
+  zonasOf(dm).filter(z => z.page === p.num).forEach(z => {
+    const st = eid !== 'all' ? zState(z, eid) : null, c = st ? ZST[st].c : '#475569';
+    const pg = document.createElementNS(ns, 'polygon');
+    pg.setAttribute('points', z.pts.map(q => q.join(',')).join(' '));
+    pg.setAttribute('fill', c); pg.setAttribute('fill-opacity', st ? ZST[st].f : 0.06);
+    pg.setAttribute('stroke', c); pg.setAttribute('stroke-width', '2'); pg.setAttribute('vector-effect', 'non-scaling-stroke');
+    if (!st) pg.setAttribute('stroke-dasharray', '6 4');
+    svg.appendChild(pg);
+    const [cx, cy] = zoneCentroid(z);
+    const t = document.createElement('button'); t.className = 'zlab'; t.style.left = (cx*100) + '%'; t.style.top = (cy*100) + '%';
+    t.textContent = z.nome + (st ? ': ' + ZST[st].l : '');
+    t.style.borderColor = c;
+    t.onclick = e => { e.stopPropagation(); if (avTool === 'paint') avPaint(p, z); else if (!avTool) openZone(dm, z); };
+    lab.appendChild(t);
+  });
+  if (avDraft && avDraft.p === p && avDraft.pts.length){
+    const pl = document.createElementNS(ns, 'polyline');
+    pl.setAttribute('points', avDraft.pts.map(q => q.join(',')).join(' '));
+    pl.setAttribute('fill', '#1d4ed8'); pl.setAttribute('fill-opacity', '0.12'); pl.setAttribute('stroke', '#1d4ed8'); pl.setAttribute('stroke-width', '2.5'); pl.setAttribute('vector-effect', 'non-scaling-stroke');
+    svg.appendChild(pl);
+    avDraft.pts.forEach(q => { const d = document.createElement('i'); d.className = 'zpt'; d.style.left = (q[0]*100) + '%'; d.style.top = (q[1]*100) + '%'; lab.appendChild(d); });
+  }
+}
+function renderAvSum(d){
+  let s = d.avsum;
+  if (!s){ s = document.createElement('div'); s.className = 'avsum'; d.avsum = s; (d.sbar || d.ebar).after(s); }
+  s.style.width = fitW + 'px';
+  if (appMode !== 'avanco'){ s.hidden = true; return; }
+  s.hidden = false; s.innerHTML = '';
+  const dm = d.meta, et = etapasOf(dm);
+  if (!zonasOf(dm).length){ s.textContent = 'Ainda sem zonas nesta planta. Toca em “✏ Nova zona” e desenha a primeira.'; return; }
+  if (!et.length){ s.textContent = 'Cria uma etapa (+ Etapa) para registar o avanço das zonas.'; return; }
+  et.forEach(e => {
+    const v = avPct(dm, e.id); if (!v) return;
+    const row = document.createElement('div'); row.className = 'avrow';
+    row.innerHTML = '<span class="avn"><i></i></span><span class="avbar"><b class="c"></b><b class="u"></b></span><span class="avp"></span>';
+    row.querySelector('i').style.background = e.cor; row.querySelector('.avn').append(e.nome);
+    row.querySelector('.c').style.width = (v.concl*100) + '%'; row.querySelector('.u').style.width = (v.curso*100) + '%';
+    row.querySelector('.avp').textContent = `${pctTxt(v.concl)} concluído` + (v.curso ? `, ${pctTxt(v.curso)} em curso` : '');
+    s.appendChild(row);
+  });
+}
+function avRefresh(dm){
+  const d = shown.find(x => x.meta.id === dm.id); if (!d) return;
+  d.pages.forEach(drawZones); renderAvSum(d);
+}
+function setAvTool(tool){
+  if (avTool === 'draw' && tool !== 'draw' && avDraft){ const p = avDraft.p; avDraft = null; drawZones(p); }
+  avTool = tool;
+  $('#zDraw').setAttribute('aria-pressed', String(tool === 'draw'));
+  document.querySelectorAll('#zBrush button').forEach(b => b.setAttribute('aria-pressed', String(tool === 'paint' && b.dataset.v === avBrush)));
+  const hb = $('#hintbar'); hb.hidden = !tool; hb.classList.remove('ok','prod','adjm','edm'); hb.classList.toggle('adjm', tool === 'draw');
+  $('#zFinish').hidden = tool !== 'draw';
+  $('#hintTxt').textContent = tool === 'draw'
+    ? 'Toca nos cantos da zona, um a um. Depois toca em “Fechar zona” (mínimo 3 pontos).'
+    : tool === 'paint' ? `Toca nas zonas para as marcar como “${ZST[avBrush].l}” na etapa escolhida em cima da planta.` : '';
+  pagesEl.classList.toggle('marking', !!tool);
+}
+async function avPageClick(e, p){
+  if (appMode !== 'avanco' || !avTool) return;
+  const r = p.el.getBoundingClientRect(), x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height;
+  if (x < 0 || x > 1 || y < 0 || y > 1) return;
+  if (avTool === 'draw'){
+    if (avDraft && avDraft.p !== p){ const op = avDraft.p; avDraft = null; drawZones(op); }
+    if (!avDraft) avDraft = {p, pts: []};
+    avDraft.pts.push([x, y]); drawZones(p); return;
+  }
+  if (avTool === 'paint'){
+    const z = zonasOf(p.d.meta).filter(z => z.page === p.num).reverse().find(z => inPoly(x, y, z.pts));
+    if (z) avPaint(p, z); else toast('Toca dentro de uma zona.');
+  }
+}
+async function avPaint(p, z){
+  const dm = p.d.meta, eid = curEtapaOf(dm);
+  if (eid === 'all'){
+    toast(etapasOf(dm).length ? 'Escolhe a etapa nos separadores por cima da planta antes de pintar.' : 'Cria primeiro uma etapa nesta planta (+ Etapa).', 4000);
+    if (!etapasOf(dm).length) openEtapaNew(dm);
+    else { p.d.ebar.classList.remove('flash'); void p.d.ebar.offsetWidth; p.d.ebar.classList.add('flash'); }
+    return;
+  }
+  if (zState(z, eid) === avBrush) return;
+  z.est = {...(z.est || {}), [eid]: avBrush};
+  avLog(dm, {z: z.id, e: eid, s: avBrush});
+  await saveDoc(dm); avRefresh(dm);
+}
+$('#zFinish').onclick = async () => {
+  if (!avDraft || avDraft.pts.length < 3){ toast('Uma zona precisa de pelo menos 3 pontos.'); return; }
+  const p = avDraft.p, dm = p.d.meta;
+  const nome = prompt('Nome da zona', 'Zona ' + (zonasOf(dm).length + 1));
+  if (nome == null){ return; }
+  const z = {id: uid('z_'), nome: nome.trim() || ('Zona ' + (zonasOf(dm).length + 1)), page: p.num, pts: avDraft.pts, pw: p.w, ph: p.h, est: {}, createdAt: Date.now()};
+  dm.zonas = [...zonasOf(dm), z];
+  avLog(dm, {z: z.id, add: true, a: zoneArea(z)});
+  avDraft = null; await saveDoc(dm); avRefresh(dm);
+  toast(`“${z.nome}” criada. Continua a tocar para desenhar a próxima, ou escolhe um estado para pintar.`, 4000);
+};
+$('#zDraw').onclick = () => setAvTool(avTool === 'draw' ? null : 'draw');
+document.querySelectorAll('#zBrush button').forEach(b => b.onclick = () => {
+  if (avTool === 'paint' && avBrush === b.dataset.v){ setAvTool(null); return; }
+  avBrush = b.dataset.v; setAvTool('paint');
+});
+let zCur = null;
+function openZone(dm, z){
+  zCur = {dm, z};
+  $('#zTitle').textContent = z.nome;
+  const tot = zonasOf(dm).reduce((a, q) => a + zoneArea(q), 0);
+  $('#zSub').textContent = nice(dm.name) + `, página ${z.page}. ${pctTxt(zoneArea(z) / (tot || 1))} da área das zonas desta planta.`;
+  const ul = $('#zEtapas'); ul.innerHTML = '';
+  if (!etapasOf(dm).length) ul.innerHTML = '<li><span class="none">Ainda não há etapas nesta planta.</span></li>';
+  etapasOf(dm).forEach(e => {
+    const li = document.createElement('li'); li.style.padding = '8px 10px'; li.style.display = 'block';
+    li.innerHTML = '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><span class="badge" style="min-width:12px;height:12px;padding:0"></span><b></b></div><div class="seg"></div>';
+    li.querySelector('.badge').style.background = e.cor; li.querySelector('b').textContent = e.nome;
+    const seg = li.querySelector('.seg');
+    Object.entries(ZST).forEach(([k, v]) => {
+      const b = document.createElement('button'); b.textContent = v.l; b.setAttribute('aria-pressed', String(zState(z, e.id) === k));
+      b.onclick = async () => { if (zState(z, e.id) === k) return; z.est = {...(z.est || {}), [e.id]: k}; avLog(dm, {z: z.id, e: e.id, s: k}); await saveDoc(dm); avRefresh(dm); openZone(dm, z); };
+      seg.appendChild(b);
+    });
+    ul.appendChild(li);
+  });
+  const hist = (dm.avLog || []).filter(h => h.z === z.id && h.s).slice(-6).reverse();
+  $('#zHist').textContent = hist.length ? 'Últimas alterações: ' + hist.map(h => `${fmtD(h.t)} ${(etapaById(dm, h.e) || {}).nome || ''} → ${ZST[h.s].l}`).join('; ') + '.' : 'Ainda sem alterações de estado.';
+  if (!$('#zDlg').open){ closeAll(); $('#zDlg').showModal(); }
+}
+$('#zRename').onclick = async () => { const {dm, z} = zCur; const v = prompt('Nome da zona', z.nome); if (v == null || !v.trim()) return; z.nome = v.trim(); await saveDoc(dm); avRefresh(dm); openZone(dm, z); };
+$('#zDelete').onclick = async () => {
+  const {dm, z} = zCur; if (!confirm(`Apagar a zona “${z.nome}”?`)) return;
+  dm.zonas = zonasOf(dm).filter(q => q !== z); avLog(dm, {z: z.id, del: true});
+  await saveDoc(dm); $('#zDlg').close(); avRefresh(dm);
+};
+
+/* ---- evolução semanal ---- */
+function weekEnds(t0){
+  const out = [], d = new Date(t0); d.setHours(23, 59, 59, 999); d.setDate(d.getDate() + ((7 - d.getDay()) % 7));
+  const now = Date.now(); while (d.getTime() < now + 7*864e5){ out.push(d.getTime()); d.setDate(d.getDate() + 7); if (out.length > 104) break; }
+  return out;
+}
+function avSeries(dm){
+  const log = (dm.avLog || []).slice().sort((a, b) => a.t - b.t);
+  if (!log.length) return null;
+  const ends = weekEnds(log[0].t);
+  const series = etapasOf(dm).map(e => ({e, v: []}));
+  const curZ = new Map(zonasOf(dm).map(z => [z.id, zoneArea(z)]));
+  for (const T of ends){
+    const area = new Map(), st = new Map();
+    for (const h of log){ if (h.t > T) break;
+      if (h.add) area.set(h.z, curZ.get(h.z) || h.a || 0);
+      else if (h.del) area.delete(h.z);
+      else if (h.s) st.set(h.z + '|' + h.e, h.s);
+    }
+    const A = [...area.values()].reduce((a, b) => a + b, 0);
+    series.forEach(s => { let c = 0; area.forEach((a, z) => { if (st.get(z + '|' + s.e.id) === 'concl') c += a; }); s.v.push(A ? c / A : 0); });
+  }
+  return {ends, series: series.filter(s => (dm.avLog || []).some(h => h.e === s.e.id))};
+}
+function chartSVG(S, w = 640, h = 260){
+  const L = 44, R = 12, T = 14, B = 34, n = S.ends.length, X = i => L + (n < 2 ? (w-L-R)/2 : i * (w-L-R) / (n-1)), Y = v => T + (1 - v) * (h-T-B);
+  let s = `<svg viewBox="0 0 ${w} ${h}" width="100%" role="img" aria-label="Evolução semanal do avanço" style="display:block;max-width:${w}px">`;
+  [0, .25, .5, .75, 1].forEach(v => { s += `<line x1="${L}" x2="${w-R}" y1="${Y(v)}" y2="${Y(v)}" stroke="currentColor" stroke-opacity=".15"/><text x="${L-6}" y="${Y(v)+4}" font-size="11" text-anchor="end" fill="currentColor" fill-opacity=".6">${v*100}%</text>`; });
+  const step = Math.max(1, Math.ceil(n / 8));
+  S.ends.forEach((t, i) => { if (i % step === 0 || i === n-1){ const d = new Date(t); s += `<text x="${X(i)}" y="${h-12}" font-size="11" text-anchor="middle" fill="currentColor" fill-opacity=".6">${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}</text>`; } });
+  S.series.forEach(se => {
+    s += `<polyline fill="none" stroke="${se.e.cor}" stroke-width="2.5" points="${se.v.map((v, i) => X(i) + ',' + Y(v)).join(' ')}"/>`;
+    se.v.forEach((v, i) => { s += `<circle cx="${X(i)}" cy="${Y(v)}" r="3" fill="${se.e.cor}"/>`; });
+  });
+  return s + '</svg>';
+}
+function openChart(){
+  const ds = shown.map(d => d.meta);
+  const sel = $('#chPlan'); sel.innerHTML = '';
+  ds.forEach(dm => sel.add(new Option('Fase ' + (phaseById(dm.phaseId) || {}).label + ', ' + nice(dm.name), dm.id)));
+  const cur = allPages.length ? pageAt(viewer.scrollTop + viewer.clientHeight * 0.4).d.meta.id : '';
+  if (cur) sel.value = cur;
+  const draw = () => {
+    const dm = docMetas.find(x => x.id === sel.value), box = $('#chBox');
+    const S = dm && avSeries(dm);
+    if (!S || !S.series.length){ box.innerHTML = '<p class="note">Ainda não há alterações de estado nesta planta. O gráfico aparece quando começares a pintar zonas.</p>'; return; }
+    box.innerHTML = chartSVG(S) + '<div class="chleg">' + S.series.map(s => `<span><i style="background:${s.e.cor}"></i>${escHtml(s.e.nome)}: ${pctTxt(s.v[s.v.length-1])}</span>`).join('') + '</div><p class="note">Percentagem da área concluída no fim de cada semana (domingo).</p>';
+  };
+  sel.onchange = draw; draw();
+  closeAll(); $('#chDlg').showModal();
+}
+$('#zChart').onclick = openChart;
+
+/* ---- relatório de avanço em PDF ---- */
+async function exportAvanco(){
+  const ds = shown.map(d => d.meta).filter(dm => zonasOf(dm).length);
+  if (!ds.length){ toast('Não há zonas nas plantas que estás a ver.'); return; }
+  toast('A preparar o relatório de avanço…', 120000);
+  try {
+    const {PDFDocument, StandardFonts, rgb, degrees} = PDFLib;
+    const out = await PDFDocument.create();
+    const font = await out.embedFont(StandardFonts.Helvetica), bold = await out.embedFont(StandardFonts.HelveticaBold);
+    const safe = f => { const c = {}; return s => [...String(s || '')].map(ch => { if (!(ch in c)){ try { f.encodeText(ch); c[ch] = ch; } catch(_){ c[ch] = '?'; } } return c[ch]; }).join(''); };
+    const S = safe(font), SB = safe(bold);
+    const hex = h => rgb(parseInt(h.slice(1,3),16)/255, parseInt(h.slice(3,5),16)/255, parseInt(h.slice(5,7),16)/255);
+    const INK = rgb(.07,.09,.11), MUT = rgb(.35,.39,.45), LINE = rgb(.85,.87,.9), WHITE = rgb(1,1,1);
+    const A4 = [841.89, 595.28], M = 40; let pg, y;
+    const np = () => { pg = out.addPage(A4); y = A4[1] - M; };
+    np();
+    pg.drawText(SB('Mapa de avanço da obra'), {x: M, y: y - 18, size: 18, font: bold, color: INK}); y -= 26;
+    pg.drawText(S((obra ? obra + '. ' : '') + 'Relatório de ' + fmtDT(Date.now())), {x: M, y: y - 11, size: 11, font, color: MUT}); y -= 24;
+    for (const dm of ds){
+      const ph = phaseById(dm.phaseId) || {}, Sx = avSeries(dm);
+      const et = etapasOf(dm).filter(e => (dm.avLog || []).some(h => h.e === e.id)); if (!et.length) et.push(...etapasOf(dm));
+      const need = 40 + et.length * 18 + (Sx && Sx.series.length ? 200 : 0);
+      if (y - need < M) np();
+      pg.drawText(SB(`Fase ${ph.label}, ${nice(dm.name)}`), {x: M, y: y - 13, size: 13, font: bold, color: INK}); y -= 18;
+      pg.drawText(S(`${zonasOf(dm).length} zonas. Percentagem pela área das zonas desenhadas na planta.`), {x: M, y: y - 10, size: 9.5, font, color: MUT}); y -= 18;
+      for (const e of et){
+        const v = avPct(dm, e.id) || {concl: 0, curso: 0};
+        pg.drawCircle({x: M + 5, y: y - 6, size: 4.5, color: hex(e.cor)});
+        pg.drawText(S(e.nome), {x: M + 16, y: y - 10, size: 10.5, font, color: INK});
+        const bx = M + 230, bw = 300;
+        pg.drawRectangle({x: bx, y: y - 12, width: bw, height: 10, color: rgb(.93,.94,.96)});
+        if (v.concl) pg.drawRectangle({x: bx, y: y - 12, width: bw * v.concl, height: 10, color: hex(ZST.concl.c)});
+        if (v.curso) pg.drawRectangle({x: bx + bw * v.concl, y: y - 12, width: bw * v.curso, height: 10, color: hex(ZST.curso.c)});
+        pg.drawText(S(`${pctTxt(v.concl)} concluído` + (v.curso ? `, ${pctTxt(v.curso)} em curso` : '')), {x: bx + bw + 10, y: y - 10, size: 10, font, color: INK});
+        y -= 18;
+      }
+      if (Sx && Sx.series.length){
+        y -= 16;
+        const cw = 520, ch = 160, cx = M + 40, cy = y - 10 - ch, n = Sx.ends.length;
+        const X = i => cx + (n < 2 ? cw/2 : i * cw / (n-1)), Y = v => cy + v * ch;
+        [0, .5, 1].forEach(v => { pg.drawLine({start: {x: cx, y: Y(v)}, end: {x: cx + cw, y: Y(v)}, thickness: .5, color: LINE}); pg.drawText(`${v*100}%`, {x: cx - 30, y: Y(v) - 3, size: 8, font, color: MUT}); });
+        const step = Math.max(1, Math.ceil(n / 8));
+        Sx.ends.forEach((t, i) => { if (i % step === 0 || i === n-1){ const d = new Date(t); pg.drawText(`${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}`, {x: X(i) - 10, y: cy - 14, size: 8, font, color: MUT}); } });
+        Sx.series.forEach(s => {
+          for (let i = 1; i < s.v.length; i++) pg.drawLine({start: {x: X(i-1), y: Y(s.v[i-1])}, end: {x: X(i), y: Y(s.v[i])}, thickness: 2, color: hex(s.e.cor)});
+          s.v.forEach((v, i) => pg.drawCircle({x: X(i), y: Y(v), size: 2.2, color: hex(s.e.cor)}));
+        });
+        pg.drawText(S('Evolução semanal da área concluída (fim de cada semana)'), {x: cx, y: cy + ch + 6, size: 9, font, color: MUT});
+        y = cy - 30;
+      }
+      y -= 10; pg.drawLine({start: {x: M, y}, end: {x: A4[0] - M, y}, thickness: .5, color: LINE}); y -= 14;
+    }
+    // plantas com as zonas pintadas, uma por etapa com registos
+    for (const dm of ds){
+      const f = await getOne('files', dm.id); if (!f) continue;
+      const src = await PDFDocument.load(f.data, {ignoreEncryption: true});
+      const jsdoc = await pdfjsLib.getDocument({data: new Uint8Array(f.data.slice(0))}).promise;
+      const ets = etapasOf(dm).filter(e => zonasOf(dm).some(z => z.est && z.est[e.id])); if (!ets.length) ets.push(null);
+      for (const e of ets){
+        const pages = [...new Set(zonasOf(dm).map(z => z.page))];
+        for (const pn of pages){
+          const [cp] = await out.copyPages(src, [pn - 1]); const page = out.addPage(cp);
+          const jp = await jsdoc.getPage(pn), vp = jp.getViewport({scale: 1});
+          const rot = ((page.getRotation().angle % 360) + 360) % 360, a = rot * Math.PI / 180, cos = Math.cos(a), sin = Math.sin(a);
+          const rr = Math.max(vp.width, vp.height) * 0.009;
+          for (const z of zonasOf(dm).filter(q => q.page === pn)){
+            const st = e ? zState(z, e.id) : null, col = hex(st ? ZST[st].c : '#475569');
+            const P = z.pts.map(q => vp.convertToPdfPoint(q[0] * vp.width, q[1] * vp.height));
+            const path = 'M ' + P.map(q => q[0] + ' ' + (-q[1])).join(' L ') + ' Z';
+            page.drawSvgPath(path, {x: 0, y: 0, color: col, opacity: st ? ZST[st].f + 0.08 : 0.06, borderColor: col, borderWidth: rr * 0.25, borderOpacity: 1});
+            const [cxn, cyn] = zoneCentroid(z), [px, py] = vp.convertToPdfPoint(cxn * vp.width, cyn * vp.height);
+            const txt = SB(z.nome), fs = rr * 1.3, tw = bold.widthOfTextAtSize(txt, fs);
+            const dx = -tw/2, dy = -fs*0.36;
+            page.drawText(txt, {x: px + dx*cos - dy*sin, y: py + dx*sin + dy*cos, size: fs, font: bold, color: INK, rotate: degrees(rot)});
+          }
+          // faixa com o título no canto
+          const lbl = SB(`Avanço${e ? ': ' + e.nome : ''}. Verde concluída, amarelo em curso, cinzento por executar.`);
+          const fs2 = rr * 1.6, w2 = bold.widthOfTextAtSize(lbl, fs2) + fs2;
+          const [ox, oy] = vp.convertToPdfPoint(vp.width * 0.02, vp.height * 0.03);
+          const r2 = (dx, dy) => [dx*cos - dy*sin, dx*sin + dy*cos];
+          const [bx0, by0] = r2(0, -fs2 * 1.6);
+          page.drawRectangle({x: ox + bx0, y: oy + by0, width: w2, height: fs2 * 1.6, color: WHITE, borderColor: LINE, borderWidth: rr * 0.1, rotate: degrees(rot)});
+          const [tx0, ty0] = r2(fs2 * 0.5, -fs2 * 1.1);
+          page.drawText(lbl, {x: ox + tx0, y: oy + ty0, size: fs2, font: bold, color: INK, rotate: degrees(rot)});
+        }
+      }
+      jsdoc.destroy();
+    }
+    out.setTitle('Mapa de avanço'); out.setCreator('DDN-INC');
+    const bytes = await out.save();
+    const d = new Date(), ymd = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+    await deliver(new Blob([bytes], {type: 'application/pdf'}), 'Mapa de avanço ' + ymd + '.pdf');
+  } catch(e){ console.error(e); toast('Não foi possível criar o relatório (' + (e && e.message || 'erro') + ').', 6000); }
+}
+$('#zReport').onclick = exportAvanco;
+
+/* ---- mudar de módulo ---- */
+function setAppMode(m){
+  if (m === appMode) return;
+  if (appMode === 'marcas'){ setMarkMode(false); if (vpMark) vpClose(); }
+  if (appMode === 'avanco') setAvTool(null);
+  appMode = m;
+  document.body.classList.toggle('mode-marcas', m === 'marcas');
+  document.body.classList.toggle('mode-avanco', m === 'avanco');
+  document.body.classList.toggle('mode-diario', m === 'diario');
+  document.querySelectorAll('#modeNav button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.m === m)));
+  $('#hintbar').hidden = true;
+  if (m === 'diario'){ diaOpen(); return; }
+  shown.forEach(d => { d.pages.forEach(drawZones); renderAvSum(d); });
+  requestAnimationFrame(() => { if (allPages.length){ measureFit(); layout(); } });
+}
+document.querySelectorAll('#modeNav button').forEach(b => b.onclick = () => setAppMode(b.dataset.m));
+
+/* ================= diário de obra ================= */
+let diaDates = [], diaCur = null, diaSaveT = 0, diaLoc = null;
+const DIA_PREFIX = 'diario:';
+const WMO = {0:'Céu limpo',1:'Pouco nublado',2:'Parcialmente nublado',3:'Nublado',45:'Nevoeiro',48:'Nevoeiro com geada',51:'Chuvisco fraco',53:'Chuvisco',55:'Chuvisco forte',56:'Chuvisco gelado',57:'Chuvisco gelado forte',61:'Chuva fraca',63:'Chuva',65:'Chuva forte',66:'Chuva gelada',67:'Chuva gelada forte',71:'Neve fraca',73:'Neve',75:'Neve forte',77:'Grãos de neve',80:'Aguaceiros fracos',81:'Aguaceiros',82:'Aguaceiros fortes',85:'Aguaceiros de neve',86:'Aguaceiros de neve fortes',95:'Trovoada',96:'Trovoada com granizo',99:'Trovoada com granizo forte'};
+const ymdOf = d => d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+const ptDate = s => { const [y, m, d] = s.split('-').map(Number); return new Date(y, m-1, d).toLocaleDateString('pt-PT', {weekday:'long', day:'numeric', month:'long', year:'numeric'}); };
+const shortDate = s => { const [y, m, d] = s.split('-'); return `${d}/${m}/${y}`; };
+async function diaList(){
+  const all = await getAll('meta');
+  diaDates = all.filter(x => x.key.startsWith(DIA_PREFIX)).map(x => x.value).sort((a, b) => b.data.localeCompare(a.data));
+  const loc = all.find(x => x.key === 'obraLoc'); diaLoc = loc ? loc.value : null;
+}
+function diaEmpty(data){ return {data, met: {ceu:'', tmax:'', tmin:'', chuva:'', vento:'', afetou:false, nota:'', fonte:''}, mo: [], eq: [], trab: '', ocor: '', fotos: [], ass: null, createdAt: Date.now(), updatedAt: Date.now()}; }
+async function diaSave(e){ e.updatedAt = Date.now(); try { await putOne('meta', {key: DIA_PREFIX + e.data, value: e}); } catch(_){ toast('Não foi possível guardar o diário. O dispositivo pode estar sem espaço.'); } }
+function diaQueue(){ clearTimeout(diaSaveT); const e = diaCur; diaSaveT = setTimeout(() => { diaSave(e); diaRenderList(); }, 400); }
+async function diaOpen(){
+  await diaList();
+  const today = ymdOf(new Date());
+  if (!diaCur) diaCur = diaDates.find(x => x.data === today) || null;
+  diaRenderList(); diaRender();
+}
+function diaRenderList(){
+  const ul = $('#diaList'); ul.innerHTML = '';
+  if (!diaDates.length) ul.innerHTML = '<li class="dnone">Ainda sem dias registados.</li>';
+  diaDates.forEach(e => {
+    const li = document.createElement('li'); const b = document.createElement('button'); b.className = 'dday' + (diaCur && diaCur.data === e.data ? ' on' : '');
+    const tot = e.mo.reduce((a, r) => a + (Number(r.n) || 0), 0);
+    b.innerHTML = '<b></b><small></small><span></span>';
+    b.querySelector('b').textContent = shortDate(e.data);
+    b.querySelector('small').textContent = (e.met.ceu || 'Sem meteorologia') + (tot ? `, ${tot} trab.` : '');
+    const st = b.querySelector('span'); st.className = e.ass ? 'dsig ok' : 'dsig'; st.textContent = e.ass ? 'Assinado' : 'Por assinar';
+    b.onclick = () => { diaCur = e; diaRenderList(); diaRender(); };
+    li.appendChild(b); ul.appendChild(li);
+  });
+  $('#diaLoc').textContent = diaLoc ? `${diaLoc.lat.toFixed(4)}, ${diaLoc.lon.toFixed(4)}` : 'não definido';
+}
+async function diaNew(){
+  const v = prompt('Data do dia (AAAA-MM-DD)', ymdOf(new Date()));
+  if (v == null) return; const s = v.trim();
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(s) || isNaN(new Date(s).getTime())){ toast('Data inválida. Usa o formato AAAA-MM-DD, por exemplo ' + ymdOf(new Date()) + '.', 4000); return; }
+  const ex = diaDates.find(x => x.data === s);
+  if (ex){ diaCur = ex; diaRenderList(); diaRender(); toast('Esse dia já existe. Abri-o.'); return; }
+  const e = diaEmpty(s); diaDates.push(e); diaDates.sort((a, b) => b.data.localeCompare(a.data));
+  diaCur = e; await diaSave(e); diaRenderList(); diaRender();
+  if (navigator.onLine !== false) diaWeather(true);
+}
+function rowTable(host, rows, cols, locked, onChange, dl){
+  host.innerHTML = '';
+  const tb = document.createElement('div'); tb.className = 'dtab';
+  rows.forEach((r, i) => {
+    const row = document.createElement('div'); row.className = 'drow';
+    cols.forEach(c => {
+      const inp = document.createElement('input'); inp.type = c.type || 'text'; inp.placeholder = c.ph; inp.value = r[c.k] == null ? '' : r[c.k]; inp.disabled = locked;
+      if (c.type === 'number'){ inp.min = '0'; inp.inputMode = 'numeric'; inp.className = 'dnum'; }
+      if (c.list) inp.setAttribute('list', c.list);
+      inp.oninput = () => { r[c.k] = c.type === 'number' ? inp.value.replace(/[^\d]/g, '') : inp.value; onChange(); };
+      row.appendChild(inp);
+    });
+    const del = document.createElement('button'); del.className = 'btn sm danger'; del.textContent = '✕'; del.setAttribute('aria-label', 'Apagar linha'); del.disabled = locked;
+    del.onclick = () => { rows.splice(i, 1); onChange(); rowTable(host, rows, cols, locked, onChange, dl); };
+    row.appendChild(del); tb.appendChild(row);
+  });
+  host.appendChild(tb);
+  if (!locked){
+    const add = document.createElement('button'); add.className = 'btn sm'; add.textContent = '+ Acrescentar linha';
+    add.onclick = () => { const o = {}; cols.forEach(c => o[c.k] = ''); rows.push(o); onChange(); rowTable(host, rows, cols, locked, onChange, dl); host.querySelector('.drow:last-child input').focus(); };
+    host.appendChild(add);
+  }
+}
+function diaRender(){
+  const box = $('#diaForm');
+  $('#diaEmpty').hidden = !!diaCur; box.hidden = !diaCur;
+  if (!diaCur) return;
+  const e = diaCur, L = !!e.ass;
+  // listas para sugestões
+  const ents = [...new Set(diaDates.flatMap(x => x.mo.map(r => r.ent)).filter(Boolean))], eqs = [...new Set(diaDates.flatMap(x => x.eq.map(r => r.nome)).filter(Boolean))];
+  $('#dlEnt').innerHTML = ents.map(v => `<option value="${escHtml(v)}">`).join(''); $('#dlEq').innerHTML = eqs.map(v => `<option value="${escHtml(v)}">`).join('');
+  $('#dTitle').textContent = ptDate(e.data).replace(/^./, c => c.toUpperCase());
+  $('#dSigState').textContent = L ? `Assinado por ${e.ass.nome} a ${fmtDT(e.ass.t)}. Para alterar, retira a assinatura.` : 'Por assinar.';
+  $('#dSigState').className = L ? 'note dsigok' : 'note';
+  box.querySelectorAll('input,textarea,select').forEach(x => { if (!x.closest('.drowhost')) x.disabled = L; });
+  const met = e.met;
+  $('#mCeu').value = met.ceu; $('#mTmax').value = met.tmax; $('#mTmin').value = met.tmin; $('#mChuva').value = met.chuva; $('#mVento').value = met.vento;
+  $('#mAfetou').checked = !!met.afetou; $('#mNota').value = met.nota || '';
+  $('#mFonte').textContent = met.fonte || '';
+  $('#dTrab').value = e.trab || ''; $('#dOcor').value = e.ocor || '';
+  const moTot = () => { $('#moTot').textContent = 'Total: ' + e.mo.reduce((a, r) => a + (Number(r.n) || 0), 0) + ' trabalhadores'; };
+  rowTable($('#dMo'), e.mo, [{k:'ent', ph:'Entidade ou subempreiteiro', list:'dlEnt'}, {k:'fun', ph:'Função (opcional)'}, {k:'n', ph:'Nº', type:'number'}], L, () => { moTot(); diaQueue(); });
+  moTot();
+  rowTable($('#dEq'), e.eq, [{k:'nome', ph:'Equipamento', list:'dlEq'}, {k:'n', ph:'Qtd.', type:'number'}, {k:'obs', ph:'Observação (opcional)'}], L, diaQueue);
+  diaFotos();
+  $('#dCopy').hidden = L; $('#mFetch').disabled = L; $('#dFotoAdd').hidden = L || (e.fotos || []).length >= 20;
+  $('#dSign').hidden = L; $('#dUnsign').hidden = !L;
+  $('#dDel').disabled = false;
+}
+function diaFotos(){
+  const e = diaCur, g = $('#dFotos'); g.innerHTML = '';
+  (e.fotos || []).forEach((f, i) => {
+    const w = document.createElement('div'); w.className = 'dfoto';
+    const b = document.createElement('button'); b.className = 'fth'; b.innerHTML = '<img alt="">'; b.querySelector('img').src = f.src;
+    b.onclick = () => openSeq(e.fotos.map((x, j) => ({k: j, label: x.leg || ('Foto ' + (j+1)), src: x.src})), i, null, 'foto');
+    const leg = document.createElement('input'); leg.type = 'text'; leg.placeholder = 'Legenda'; leg.value = f.leg || ''; leg.disabled = !!e.ass;
+    leg.oninput = () => { f.leg = leg.value; diaQueue(); };
+    const rm = document.createElement('button'); rm.className = 'btn sm danger'; rm.textContent = 'Retirar'; rm.hidden = !!e.ass;
+    rm.onclick = () => { if (!confirm('Retirar esta foto do dia?')) return; e.fotos.splice(i, 1); diaQueue(); diaFotos(); };
+    w.append(b, leg, rm); g.appendChild(w);
+  });
+  if (!(e.fotos || []).length) g.innerHTML = '<p class="note" style="margin:0">Sem fotos neste dia.</p>';
+  $('#dFotoAdd').hidden = !!e.ass || (e.fotos || []).length >= 20;
+}
+$('#dFotoAdd').onclick = () => { $('#diaPicker').value = ''; $('#diaPicker').click(); };
+$('#diaPicker').addEventListener('change', async ev => {
+  const e = diaCur, files = [...ev.target.files]; if (!e || !files.length) return;
+  e.fotos = e.fotos || []; const room = 20 - e.fotos.length;
+  try { for (const f of files.slice(0, room)) e.fotos.push({src: await fileToJpeg(f), leg: ''}); } catch(err){ toast(err.message, 5000); }
+  if (files.length > room) toast(`Só cabem 20 fotos por dia. Entraram ${room}.`, 4000);
+  await diaSave(e); diaFotos();
+});
+[['mCeu','ceu'],['mTmax','tmax'],['mTmin','tmin'],['mChuva','chuva'],['mVento','vento'],['mNota','nota']].forEach(([id, k]) => $('#' + id).addEventListener('input', () => { if (diaCur){ diaCur.met[k] = $('#' + id).value; diaCur.met.fonte = diaCur.met.fonte ? diaCur.met.fonte.replace(/( Editado à mão\.)?$/, ' Editado à mão.') : ''; $('#mFonte').textContent = diaCur.met.fonte; diaQueue(); } }));
+$('#mAfetou').addEventListener('change', () => { if (diaCur){ diaCur.met.afetou = $('#mAfetou').checked; diaQueue(); } });
+$('#dTrab').addEventListener('input', () => { if (diaCur){ diaCur.trab = $('#dTrab').value; diaQueue(); } });
+$('#dOcor').addEventListener('input', () => { if (diaCur){ diaCur.ocor = $('#dOcor').value; diaQueue(); } });
+$('#diaNew').onclick = diaNew;
+$('#dCopy').onclick = () => {
+  const e = diaCur; const prev = diaDates.filter(x => x.data < e.data).sort((a, b) => b.data.localeCompare(a.data))[0];
+  if (!prev){ toast('Não há um dia anterior para copiar.'); return; }
+  if ((e.mo.length || e.eq.length) && !confirm(`Substituir a mão-de-obra e os equipamentos deste dia pelos de ${shortDate(prev.data)}?`)) return;
+  e.mo = prev.mo.map(r => ({...r})); e.eq = prev.eq.map(r => ({...r})); diaQueue(); diaRender();
+  toast('Copiado de ' + shortDate(prev.data) + '. Ajusta os números se for preciso.');
+};
+$('#dDel').onclick = async () => {
+  const e = diaCur; if (!e || !confirm(`Apagar o diário de ${shortDate(e.data)}${e.ass ? ', que está assinado,' : ''} deste aparelho?`)) return;
+  await delOne('meta', DIA_PREFIX + e.data); diaDates = diaDates.filter(x => x !== e); diaCur = null; diaRenderList(); diaRender();
+};
+$('#diaLocBtn').onclick = async () => {
+  const opt = confirm('Usar a localização atual deste aparelho como local da obra?\n\nOK: usar a localização atual.\nCancelar: escrever as coordenadas.');
+  if (opt && navigator.geolocation){
+    navigator.geolocation.getCurrentPosition(async pos => { diaLoc = {lat: pos.coords.latitude, lon: pos.coords.longitude}; await putOne('meta', {key:'obraLoc', value: diaLoc}); diaRenderList(); toast('Local da obra guardado.'); },
+      err => toast('Não foi possível obter a localização (' + err.message + '). Escreve as coordenadas.', 5000), {enableHighAccuracy: false, timeout: 15000});
+    return;
+  }
+  const v = prompt('Coordenadas da obra (latitude, longitude)', diaLoc ? `${diaLoc.lat}, ${diaLoc.lon}` : '');
+  if (v == null) return; const m = v.match(/(-?\d+(?:[.,]\d+)?)\s*[,; ]\s*(-?\d+(?:[.,]\d+)?)/);
+  if (!m){ toast('Escreve, por exemplo: 37.1350, -8.6300'); return; }
+  diaLoc = {lat: parseFloat(m[1].replace(',', '.')), lon: parseFloat(m[2].replace(',', '.'))};
+  await putOne('meta', {key:'obraLoc', value: diaLoc}); diaRenderList();
+};
+async function diaWeather(silent){
+  const e = diaCur; if (!e || e.ass) return;
+  if (!diaLoc){ if (!silent) toast('Define primeiro o local da obra (em cima, “Local da obra”).', 4500); return; }
+  const has = e.met.ceu || e.met.tmax || e.met.tmin;
+  if (has && !silent && !confirm('Substituir a meteorologia deste dia pelos dados da internet?')) return;
+  if (has && silent) return;
+  const old = Date.now() - new Date(e.data).getTime() > 80 * 864e5;
+  const base = old ? 'https://archive-api.open-meteo.com/v1/archive' : 'https://api.open-meteo.com/v1/forecast';
+  const url = `${base}?latitude=${diaLoc.lat}&longitude=${diaLoc.lon}&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,wind_speed_10m_max&timezone=Europe%2FLisbon&start_date=${e.data}&end_date=${e.data}`;
+  try {
+    $('#mFetch').disabled = true; if (!silent) toast('A obter a meteorologia…', 15000);
+    const r = await fetch(url); if (!r.ok) throw new Error('resposta ' + r.status);
+    const j = await r.json(), d = j.daily || {};
+    const v = k => d[k] && d[k][0] != null ? d[k][0] : null;
+    if (v('weather_code') == null && v('temperature_2m_max') == null) throw new Error('sem dados para este dia');
+    e.met.ceu = WMO[v('weather_code')] || ''; e.met.tmax = v('temperature_2m_max') != null ? String(Math.round(v('temperature_2m_max'))) : '';
+    e.met.tmin = v('temperature_2m_min') != null ? String(Math.round(v('temperature_2m_min'))) : '';
+    e.met.chuva = v('precipitation_sum') != null ? String(Math.round(v('precipitation_sum') * 10) / 10).replace('.', ',') : '';
+    e.met.vento = v('wind_speed_10m_max') != null ? String(Math.round(v('wind_speed_10m_max'))) : '';
+    e.met.fonte = 'Dados de Open-Meteo para o local da obra, obtidos a ' + fmtDT(Date.now()) + '.';
+    await diaSave(e); diaRender(); diaRenderList(); toast('Meteorologia preenchida. Podes corrigir à mão.');
+  } catch(err){ if (!silent) toast('Não foi possível obter a meteorologia (' + err.message + '). Preenche à mão.', 5000); }
+  finally { $('#mFetch').disabled = !!(diaCur && diaCur.ass); }
+}
+$('#mFetch').onclick = () => diaWeather(false);
+
+/* ---- assinatura da fiscalização ---- */
+let sigDrawn = false;
+function sigSetup(){
+  const cv = $('#sigPad'), ctx = cv.getContext('2d');
+  const fit = () => { const r = cv.getBoundingClientRect(), dpr = window.devicePixelRatio || 1; cv.width = Math.round(r.width * dpr); cv.height = Math.round(r.height * dpr); ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.lineWidth = 2.2; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.strokeStyle = '#111'; ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, r.width, r.height); sigDrawn = false; };
+  let last = null;
+  cv.addEventListener('pointerdown', e => { cv.setPointerCapture(e.pointerId); const r = cv.getBoundingClientRect(); last = [e.clientX - r.left, e.clientY - r.top]; });
+  cv.addEventListener('pointermove', e => { if (!last) return; const r = cv.getBoundingClientRect(), p = [e.clientX - r.left, e.clientY - r.top]; ctx.beginPath(); ctx.moveTo(...last); ctx.lineTo(...p); ctx.stroke(); last = p; sigDrawn = true; });
+  const up = () => { last = null; }; cv.addEventListener('pointerup', up); cv.addEventListener('pointercancel', up);
+  $('#sigClear').onclick = fit;
+  return fit;
+}
+const sigFit = sigSetup();
+$('#dSign').onclick = async () => {
+  const last = await getOne('meta', 'fiscalNome');
+  $('#sigNome').value = last ? last.value : '';
+  closeAll(); $('#sigDlg').showModal(); requestAnimationFrame(sigFit);
+};
+$('#sigOk').onclick = async () => {
+  const nome = $('#sigNome').value.trim();
+  if (!nome){ toast('Escreve o nome de quem assina pela fiscalização.'); return; }
+  if (!sigDrawn){ toast('Assina no quadro antes de confirmar.'); return; }
+  const e = diaCur; e.ass = {nome, png: $('#sigPad').toDataURL('image/png'), t: Date.now()};
+  await putOne('meta', {key:'fiscalNome', value: nome});
+  await diaSave(e); $('#sigDlg').close(); diaRender(); diaRenderList(); toast('Dia assinado. Já podes gerar o PDF.');
+};
+$('#dUnsign').onclick = async () => {
+  const e = diaCur; if (!e || !e.ass || !confirm(`Retirar a assinatura de ${e.ass.nome}? O dia volta a poder ser alterado e terá de ser assinado de novo.`)) return;
+  e.ass = null; await diaSave(e); diaRender(); diaRenderList();
+};
+
+/* ---- PDF do dia ---- */
+$('#dPdf').onclick = async () => {
+  const e = diaCur; if (!e) return;
+  if (!e.ass && !confirm('Este dia ainda não está assinado. Gerar o PDF mesmo assim?')) return;
+  try {
+    const {PDFDocument, StandardFonts, rgb} = PDFLib;
+    const out = await PDFDocument.create();
+    const font = await out.embedFont(StandardFonts.Helvetica), bold = await out.embedFont(StandardFonts.HelveticaBold);
+    const safe = f => { const c = {}; return s => [...String(s == null ? '' : s)].map(ch => { if (ch === '\n') return ch; if (!(ch in c)){ try { f.encodeText(ch); c[ch] = ch; } catch(_){ c[ch] = '?'; } } return c[ch]; }).join(''); };
+    const S = safe(font), SB = safe(bold);
+    const INK = rgb(.07,.09,.11), MUT = rgb(.35,.39,.45), LINE = rgb(.85,.87,.9), BG = rgb(.95,.96,.97);
+    const A4 = [595.28, 841.89], M = 44, W = A4[0] - 2*M; let pg, y;
+    const np = () => { pg = out.addPage(A4); y = A4[1] - M; };
+    const need = h => { if (y - h < M) np(); };
+    const wrap = (f, t, s, w) => { const out = []; for (const para of String(t).split('\n')){ let line = ''; for (const wd of para.split(/\s+/).filter(Boolean)){ const tt = line ? line + ' ' + wd : wd; if (f.widthOfTextAtSize(tt, s) <= w) line = tt; else { if (line) out.push(line); line = wd; } } out.push(line); } return out; };
+    const text = (t, s, f, c, x, w) => { for (const l of wrap(f, t, s, w || W)){ need(s * 1.45); pg.drawText(l, {x: x || M, y: y - s, size: s, font: f, color: c || INK}); y -= s * 1.45; } };
+    const sect = t => { y -= 8; need(28); pg.drawRectangle({x: M, y: y - 18, width: W, height: 18, color: BG}); pg.drawText(SB(t), {x: M + 6, y: y - 13, size: 10.5, font: bold, color: INK}); y -= 24; };
+    np();
+    pg.drawText(SB('Diário de obra'), {x: M, y: y - 20, size: 20, font: bold, color: INK}); y -= 28;
+    text(S(ptDate(e.data).replace(/^./, c => c.toUpperCase())), 13, bold);
+    if (obra) text(S(obra), 11, font, MUT);
+    sect('Meteorologia');
+    const met = e.met;
+    text(S([met.ceu || '—', met.tmax !== '' ? `máx. ${met.tmax} °C` : '', met.tmin !== '' ? `mín. ${met.tmin} °C` : '', met.chuva !== '' ? `precipitação ${met.chuva} mm` : '', met.vento !== '' ? `vento até ${met.vento} km/h` : ''].filter(Boolean).join(', ') + '.'), 10.5, font);
+    text(S(met.afetou ? 'As condições meteorológicas afetaram os trabalhos.' : 'As condições meteorológicas não afetaram os trabalhos.'), 10.5, font);
+    if (met.nota) text(S(met.nota), 10.5, font);
+    if (met.fonte) text(S(met.fonte), 8.5, font, MUT);
+    const table = (rows, cols) => {
+      if (!rows.length){ text(S('Sem registos.'), 10.5, font, MUT); return; }
+      need(18); let x = M; cols.forEach(c => { pg.drawText(SB(c.h), {x: x + 4, y: y - 11, size: 9.5, font: bold, color: MUT}); x += c.w; }); y -= 16;
+      rows.forEach(r => { need(16); let x = M; pg.drawLine({start:{x: M, y}, end:{x: M + W, y}, thickness: .4, color: LINE}); cols.forEach(c => { const v = S(c.f(r)); let t = v; while (t && font.widthOfTextAtSize(t, 10) > c.w - 8) t = t.slice(0, -1); pg.drawText(t, {x: x + 4, y: y - 12, size: 10, font, color: INK}); x += c.w; }); y -= 16; });
+    };
+    sect('Mão-de-obra');
+    table(e.mo.filter(r => r.ent || r.n), [{h:'Entidade', w: W*0.5, f: r => r.ent}, {h:'Função', w: W*0.35, f: r => r.fun || ''}, {h:'Nº', w: W*0.15, f: r => r.n || '0'}]);
+    const tot = e.mo.reduce((a, r) => a + (Number(r.n) || 0), 0); if (tot) text(SB(`Total: ${tot} trabalhadores`), 10.5, bold);
+    sect('Equipamentos');
+    table(e.eq.filter(r => r.nome), [{h:'Equipamento', w: W*0.5, f: r => r.nome}, {h:'Qtd.', w: W*0.12, f: r => r.n || '1'}, {h:'Observação', w: W*0.38, f: r => r.obs || ''}]);
+    sect('Trabalhos executados'); text(S(e.trab || 'Sem registo.'), 10.5, font, e.trab ? INK : MUT);
+    sect('Ocorrências'); text(S(e.ocor || 'Sem ocorrências.'), 10.5, font, e.ocor ? INK : MUT);
+    if ((e.fotos || []).length){
+      sect('Fotos');
+      const cols = 3, gap = 10, fw = (W - gap*(cols-1)) / cols, fh = fw * 0.75;
+      for (let i = 0; i < e.fotos.length; i++){
+        if (i % cols === 0){ need(fh + 24); }
+        const x = M + (i % cols) * (fw + gap), top = y;
+        try { const img = await out.embedJpg(e.fotos[i].src); const s = Math.min(fw / img.width, fh / img.height); pg.drawRectangle({x, y: top - fh, width: fw, height: fh, color: BG}); pg.drawImage(img, {x: x + (fw - img.width*s)/2, y: top - fh + (fh - img.height*s)/2, width: img.width*s, height: img.height*s}); } catch(_){}
+        let lg = S(e.fotos[i].leg || ('Foto ' + (i+1))); while (lg && font.widthOfTextAtSize(lg, 8.5) > fw) lg = lg.slice(0, -1);
+        pg.drawText(lg, {x, y: top - fh - 11, size: 8.5, font, color: MUT});
+        if (i % cols === cols - 1 || i === e.fotos.length - 1) y = top - fh - 22;
+      }
+    }
+    sect('Fiscalização');
+    if (e.ass){
+      need(110);
+      try { const sg = await out.embedPng(e.ass.png); const s = Math.min(220 / sg.width, 80 / sg.height); pg.drawImage(sg, {x: M, y: y - sg.height*s, width: sg.width*s, height: sg.height*s}); y -= sg.height*s + 4; } catch(_){}
+      pg.drawLine({start:{x: M, y}, end:{x: M + 240, y}, thickness: .6, color: INK}); y -= 4;
+      text(S(`${e.ass.nome}, assinado a ${fmtDT(e.ass.t)}`), 10, font);
+    } else text(S('Por assinar.'), 10.5, font, MUT);
+    out.setTitle('Diário de obra ' + e.data); out.setCreator('DDN-INC');
+    const bytes = await out.save();
+    await deliver(new Blob([bytes], {type: 'application/pdf'}), `Diário de obra ${e.data}${e.ass ? '' : ' (por assinar)'}.pdf`);
+  } catch(err){ console.error(err); toast('Não foi possível criar o PDF (' + (err && err.message || 'erro') + ').', 6000); }
+};
+
 /* ================= pacote: levar tudo para outro aparelho ================= */
 const PKG_MAGIC = 'DDNOBRA1';
 let pkPending = null;
@@ -2696,6 +3411,7 @@ function openPack(){
   if (present.has(NO_ESP)) es.add(new Option(NO_ESP, NO_ESP));
   es.value = espView !== 'all' && present.has(espView) ? espView : 'all';
   $('#pkMarks').checked = true;
+  getAll('meta').then(all => { const n = all.filter(x => x.key.startsWith(DIA_PREFIX)).length; $('#pkDia').closest('li').hidden = !n; $('#pkDiaM').textContent = `${n} ${n===1?'dia registado':'dias registados'} neste aparelho.`; });
   packSummary();
   $('#phasesDlg').close(); $('#pkDlg').showModal();
 }
@@ -2728,8 +3444,10 @@ $('#pkGo').onclick = async () => {
       const len = f.data.byteLength;
       docs.push({...d, off, len}); parts.push(f.data); off += len;
     }
+    let diario = [], loc = null;
+    if ($('#pkDia').checked){ const all = await getAll('meta'); diario = all.filter(x => x.key.startsWith(DIA_PREFIX)).map(x => x.value); const l = all.find(x => x.key === 'obraLoc'); loc = l ? l.value : null; }
     const head = {v: 1, criado: Date.now(), obra, esps: customEsps,
-      phases: phases.filter(p => pids.includes(p.id)), docs, marks: ms};
+      phases: phases.filter(p => pids.includes(p.id)), docs, marks: ms, diario, obraLoc: loc};
     const json = new TextEncoder().encode(JSON.stringify(head));
     const lenBuf = new ArrayBuffer(4); new DataView(lenBuf).setUint32(0, json.byteLength, true);
     const blob = new Blob([new TextEncoder().encode(PKG_MAGIC), lenBuf, json, ...parts], {type: 'application/octet-stream'});
@@ -2751,7 +3469,8 @@ $('#pkPicker').addEventListener('change', async e => {
     const head = JSON.parse(new TextDecoder().decode(new Uint8Array(buf, 12, jl)));
     pkPending = {buf, base: 12 + jl, head};
     const h = head;
-    $('#ipSum').textContent = `Pacote${h.obra ? ' da obra ' + h.obra : ''}, criado a ${fmtDT(h.criado)}: ${h.phases.length} ${h.phases.length===1?'fase':'fases'}, ${h.docs.length} ${h.docs.length===1?'planta':'plantas'} e ${h.marks.length} ${h.marks.length===1?'marca':'marcas'}.`;
+    const nz = h.docs.reduce((a, d) => a + zonasOf(d).length, 0), ndi = (h.diario || []).length;
+    $('#ipSum').textContent = `Pacote${h.obra ? ' da obra ' + h.obra : ''}, criado a ${fmtDT(h.criado)}: ${h.phases.length} ${h.phases.length===1?'fase':'fases'}, ${h.docs.length} ${h.docs.length===1?'planta':'plantas'}, ${h.marks.length} ${h.marks.length===1?'marca':'marcas'}` + (nz ? `, ${nz} ${nz===1?'zona':'zonas'} de avanço` : '') + (ndi ? ` e ${ndi} ${ndi===1?'dia':'dias'} do diário` : '') + '.';
     $('#ipReplace').hidden = !docMetas.length;
     $('#toast').classList.remove('on');
     closeAll(); $('#ipDlg').showModal();
@@ -2780,7 +3499,10 @@ async function importPack(replaceAll){
       const data = P.buf.slice(P.base + d.off, P.base + d.off + d.len);
       const exd = docMetas.find(x => x.id === id), etm = etapasOf(exd).slice();
       etapasOf(d).forEach(e => { const x = etm.find(q => q.id === e.id); if (!x) etm.push(e); else subsOf(e).forEach(s => { if (!subsOf(x).includes(s)) x.subs = [...subsOf(x), s]; }); });
-      const meta = {id, phaseId: pid, name: d.name, esp: d.esp || '', updatedAt: d.updatedAt, size: d.len, etapas: etm};
+      const zm = new Map(zonasOf(exd).map(z => [z.id, z])); zonasOf(d).forEach(z => zm.set(z.id, z));
+      const lk = h => h.t + '|' + h.z + '|' + (h.e || '') + '|' + (h.s || (h.add ? 'add' : h.del ? 'del' : ''));
+      const lm = new Map(); [...((exd && exd.avLog) || []), ...(d.avLog || [])].forEach(h => lm.set(lk(h), h));
+      const meta = {id, phaseId: pid, name: d.name, esp: d.esp || '', updatedAt: d.updatedAt, size: d.len, etapas: etm, zonas: [...zm.values()], avLog: [...lm.values()].sort((a, b) => a.t - b.t)};
       await run(['docs','files'], 'readwrite', t => { t.objectStore('files').put({id, data}); t.objectStore('docs').put(meta); });
       const ex = docMetas.find(x => x.id === id); if (ex) Object.assign(ex, meta); else docMetas.push(meta);
       dmap[d.id] = id; nd++;
@@ -2799,7 +3521,14 @@ async function importPack(replaceAll){
       await putOne('meta', {key:'esps', value: customEsps});
     }
     if (!obra && P.head.obra){ obra = P.head.obra; await putOne('meta', {key:'obra', value: obra}); }
-    toast(`Pacote importado: ${nd} ${nd===1?'planta':'plantas'} e ${nm} ${nm===1?'marca':'marcas'}.`, 5000);
+    let ndia = 0;
+    for (const e of (P.head.diario || [])){
+      const ex = await getOne('meta', DIA_PREFIX + e.data), cur = ex && ex.value;
+      const take = !cur || (e.ass && !cur.ass) || (!!e.ass === !!cur.ass && (e.updatedAt || 0) > (cur.updatedAt || 0));
+      if (take){ await putOne('meta', {key: DIA_PREFIX + e.data, value: e}); ndia++; }
+    }
+    if (P.head.obraLoc && !(await getOne('meta', 'obraLoc'))) await putOne('meta', {key:'obraLoc', value: P.head.obraLoc});
+    toast(`Pacote importado: ${nd} ${nd===1?'planta':'plantas'}, ${nm} ${nm===1?'marca':'marcas'}` + (ndia ? ` e ${ndia} ${ndia===1?'dia':'dias'} do diário` : '') + '.', 5000);
   } catch(e){
     console.error(e);
     toast('A importação parou a meio (' + (e && e.message || 'erro') + '). O dispositivo pode estar sem espaço. O que já entrou ficou guardado.', 8000);

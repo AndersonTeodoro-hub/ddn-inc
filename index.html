@@ -223,7 +223,37 @@ label.f:first-child{margin-top:0}
 dialog.full{width:100vw;height:100vh;height:100dvh;max-width:none;max-height:none;margin:0;padding:0;border:0;border-radius:0;background:#0b0d10;color:#fff;box-shadow:none;overflow:hidden}
 dialog.full[open]{display:flex;align-items:center;justify-content:center}
 dialog.full::backdrop{background:#0b0d10}
-dialog.full img{max-width:100%;max-height:100%;object-fit:contain;touch-action:pan-y;user-select:none}
+dialog.full img{max-width:100%;max-height:100%;object-fit:contain;touch-action:none;user-select:none;-webkit-user-drag:none}
+dialog.full.zoomed img{cursor:grab}
+.fhint{position:absolute;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 14px);transform:translateX(-50%);background:rgba(0,0,0,.6);color:#fff;font-size:13px;padding:5px 12px;border-radius:6px;pointer-events:none;z-index:2;white-space:nowrap}
+#editBtn[aria-pressed="true"]{background:#12161c;border-color:#12161c;color:#fff}
+.hintbar.edm{background:#12161c}
+.hintbar.edm button{color:#12161c}
+#vpanel{position:fixed;right:12px;top:150px;bottom:12px;width:min(400px,calc(100vw - 24px));background:var(--panel);border:1px solid var(--line);border-radius:12px;box-shadow:0 12px 40px rgba(0,0,0,.3);display:flex;flex-direction:column;overflow:hidden;z-index:20}
+@media (min-width:701px){body.vpo #viewer{margin-right:424px}}
+@media (max-width:700px){#vpanel{left:0;right:0;top:auto;bottom:0;width:auto;max-height:64%;border-radius:12px 12px 0 0;padding-bottom:env(safe-area-inset-bottom,0px)}}
+.vph{display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid var(--line)}
+.vph b{display:block}.vph small{display:block;color:var(--muted);font-size:12.5px}.vph > div{flex:1;min-width:0}
+.vpb{overflow:auto;flex:1}
+.zbox{position:relative;overflow:hidden;background:#000;touch-action:pan-y}
+.zbox.zoomed{touch-action:none}
+.pimg{display:block;width:100%;height:auto;cursor:zoom-in;user-select:none;-webkit-user-drag:none}
+.zbox.zoomed .pimg{cursor:grab}
+.zfs{position:absolute;right:8px;top:8px;z-index:2;background:rgba(255,255,255,.95);color:#12161c;border:0;border-radius:6px;font:600 13px/1 system-ui,Arial,sans-serif;padding:8px 10px;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.3)}
+.zhint{position:absolute;left:8px;bottom:8px;z-index:2;background:rgba(0,0,0,.6);color:#fff;font-size:12px;padding:3px 8px;border-radius:4px;pointer-events:none}
+.pcv{display:block;width:100%;height:280px;background:#000}
+.mbar{display:flex;align-items:center;gap:8px;padding:8px 14px;font-size:13px;color:var(--muted)}.mbar span{flex:1}
+.vstrip{display:flex;gap:6px;overflow-x:auto;padding:10px 14px 4px}
+.vth{flex:0 0 auto;width:84px;padding:0;border:1px solid var(--line-strong);border-radius:6px;overflow:hidden;background:var(--bg);cursor:pointer;font:inherit;color:inherit;display:flex;flex-direction:column}
+.vth.on{outline:3px solid var(--accent);outline-offset:-1px}
+.vth img{width:100%;aspect-ratio:1;object-fit:cover;display:block}.vth span{font-size:11.5px;font-weight:600;padding:2px;text-align:center}
+.vnone{margin:0;padding:24px 14px;text-align:center;color:var(--muted)}
+#vpTx{padding:12px 14px;white-space:pre-wrap;margin:0}#vpTx.e{color:var(--muted);font-style:italic}
+#vpDt{padding:0 14px 12px;font-size:13px;color:var(--muted);margin:0}
+.vpf{display:flex;gap:8px;padding:10px 14px;border-top:1px solid var(--line);align-items:center}
+.vpf .btn{flex:1}
+#vpPos{font-size:12.5px;color:var(--muted);white-space:nowrap}
+.mk.on{outline:3px solid #ffb400;outline-offset:3px}
 dialog.full canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
 .fbar{position:absolute;top:0;left:0;right:0;display:flex;align-items:center;gap:8px;padding:calc(env(safe-area-inset-top,0px) + 10px) 12px 18px;background:linear-gradient(rgba(0,0,0,.7),transparent);z-index:2}
 .fbar span{flex:1;font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -268,6 +298,7 @@ dialog.full canvas{position:absolute;inset:0;width:100%;height:100%;display:bloc
   <button class="btn" id="markBtn" aria-pressed="false" title="Marcar sítio em produção (círculo amarelo)">📍 Marcar</button>
   <button class="btn" id="okBtn" aria-pressed="false" title="Marcar sítio vistoriado e OK (círculo verde)">✓ OK</button>
   <button class="btn" id="adjBtn" aria-pressed="false" title="Mover ou mudar o tamanho de uma marca">⤧ Ajustar</button>
+  <button class="btn" id="editBtn" aria-pressed="false" title="Tocar numa marca abre o cartão de edição">✎ Editar</button>
   <button class="btn" id="exHere" title="Exportar a planta que está no ecrã">Exportar planta</button>
   <span class="spacer"></span>
   <button class="btn icon hide-md" id="zoomOut" aria-label="Afastar">−</button>
@@ -376,7 +407,7 @@ dialog.full canvas{position:absolute;inset:0;width:100%;height:100%;display:bloc
 
 <dialog class="full" id="full">
   <div class="fbar"><span id="fLbl"></span><button class="btn sm" id="fSwap" hidden>Trocar</button><button class="btn sm" id="fDel" hidden>Apagar</button><button class="btn sm" id="fClose">Fechar</button></div>
-  <img id="fullImg" alt="">
+  <img id="fullImg" alt=""><span class="fhint" id="fHint"></span>
   <button class="fnav prev" id="fPrev" aria-label="Anterior">‹</button><button class="fnav next" id="fNext" aria-label="Seguinte">›</button>
 </dialog>
 <!-- Partilhar pacote -->
@@ -425,6 +456,11 @@ dialog.full canvas{position:absolute;inset:0;width:100%;height:100%;display:bloc
   <div class="dlg-foot"><button class="btn primary" id="dlvSave">Guardar no aparelho</button><button class="btn" id="dlvShare" hidden>Partilhar</button></div>
 </div></dialog>
 
+<aside id="vpanel" hidden aria-live="polite">
+  <div class="vph"><span class="badge" id="vpBadge"></span><div><b id="vpT"></b><small id="vpW"></small></div><button class="btn sm" id="vpClose" aria-label="Fechar">✕</button></div>
+  <div class="vpb"><div id="vpMedia"></div><p id="vpTx"></p><p id="vpDt"></p></div>
+  <div class="vpf"><button class="btn" id="vpPrev" aria-label="Marca anterior">←</button><button class="btn primary" id="vpEdit">✎ Editar</button><button class="btn" id="vpNext" aria-label="Marca seguinte">→</button><span id="vpPos"></span></div>
+</aside>
 <div id="adjPanel" hidden role="group" aria-label="Ajustar marca">
   <div><b id="adjLbl">Marca</b><div id="adjInfo"></div></div>
   <div class="grp"><button class="btn" data-mv="-1,0" aria-label="Mover para a esquerda">←</button><button class="btn" data-mv="0,-1" aria-label="Mover para cima">↑</button><button class="btn" data-mv="0,1" aria-label="Mover para baixo">↓</button><button class="btn" data-mv="1,0" aria-label="Mover para a direita">→</button></div>
@@ -1373,18 +1409,22 @@ function setMarkMode(mode){
   $('#markBtn').setAttribute('aria-pressed', String(markMode === 'nc'));
   $('#okBtn').setAttribute('aria-pressed', String(markMode === 'ok'));
   $('#adjBtn').setAttribute('aria-pressed', String(markMode === 'adj'));
+  $('#editBtn').setAttribute('aria-pressed', String(markMode === 'edit'));
+  $('#hintbar').classList.toggle('edm', markMode === 'edit');
   if (markMode !== 'adj' && typeof adjClear === 'function') adjClear();
   $('#hintbar').hidden = !markMode;
   $('#hintbar').classList.toggle('adjm', markMode === 'adj');
   pagesEl.classList.toggle('adjmode', markMode === 'adj');
   $('#hintbar').classList.toggle('ok', markMode === 'ok');
   $('#hintbar').classList.toggle('prod', markMode === 'nc');
-  $('#hintTxt').textContent = markMode === 'adj'
+  $('#hintTxt').textContent = markMode === 'edit'
+    ? 'Toca numa marca para abrir o cartão de edição (fotos, nota, etapa e estado).'
+    : markMode === 'adj'
     ? 'Toca numa marca para a ajustar. Arrasta-a para mover e usa a pega azul ou os botões para o tamanho.'
     : markMode === 'ok'
     ? 'Toca nos sítios vistoriados que estão OK. Cada toque deixa um círculo verde.'
     : 'Toca no sítio da planta para marcar em produção (amarelo). Na vistoria passas a OK ou Não conforme.';
-  pagesEl.classList.toggle('marking', !!markMode);
+  pagesEl.classList.toggle('marking', !!markMode && markMode !== 'edit');
 }
 $('#markBtn').onclick = () => {
   if (!allPages.length){ toast('Carrega primeiro as plantas.'); return; }
@@ -1395,6 +1435,114 @@ $('#okBtn').onclick = () => {
   setMarkMode(markMode === 'ok' ? false : 'ok');
 };
 $('#markOff').onclick = () => setMarkMode(false);
+/* ---- painel lateral de consulta da marca (toque na marca) ---- */
+let vpMark = null, vpPano = null, vpZ = null;
+function vpList(m){
+  // marcas da mesma planta visíveis no filtro de etapa atual, por número
+  const d = docMetas.find(x => x.id === m.docId), et = etapasOf(d);
+  const c0 = curEtapa[m.docId] || 'all', cur = c0 === 'all' && et.length === 1 ? et[0].id : c0, cs = cur !== 'all' ? (curSub[m.docId] || '') : '';
+  return marks.filter(x => x.docId === m.docId && (cur === 'all' || x.etapaId === cur) && (!cs || x.sub === cs)).sort((a, b) => a.n - b.n);
+}
+function vpHighlight(){
+  document.querySelectorAll('.mk.on').forEach(b => b.classList.remove('on'));
+  if (vpMark){ const b = document.querySelector(`.mk[data-id="${vpMark.id}"]`); if (b) b.classList.add('on'); }
+}
+function vpRelayout(){
+  if (!allPages.length) return;
+  const a = anchorAt(viewer.clientWidth/2, viewer.clientHeight/2);
+  measureFit(); layout(); restore(a); allPages.forEach(q => q.rz = null); scheduleRedraw();
+}
+function vpOpen(m){
+  vpMark = m;
+  const wasOpen = !$('#vpanel').hidden;
+  $('#vpanel').hidden = false;
+  if (!wasOpen && matchMedia('(min-width:701px)').matches){ document.body.classList.add('vpo'); vpRelayout(); }
+  vpFill(); vpHighlight();
+}
+function vpClose(){
+  vpMark = null; if (vpPano){ vpPano.destroy(); vpPano = null; }
+  $('#vpanel').hidden = true;
+  if (document.body.classList.contains('vpo')){ document.body.classList.remove('vpo'); vpRelayout(); }
+  vpHighlight();
+}
+function vpFill(){
+  const m = vpMark; if (!m) return;
+  if (vpPano){ vpPano.destroy(); vpPano = null; }
+  const dm = docMetas.find(d => d.id === m.docId);
+  $('#vpBadge').textContent = m.n; $('#vpBadge').style.background = estColor(m); $('#vpBadge').style.color = estText(m);
+  $('#vpT').textContent = 'Marca ' + m.n + ', ' + estLabel(m);
+  $('#vpW').textContent = (dm ? nice(dm.name) : '') + ', página ' + m.page + (etapaLabel(m) ? '. ' + etapaLabel(m) : '');
+  const box = $('#vpMedia'); box.innerHTML = '';
+  const k = tipoOf(m), ph = photosOf(m);
+  if (k === 'foto' && ph.length){
+    let cur = 0;
+    const zb = document.createElement('div'); zb.className = 'zbox';
+    const im = document.createElement('img'); im.className = 'pimg'; im.src = ph[0]; im.alt = 'Foto 1 da marca ' + m.n;
+    const fs = document.createElement('button'); fs.className = 'zfs'; fs.textContent = '⤢ Ecrã inteiro';
+    fs.onclick = () => openSeq(fotoItems(m), cur, null, 'foto');
+    const hint = document.createElement('span'); hint.className = 'zhint'; hint.textContent = isTouch() ? 'Pinça para ampliar' : 'Roda o rato para ampliar';
+    zb.append(im, fs, hint); box.appendChild(zb); vpZ = Zoomable(zb, im);
+    if (ph.length > 1){
+      const st = document.createElement('div'); st.className = 'vstrip';
+      ph.forEach((src, i) => {
+        const b = document.createElement('button'); b.className = 'vth' + (i === 0 ? ' on' : '');
+        b.innerHTML = '<img alt=""><span></span>'; b.querySelector('img').src = src; b.querySelector('span').textContent = 'Foto ' + (i+1);
+        b.onclick = () => { cur = i; vpZ.reset(); im.src = src; im.alt = 'Foto ' + (i+1) + ' da marca ' + m.n; st.querySelectorAll('.vth').forEach((x, j) => x.classList.toggle('on', j === i)); };
+        st.appendChild(b);
+      });
+      box.appendChild(st);
+    }
+  } else if (k === '360' && m.pano){
+    const cv = document.createElement('canvas'); cv.className = 'pcv'; box.appendChild(cv);
+    const bar = document.createElement('div'); bar.className = 'mbar'; bar.innerHTML = '<span>Foto 360°. Arrasta para olhar à volta.</span>';
+    const b = document.createElement('button'); b.className = 'btn sm'; b.textContent = '⤢ Ecrã inteiro'; b.onclick = () => openPano(m.pano, 'Marca ' + m.n + ', 360°');
+    bar.appendChild(b); box.appendChild(bar);
+    try { vpPano = Pano(cv); vpPano.load(m.pano).catch(() => {}); } catch(e){ cv.remove(); bar.firstChild.textContent = e.message; }
+  } else if (k === 'grupo' && dirItems(m).length){
+    const its = dirItems(m);
+    const st = document.createElement('div'); st.className = 'vstrip';
+    its.forEach((it, i) => {
+      const b = document.createElement('button'); b.className = 'vth';
+      b.innerHTML = '<img alt=""><span></span>'; b.querySelector('img').src = it.src; b.querySelector('span').textContent = it.label;
+      b.onclick = () => openSeq(its, i, null, 'dir'); st.appendChild(b);
+    });
+    const bar = document.createElement('div'); bar.className = 'mbar'; bar.innerHTML = '<span></span>';
+    bar.firstChild.textContent = its.map(x => x.label).join(', ') + '. Toca para ver em sequência.';
+    box.append(st, bar);
+  } else {
+    box.innerHTML = '<p class="vnone">Sem fotos nesta marca.</p>';
+  }
+  const tx = $('#vpTx'); tx.textContent = m.nota || 'Sem nota.'; tx.classList.toggle('e', !m.nota);
+  $('#vpDt').textContent = datesText(m);
+  const L = vpList(m), i = L.indexOf(m);
+  $('#vpPos').textContent = i >= 0 ? `${i+1} de ${L.length}` : '';
+}
+function vpStep(d){
+  if (!vpMark) return;
+  const L = vpList(vpMark); if (!L.length) return;
+  let i = L.indexOf(vpMark); i = (i + d + L.length) % L.length;
+  const m = L[i];
+  const p = pageMap.get(m.docId + '|' + m.page);
+  if (p){
+    viewer.scrollTop = p.el.offsetTop + m.y*p.el.offsetHeight - viewer.clientHeight/2;
+    viewer.scrollLeft = p.el.offsetLeft + m.x*p.el.offsetWidth - viewer.clientWidth/2;
+  }
+  vpOpen(m);
+}
+$('#vpClose').onclick = vpClose;
+$('#vpPrev').onclick = () => vpStep(-1);
+$('#vpNext').onclick = () => vpStep(1);
+$('#vpEdit').onclick = () => { if (vpMark) openMark(vpMark.id); };
+$('#editBtn').onclick = () => {
+  if (!allPages.length){ toast('Carrega primeiro as plantas.'); return; }
+  setMarkMode(markMode === 'edit' ? false : 'edit');
+};
+window.addEventListener('keydown', e => {
+  if (!vpMark || adj || document.querySelector('dialog[open]') || /INPUT|TEXTAREA|SELECT/.test(e.target.tagName)) return;
+  if (e.key === 'ArrowRight') vpStep(1); else if (e.key === 'ArrowLeft') vpStep(-1); else if (e.key === 'Escape') vpClose();
+});
+
+
 /* ---- ajustar marca: mover e mudar o tamanho ---- */
 let adj = null, adjSaveT = 0;
 const DEF_PX = 24;
@@ -1541,7 +1689,8 @@ function drawMarks(p){
     b.style.setProperty('--tagc', estColor(m)); b.style.setProperty('--tagt', estText(m));
     const s = document.createElement('span'); s.textContent = m.n; b.appendChild(s);
     b.setAttribute('aria-label', `Marca ${m.n}, ${et ? etapaLabel(m) + ', ' : ''}${estLabel(m)}${m.nota ? ': ' + m.nota : ''}`);
-    b.addEventListener('click', e => { e.stopPropagation(); if (markMode === 'adj'){ if (!adj || adj.m !== m) adjSelect(m, b); } else openMark(m.id); });
+    b.addEventListener('click', e => { e.stopPropagation(); if (markMode === 'adj'){ if (!adj || adj.m !== m) adjSelect(m, b); } else if (markMode === 'edit') openMark(m.id); else vpOpen(m); });
+    if (vpMark && vpMark.id === m.id) b.classList.add('on');
     if (adj && adj.m === m) setTimeout(() => adjSelect(m, b));
     b.addEventListener('dblclick', e => e.stopPropagation());
     p.layer.appendChild(b);
@@ -1551,6 +1700,7 @@ function redrawMarksFor(m){ const p = pageMap.get(m.docId + '|' + m.page); if (p
 async function onPageClick(e, p){
   if (!markMode || e.target.closest('.mk')) return;
   if (markMode === 'adj'){ adjClear(); return; }
+  if (markMode === 'edit') return;
   const r = p.el.getBoundingClientRect();
   const x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height;
   if (x < 0 || x > 1 || y < 0 || y > 1) return;
@@ -1676,7 +1826,7 @@ $('#mdNota').addEventListener('input', () => {
   if (!curMark) return; curMark.nota = $('#mdNota').value;
   clearTimeout(notaT); const m = curMark; notaT = setTimeout(() => { saveMark(m); redrawMarksFor(m); }, 400);
 });
-$('#markDlg').addEventListener('close', () => { if (curMark){ clearTimeout(notaT); saveMark(curMark); redrawMarksFor(curMark); } });
+$('#markDlg').addEventListener('close', () => { if (curMark){ clearTimeout(notaT); saveMark(curMark); redrawMarksFor(curMark); } if (vpMark){ if (marks.includes(vpMark)) vpFill(); else vpClose(); } });
 document.querySelectorAll('#mdEstado button').forEach(b => b.onclick = () => {
   const m = curMark; if (!m || m.estado === b.dataset.v) return;
   m.estado = b.dataset.v; m.resolvedAt = m.estado === 'producao' ? null : Date.now();
@@ -1800,7 +1950,48 @@ document.querySelectorAll('#mdTipo button').forEach(b => b.onclick = () => {
 }));
 
 /* ---- ecrã inteiro: fotos em sequência e 360° ---- */
+/* Zoom de fotos: roda do rato (para cima amplia, para baixo reduz), arrastar quando ampliada,
+   pinça no tablet, duplo clique alterna entre 1x e 2,5x. */
+function Zoomable(box, img){
+  let s = 1, tx = 0, ty = 0; const pts = new Map(); let ld = 0, lp = null;
+  img.style.transformOrigin = '0 0'; img.draggable = false;
+  const apply = () => { img.style.transform = s > 1.001 ? `translate(${tx}px,${ty}px) scale(${s})` : ''; box.classList.toggle('zoomed', s > 1.001); };
+  const clamp = () => {
+    const w = img.offsetWidth, h = img.offsetHeight;
+    tx = Math.min(0, Math.max(w - w*s, tx)); ty = Math.min(0, Math.max(h - h*s, ty));
+    if (s <= 1.001){ s = 1; tx = 0; ty = 0; }
+  };
+  function zoomAt(ns, cx, cy){
+    ns = Math.min(6, Math.max(1, ns));
+    const r = img.getBoundingClientRect(), x0 = r.left - tx, y0 = r.top - ty;
+    const px = cx - x0, py = cy - y0;
+    tx = px - (px - tx) * (ns / s); ty = py - (py - ty) * (ns / s); s = ns;
+    clamp(); apply();
+  }
+  box.addEventListener('wheel', e => {
+    if (img.hidden) return;
+    e.preventDefault(); zoomAt(s * Math.exp(-e.deltaY * 0.0015), e.clientX, e.clientY);
+  }, {passive:false});
+  img.addEventListener('dblclick', e => { e.preventDefault(); e.stopPropagation(); zoomAt(s > 1.05 ? 1 : 2.5, e.clientX, e.clientY); });
+  img.addEventListener('pointerdown', e => { pts.set(e.pointerId, {x:e.clientX, y:e.clientY}); ld = 0; lp = {x:e.clientX, y:e.clientY}; if (s > 1.001 || pts.size > 1) img.setPointerCapture(e.pointerId); });
+  img.addEventListener('pointermove', e => {
+    if (!pts.has(e.pointerId)) return;
+    pts.set(e.pointerId, {x:e.clientX, y:e.clientY});
+    if (pts.size === 2){
+      const [a, b] = [...pts.values()], d = Math.hypot(a.x-b.x, a.y-b.y);
+      if (ld) zoomAt(s * d / ld, (a.x+b.x)/2, (a.y+b.y)/2); ld = d;
+    } else if (pts.size === 1 && s > 1.001 && lp){
+      tx += e.clientX - lp.x; ty += e.clientY - lp.y; clamp(); apply();
+    }
+    lp = {x:e.clientX, y:e.clientY};
+  });
+  const up = e => { pts.delete(e.pointerId); if (pts.size < 2) ld = 0; lp = null; };
+  img.addEventListener('pointerup', up); img.addEventListener('pointercancel', up);
+  return { reset(){ s = 1; tx = 0; ty = 0; apply(); }, zoomed: () => s > 1.001 };
+}
 let seq = null, seqI = 0, pano = null;
+const fzApp = Zoomable($('#full'), $('#fullImg'));
+$('#fHint').textContent = isTouch() ? 'Pinça para ampliar. Toque duplo para voltar.' : 'Roda o rato para ampliar. Duplo clique para voltar.';
 function openSeq(items, i, mark, kind){
   seq = {items, mark: mark || null, kind: kind || 'dir'}; seqI = Math.max(0, i || 0);
   if (!$('#full').open) $('#full').showModal();
@@ -1808,6 +1999,7 @@ function openSeq(items, i, mark, kind){
 }
 function showSeq(){
   const it = seq.items[seqI]; if (!it) return;
+  if (fzApp) fzApp.reset(); $('#fHint').hidden = false;
   const cv = $('#full canvas'); if (cv) cv.remove();
   if (pano){ pano.destroy(); pano = null; }
   const im = $('#fullImg'); im.hidden = false; im.src = it.src; im.alt = it.label;
@@ -1819,7 +2011,7 @@ function seqStep(d){ if (!seq || seq.items.length < 2) return; seqI = (seqI + d 
 async function openPano(src, label){
   seq = null;
   if (!$('#full').open) $('#full').showModal();
-  $('#fullImg').hidden = true; $('#fullImg').removeAttribute('src');
+  $('#fullImg').hidden = true; $('#fullImg').removeAttribute('src'); $('#fHint').hidden = true;
   $('#fPrev').hidden = $('#fNext').hidden = true; $('#fSwap').hidden = $('#fDel').hidden = true;
   $('#fLbl').textContent = (label || 'Foto 360°') + '. Arrasta para olhar à volta.';
   const old = $('#full canvas'); if (old) old.remove();
@@ -1828,6 +2020,7 @@ async function openPano(src, label){
   try { pano = Pano(cv); await pano.load(src); } catch(e){ toast(e.message, 5000); $('#full').close(); }
 }
 $('#full').addEventListener('close', () => {
+  if (fzApp) fzApp.reset();
   $('#fullImg').removeAttribute('src'); const cv = $('#full canvas'); if (cv) cv.remove();
   if (pano){ pano.destroy(); pano = null; } seq = null;
 });
@@ -1836,7 +2029,7 @@ $('#fPrev').onclick = () => seqStep(-1); $('#fNext').onclick = () => seqStep(1);
 $('#full').addEventListener('keydown', e => { if (e.key === 'ArrowRight') seqStep(1); else if (e.key === 'ArrowLeft') seqStep(-1); });
 let swX = null;
 $('#fullImg').addEventListener('pointerdown', e => { swX = e.clientX; });
-$('#fullImg').addEventListener('pointerup', e => { if (swX == null) return; const dx = e.clientX - swX; swX = null; if (Math.abs(dx) > 50) seqStep(dx < 0 ? 1 : -1); });
+$('#fullImg').addEventListener('pointerup', e => { if (swX == null) return; const dx = e.clientX - swX; swX = null; if (!(fzApp && fzApp.zoomed()) && Math.abs(dx) > 50) seqStep(dx < 0 ? 1 : -1); });
 $('#fSwap').onclick = () => { const it = seq && seq.items[seqI]; if (!it) return; if (seq.kind === 'foto') pick({kind:'foto', idx: it.k}, 'cam'); else pick({kind:'dir', k: it.k}, 'cam'); };
 $('#fDel').onclick = () => {
   const m = seq && seq.mark, it = seq && seq.items[seqI]; if (!m || !it || !confirm(`Apagar a foto ${it.label} desta marca?`)) return;

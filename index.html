@@ -570,7 +570,7 @@ dialog.full canvas{position:absolute;inset:0;width:100%;height:100%;display:bloc
   <div class="dlg-body"><ul class="list" id="etManList"></ul></div>
 </div></dialog>
 <dialog id="dlvDlg"><div class="dlg">
-  <div class="dlg-head"><h2>O ficheiro está pronto<span class="sub" id="dlvName"></span></h2><button class="btn sm" data-close>Fechar</button></div>
+  <div class="dlg-head"><h2><span id="dlvTitle">O ficheiro está pronto</span><span class="sub" id="dlvName"></span></h2><button class="btn sm" data-close>Fechar</button></div>
   <div class="dlg-body"><p style="margin:0">Tamanho: <span id="dlvSize"></span>.</p><p class="note" id="dlvMsg"></p></div>
   <div class="dlg-foot"><button class="btn primary" id="dlvSave">Guardar no aparelho</button><button class="btn" id="dlvShare" hidden>Partilhar</button></div>
 </div></dialog>
@@ -578,7 +578,7 @@ dialog.full canvas{position:absolute;inset:0;width:100%;height:100%;display:bloc
 <aside id="vpanel" hidden aria-live="polite">
   <div class="vph"><span class="badge" id="vpBadge"></span><div><b id="vpT"></b><small id="vpW"></small></div><button class="btn sm" id="vpClose" aria-label="Fechar">✕</button></div>
   <div class="vpb"><div id="vpMedia"></div><p id="vpTx"></p><p id="vpDt"></p></div>
-  <div class="vpf"><button class="btn" id="vpPrev" aria-label="Marca anterior">←</button><button class="btn primary" id="vpEdit">✎ Editar</button><button class="btn" id="vpNext" aria-label="Marca seguinte">→</button><span id="vpPos"></span></div>
+  <div class="vpf"><button class="btn" id="vpPrev" aria-label="Marca anterior">←</button><button class="btn primary" id="vpEdit">✎ Editar</button><button class="btn" id="vpFotos" hidden>⬇ Fotos</button><button class="btn" id="vpNext" aria-label="Marca seguinte">→</button><span id="vpPos"></span></div>
 </aside>
 <dialog id="zDlg"><div class="dlg">
   <div class="dlg-head"><h2><span id="zTitle"></span><span class="sub" id="zSub"></span></h2><button class="btn sm" data-close>Fechar</button></div>
@@ -1351,9 +1351,10 @@ async function build(){
     if (!ds.length){ const e = document.createElement('p'); e.className = 'ph-empty'; e.textContent = espView === 'all' ? 'Ainda sem plantas nesta fase. Carrega-as com Atualizar.' : `Sem plantas de ${espView} nesta fase.`; frag.appendChild(e); }
     for (const d of ds){
       const h = document.createElement('div'); h.className = 'dochead';
-      h.innerHTML = '<b></b><span class="esp"></span><span></span><button class="btn sm dh-rev" title="Trocar esta planta por uma revisão nova, mantendo as marcas">⇄ Nova revisão</button><button class="btn sm dh-ex">Exportar</button>';
+      h.innerHTML = '<b></b><span class="esp"></span><span></span><button class="btn sm dh-rev" title="Trocar esta planta por uma revisão nova, mantendo as marcas">⇄ Nova revisão</button><button class="btn sm dh-fotos" title="Descarregar as fotos de todas as marcas desta planta">⬇ Fotos</button><button class="btn sm dh-ex">Exportar</button>';
       h.querySelector('.dh-ex').onclick = () => openExport(d.phase, d.meta.id);
       h.querySelector('.dh-rev').onclick = () => pickRevision(d.meta);
+      h.querySelector('.dh-fotos').onclick = () => fotosDaPlanta(d.meta);
       h.firstChild.textContent = nice(d.meta.name);
       h.children[1].textContent = espOf(d.meta);
       h.children[2].textContent = `${d.pages.length} ${d.pages.length===1?'página':'páginas'}, atualizada a ${fmtDT(d.meta.updatedAt)}`;
@@ -1607,6 +1608,7 @@ function vpFill(){
   const dm = docMetas.find(d => d.id === m.docId);
   $('#vpBadge').textContent = m.n; $('#vpBadge').style.background = estColor(m); $('#vpBadge').style.color = estText(m);
   $('#vpT').textContent = 'Marca ' + m.n + ', ' + estLabel(m);
+  $('#vpFotos').hidden = !mediaDaMarca(m).length;
   $('#vpW').textContent = (dm ? nice(dm.name) : '') + ', página ' + m.page + (etapaLabel(m) ? '. ' + etapaLabel(m) : '');
   const box = $('#vpMedia'); box.innerHTML = '';
   const k = tipoOf(m), ph = photosOf(m);
@@ -2420,6 +2422,80 @@ async function removeDoc(d, ph){
   renderPhaseLists(ph); toast('Planta removida'); build();
 }
 
+/* ================= descarregar fotos das marcas ================= */
+// As fotos tiradas na ferramenta ficam dentro da marca (no browser). Estas funções entregam-nas
+// como ficheiros: uma a uma para a galeria (Partilhar → Guardar imagens) ou num .zip.
+function mediaDaMarca(m){
+  const k = tipoOf(m), out = [];
+  if (k === 'foto') photosOf(m).forEach((src, i) => out.push({src, suf: 'foto' + (i + 1)}));
+  else if (k === '360' && m.pano) out.push({src: m.pano, suf: '360'});
+  else if (m.dirs){
+    if (Array.isArray(m.dirs)) m.dirs.forEach((d, i) => d && d.src && out.push({src: d.src, suf: (d.l || ('dir' + (i + 1)))}));
+    else DIRS.forEach(([d, l]) => { const v = m.dirs[d]; const src = v && (v.src || v); if (typeof src === 'string') out.push({src, suf: l}); });
+  }
+  return out.filter(x => typeof x.src === 'string' && x.src.startsWith('data:'));
+}
+function bytesDeDataUrl(src){
+  const i = src.indexOf(','), meta = src.slice(5, i), b64 = meta.includes(';base64');
+  const s = b64 ? atob(src.slice(i + 1)) : decodeURIComponent(src.slice(i + 1));
+  const u = new Uint8Array(s.length); for (let k = 0; k < s.length; k++) u[k] = s.charCodeAt(k);
+  return {bytes: u, mime: meta.split(';')[0] || 'image/jpeg'};
+}
+const nomeSeguro = s => String(s).replace(/[\\/:*?"<>|]+/g, '-').replace(/\s+/g, ' ').trim();
+function ficheirosDasMarcas(ms){
+  const files = [];
+  ms.slice().sort((a, b) => a.n - b.n).forEach(m => {
+    const dm = docMetas.find(d => d.id === m.docId), pl = dm ? nice(dm.name) : 'planta';
+    mediaDaMarca(m).forEach(x => {
+      const {bytes, mime} = bytesDeDataUrl(x.src), ext = mime.includes('png') ? 'png' : mime.includes('webp') ? 'webp' : 'jpg';
+      files.push(new File([bytes], nomeSeguro(`${pl} M${String(m.n).padStart(2, '0')} ${x.suf}`) + '.' + ext, {type: mime, lastModified: m.createdAt || Date.now()}));
+    });
+  });
+  return files;
+}
+const CRC = (() => { const t = new Uint32Array(256); for (let n = 0; n < 256; n++){ let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; } return t; })();
+function crc32(u){ let c = 0xFFFFFFFF; for (let i = 0; i < u.length; i++) c = CRC[(c ^ u[i]) & 255] ^ (c >>> 8); return (c ^ 0xFFFFFFFF) >>> 0; }
+async function zipSimples(files){
+  // ZIP sem compressão (as fotos JPEG já vêm comprimidas); nomes em UTF-8.
+  const enc = new TextEncoder(), parts = [], central = []; let off = 0;
+  const d = new Date(), dt = ((d.getHours() << 11) | (d.getMinutes() << 5) | (d.getSeconds() >> 1)) & 0xFFFF, dd = (((d.getFullYear() - 1980) << 9) | ((d.getMonth() + 1) << 5) | d.getDate()) & 0xFFFF;
+  for (const f of files){
+    const data = new Uint8Array(await f.arrayBuffer()), name = enc.encode(f.name), crc = crc32(data);
+    const h = new DataView(new ArrayBuffer(30));
+    h.setUint32(0, 0x04034b50, true); h.setUint16(4, 20, true); h.setUint16(6, 0x0800, true); h.setUint16(8, 0, true);
+    h.setUint16(10, dt, true); h.setUint16(12, dd, true); h.setUint32(14, crc, true); h.setUint32(18, data.length, true); h.setUint32(22, data.length, true);
+    h.setUint16(26, name.length, true); h.setUint16(28, 0, true);
+    parts.push(h.buffer, name, data);
+    const c = new DataView(new ArrayBuffer(46));
+    c.setUint32(0, 0x02014b50, true); c.setUint16(4, 20, true); c.setUint16(6, 20, true); c.setUint16(8, 0x0800, true); c.setUint16(10, 0, true);
+    c.setUint16(12, dt, true); c.setUint16(14, dd, true); c.setUint32(16, crc, true); c.setUint32(20, data.length, true); c.setUint32(24, data.length, true);
+    c.setUint16(28, name.length, true); c.setUint32(42, off, true);
+    central.push(c.buffer, name);
+    off += 30 + name.length + data.length;
+  }
+  const cdSize = central.reduce((a, x) => a + (x.byteLength || x.length), 0);
+  const e = new DataView(new ArrayBuffer(22));
+  e.setUint32(0, 0x06054b50, true); e.setUint16(8, files.length, true); e.setUint16(10, files.length, true); e.setUint32(12, cdSize, true); e.setUint32(16, off, true);
+  return new Blob([...parts, ...central, e.buffer], {type: 'application/zip'});
+}
+async function entregarFotos(ms, nomeBase){
+  const files = ficheirosDasMarcas(ms);
+  if (!files.length){ toast('Estas marcas ainda não têm fotos.'); return; }
+  if (files.length === 1){
+    await deliver(files[0], files[0].name, files[0].type, {title: 'A foto está pronta', shareLabel: 'Partilhar / guardar na galeria'});
+    return;
+  }
+  toast('A preparar as fotos…', 60000);
+  const zip = await zipSimples(files);
+  await deliver(zip, nomeSeguro(nomeBase) + '.zip', 'application/zip', {files, title: `As ${files.length} fotos estão prontas`, shareLabel: 'Partilhar / guardar na galeria'});
+  $('#dlvMsg').textContent = '“Guardar no aparelho” descarrega um .zip com todas as fotos. Para as pôr na galeria do telemóvel, usa “Partilhar / guardar na galeria” e escolhe Guardar imagens.';
+}
+function fotosDaPlanta(dm){
+  const ms = marks.filter(m => m.docId === dm.id);
+  entregarFotos(ms, `Fotos ${nice(dm.name)} ${new Date().toISOString().slice(0, 10)}`);
+}
+$('#vpFotos').onclick = () => { const m = vpMark; if (!m) return; const dm = docMetas.find(d => d.id === m.docId); entregarFotos([m], `Fotos marca ${m.n} ${dm ? nice(dm.name) : ''}`); };
+
 /* ================= nova revisão de uma planta ================= */
 // Troca o PDF de uma planta por outro (nome diferente), mantendo marcas, etapas, zonas e avanço.
 // As marcas ficam na mesma posição relativa da página; o utilizador confirma e ajusta depois.
@@ -2834,11 +2910,15 @@ async function exportHtml(ph, ids, etapaNome){
 /* Entrega do ficheiro: a criação pode demorar vários segundos, por isso guardar e partilhar
    ficam em botões próprios, cada um com o seu toque, em vez de arrancarem sozinhos no fim. */
 let dlv = null;
-async function deliver(blob, filename, mime){
+async function deliver(blob, filename, mime, opts){
+  opts = opts || {};
   const file = new File([blob], filename, {type: mime || 'application/pdf'});
+  const files = opts.files && opts.files.length ? opts.files : [file];
   let canShare = false;
-  try { canShare = !!(navigator.canShare && navigator.canShare({files: [file]})); } catch(_){}
-  dlv = {blob, file, filename};
+  try { canShare = !!(navigator.canShare && navigator.canShare({files})); } catch(_){}
+  dlv = {blob, file, files, filename};
+  $('#dlvTitle').textContent = opts.title || 'O ficheiro está pronto';
+  $('#dlvShare').textContent = opts.shareLabel || 'Partilhar';
   $('#dlvName').textContent = filename;
   $('#dlvSize').textContent = mb(blob.size);
   $('#dlvShare').hidden = !canShare;
@@ -2854,7 +2934,7 @@ $('#dlvSave').onclick = () => {
 };
 $('#dlvShare').onclick = async () => {
   if (!dlv) return;
-  try { await navigator.share({files: [dlv.file], title: dlv.filename}); $('#dlvMsg').textContent = 'Enviado para partilhar.'; }
+  try { await navigator.share({files: dlv.files || [dlv.file], title: dlv.filename}); $('#dlvMsg').textContent = 'Enviado.'; }
   catch(e){ if (!e || e.name !== 'AbortError') $('#dlvMsg').textContent = 'A partilha não funcionou neste aparelho (' + (e ? e.name + (e.message ? ': ' + e.message : '') : 'erro') + '). Usa Guardar no aparelho.'; }
 };
 $('#dlvDlg').addEventListener('close', () => { dlv = null; $('#dlvMsg').textContent = ''; });

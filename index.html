@@ -4,6 +4,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
 <title>DDN-INC – Acompanhamento de obra</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#1f7a36">
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="DDN-INC">
 <style>
 :root{
   --bg:#f4f6f9; --panel:#ffffff; --ink:#12161c; --muted:#5a6472; --line:#e1e5eb; --line-strong:#cfd5dd; --field:#ffffff;
@@ -142,7 +149,9 @@ select:focus,input:focus,textarea:focus{outline:2px solid var(--accent);outline-
 .fth span{position:absolute;left:4px;top:4px;background:rgba(0,0,0,.65);color:#fff;font-size:11px;font-weight:700;padding:1px 6px;border-radius:4px}
 .fempty{grid-column:1/-1;margin:0;padding:18px;text-align:center;color:var(--muted);border:1px dashed var(--line-strong);border-radius:8px}
 .etsug{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
-.dochead .dh-ex{margin-left:auto;flex:0 0 auto}
+.dochead .dh-rev{margin-left:auto;flex:0 0 auto}
+.dochead .dh-ex{flex:0 0 auto}
+@media (max-width:560px){.dochead{flex-wrap:wrap;row-gap:6px}.dochead .dh-rev{margin-left:0}}
 .dochead b{color:var(--ink);font-size:14px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .page{position:relative;background:#fff;margin:0 0 10px;box-shadow:0 0 0 1px var(--line-strong)}
 .page canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
@@ -285,6 +294,10 @@ body:not(.mode-diario) #diario{display:none!important}
 .dfoto{display:flex;flex-direction:column;gap:4px}
 .dfoto .fth{aspect-ratio:4/3}
 #sigPad{width:100%;height:190px;border:1px solid var(--line-strong);border-radius:8px;background:#fff;touch-action:none;display:block}
+#updBar{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom,0px) + 14px);z-index:40;background:var(--ink);color:var(--panel);border-radius:10px;padding:10px 12px 10px 16px;display:flex;align-items:center;gap:12px;box-shadow:0 10px 30px rgba(0,0,0,.35);max-width:calc(100vw - 20px);font-size:14px}
+#updBar .btn{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+#installBtn[hidden]{display:none!important}
+@media (max-width:560px){header.top{flex-wrap:wrap;row-gap:6px;gap:8px}header.top .where{display:none}header.top .modenav{margin-right:auto}}
 #vpanel{position:fixed;right:12px;top:150px;bottom:12px;width:min(400px,calc(100vw - 24px));background:var(--panel);border:1px solid var(--line);border-radius:12px;box-shadow:0 12px 40px rgba(0,0,0,.3);display:flex;flex-direction:column;overflow:hidden;z-index:20}
 @media (min-width:701px){body.vpo #viewer{margin-right:424px}}
 @media (max-width:700px){#vpanel{left:0;right:0;top:auto;bottom:0;width:auto;max-height:64%;border-radius:12px 12px 0 0;padding-bottom:env(safe-area-inset-bottom,0px)}}
@@ -346,6 +359,7 @@ dialog.full canvas{position:absolute;inset:0;width:100%;height:100%;display:bloc
   </svg>
   <div class="where" aria-live="polite"><b id="whereName">Acompanhamento de obra</b><span id="wherePage">Sem plantas carregadas</span></div>
   <div class="seg modenav" id="modeNav" role="group" aria-label="Módulo"><button data-m="marcas" aria-pressed="true">📍<span> Marcas</span></button><button data-m="avanco" aria-pressed="false">▦<span> Avanço</span></button><button data-m="diario" aria-pressed="false">📓<span> Diário</span></button></div>
+  <button class="btn" id="installBtn" type="button" hidden>⬇<span class="hide-sm"> Instalar app</span></button>
   <button class="btn" id="openPhases">Fases</button>
   <button class="btn primary" id="updateBtn">Atualizar</button>
 </header>
@@ -412,6 +426,7 @@ dialog.full canvas{position:absolute;inset:0;width:100%;height:100%;display:bloc
 <input id="diaPicker" type="file" accept="image/*" multiple hidden>
 
 <input id="pdfPicker" type="file" accept="application/pdf,.pdf" multiple hidden>
+<input id="revPicker" type="file" accept="application/pdf,.pdf" hidden>
 <input id="cameraPicker" type="file" accept="image/*" capture="environment" hidden>
 <input id="photoPicker" type="file" accept="image/*" hidden>
 
@@ -423,6 +438,7 @@ dialog.full canvas{position:absolute;inset:0;width:100%;height:100%;display:bloc
     <input type="text" id="obraName" placeholder="Nome da obra (aparece no PDF)" autocomplete="off">
     <p class="sect">Fases</p>
     <ul class="list" id="phasesList"></ul>
+    <p class="note" id="iosHint" hidden>Para instalar no iPhone ou iPad: abre o link no Safari, toca em Partilhar e depois em “Adicionar ao ecrã principal”.</p>
   </div>
   <div class="dlg-foot"><button class="btn" id="newPhaseBtn">+ Nova fase</button><button class="btn primary" id="pkOpen">Partilhar pacote</button><button class="btn" id="pkImport">Importar pacote</button></div>
 </div></dialog>
@@ -584,6 +600,7 @@ dialog.full canvas{position:absolute;inset:0;width:100%;height:100%;display:bloc
   <div class="grp"><button class="btn" id="adjMinus" aria-label="Diminuir">−</button><button class="btn" id="adjPlus" aria-label="Aumentar">+</button><button class="btn txt" id="adjReset">Repor tamanho</button></div>
   <button class="btn primary txt" id="adjDone">Concluir</button>
 </div>
+<div id="updBar" hidden role="status"><span>Há uma versão nova da app.</span><button class="btn sm" id="updReload">Usar a versão nova</button><button class="btn sm" id="updLater" style="background:transparent;border-color:transparent;color:inherit">Depois</button></div>
 <div id="toast" role="status"></div>
 
 <template id="viewerTpl"><style>
@@ -1334,8 +1351,9 @@ async function build(){
     if (!ds.length){ const e = document.createElement('p'); e.className = 'ph-empty'; e.textContent = espView === 'all' ? 'Ainda sem plantas nesta fase. Carrega-as com Atualizar.' : `Sem plantas de ${espView} nesta fase.`; frag.appendChild(e); }
     for (const d of ds){
       const h = document.createElement('div'); h.className = 'dochead';
-      h.innerHTML = '<b></b><span class="esp"></span><span></span><button class="btn sm dh-ex">Exportar</button>';
+      h.innerHTML = '<b></b><span class="esp"></span><span></span><button class="btn sm dh-rev" title="Trocar esta planta por uma revisão nova, mantendo as marcas">⇄ Nova revisão</button><button class="btn sm dh-ex">Exportar</button>';
       h.querySelector('.dh-ex').onclick = () => openExport(d.phase, d.meta.id);
+      h.querySelector('.dh-rev').onclick = () => pickRevision(d.meta);
       h.firstChild.textContent = nice(d.meta.name);
       h.children[1].textContent = espOf(d.meta);
       h.children[2].textContent = `${d.pages.length} ${d.pages.length===1?'página':'páginas'}, atualizada a ${fmtDT(d.meta.updatedAt)}`;
@@ -2400,6 +2418,52 @@ async function removeDoc(d, ph){
   });
   docMetas = docMetas.filter(x => x !== d); marks = marks.filter(m => m.docId !== d.id);
   renderPhaseLists(ph); toast('Planta removida'); build();
+}
+
+/* ================= nova revisão de uma planta ================= */
+// Troca o PDF de uma planta por outro (nome diferente), mantendo marcas, etapas, zonas e avanço.
+// As marcas ficam na mesma posição relativa da página; o utilizador confirma e ajusta depois.
+let revTarget = null;
+function pickRevision(meta){ revTarget = meta; $('#revPicker').value = ''; $('#revPicker').click(); }
+$('#revPicker').onchange = () => { const f = $('#revPicker').files[0], old = revTarget; revTarget = null; if (f && old) replaceRevision(old, f); };
+async function replaceRevision(old, file){
+  if (busy){ toast('Espera que termine a operação em curso.'); return; }
+  const data = await file.arrayBuffer();
+  const head = new Uint8Array(data, 0, Math.min(1024, data.byteLength));
+  if (!String.fromCharCode.apply(null, head).includes('%PDF')){ toast(`“${file.name}” não é um PDF válido.`); return; }
+  const newId = old.phaseId + '::' + file.name;
+  if (newId !== old.id && docMetas.some(d => d.id === newId)){ toast(`Já existe “${nice(file.name)}” nesta fase. Apaga essa planta primeiro ou escolhe outro ficheiro.`, 6000); return; }
+  let np = 0;
+  try { const pdf = await pdfjsLib.getDocument({data: new Uint8Array(data.slice(0))}).promise; np = pdf.numPages; pdf.destroy(); }
+  catch(e){ toast(`“${file.name}” não abriu. O ficheiro pode estar danificado.`); return; }
+  const ms = marks.filter(m => m.docId === old.id), fora = ms.filter(m => (m.page || 1) > np).length;
+  const nz = zonasOf(old).length;
+  if (!confirm(`Trocar “${nice(old.name)}” pela revisão “${nice(file.name)}”?\n\n` +
+    `${ms.length} ${ms.length === 1 ? 'marca passa' : 'marcas passam'} para a nova revisão` + (nz ? `, com ${nz} ${nz === 1 ? 'zona' : 'zonas'} do avanço` : '') + `, na mesma posição da página. ` +
+    `Se o desenho mudou de sítio ou de escala, confirma cada marca e corrige com “⤧ Ajustar”.\n\n` +
+    `O PDF da revisão anterior sai deste aparelho (fica registado o nome no histórico da planta). Antes de trocar, convém fazer um pacote de segurança.` +
+    (fora ? `\n\nAtenção: a nova revisão tem ${np} ${np === 1 ? 'página' : 'páginas'}; ${fora} ${fora === 1 ? 'marca estava' : 'marcas estavam'} em páginas que deixam de existir e ${fora === 1 ? 'passa' : 'passam'} para a última página.` : ''))) return;
+  busy = true;
+  try {
+    const now = Date.now();
+    const meta = {...old, id: newId, name: file.name, updatedAt: now, size: data.byteLength, revisoes: [...(old.revisoes || []), {name: old.name, ate: now}]};
+    const upd = ms.map(m => ({...m, docId: newId, page: Math.min(m.page || 1, np)}));
+    await run(['docs','files','marks'], 'readwrite', t => {
+      t.objectStore('files').put({id: newId, data}); t.objectStore('docs').put(meta);
+      if (newId !== old.id){ t.objectStore('docs').delete(old.id); t.objectStore('files').delete(old.id); }
+      upd.forEach(m => t.objectStore('marks').put(m));
+    });
+    const i = docMetas.indexOf(old); if (i >= 0) docMetas[i] = meta; else docMetas.push(meta);
+    ms.forEach((m, k) => Object.assign(m, upd[k]));
+    if (newId !== old.id){
+      if (old.id in curEtapa){ curEtapa[newId] = curEtapa[old.id]; delete curEtapa[old.id]; }
+      if (typeof curSub === 'object' && curSub && old.id in curSub){ curSub[newId] = curSub[old.id]; delete curSub[old.id]; }
+    }
+    toast(`Revisão trocada: ${ms.length} ${ms.length === 1 ? 'marca passou' : 'marcas passaram'} para “${nice(file.name)}”. Confirma as posições e usa “⤧ Ajustar” onde for preciso.`, 8000);
+  } catch(e){
+    console.error(e); toast('Não foi possível trocar a revisão. O dispositivo pode estar sem espaço. Nada foi alterado.', 7000);
+  } finally { busy = false; }
+  build();
 }
 
 /* ================= atualizar plantas ================= */
@@ -3539,6 +3603,34 @@ $('#ipMerge').onclick = () => importPack(false);
 $('#ipReplace').onclick = () => { if (confirm('Apagar todas as plantas e marcas deste aparelho e ficar só com as do pacote?')) importPack(true); };
 
 $('#pkOpen').onclick = openPack; $('#pkImport').onclick = pickPack;
+
+/* ================= app instalável (PWA) ================= */
+(function(){
+  const btn = $('#installBtn');
+  const standalone = matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+  const supportsWebInstall = typeof Navigator !== 'undefined' && typeof Navigator.prototype.install === 'function';
+  let deferred = null;
+  if (!standalone && supportsWebInstall && location.protocol === 'https:') btn.hidden = false;
+  window.addEventListener('beforeinstallprompt', ev => { ev.preventDefault(); deferred = ev; if (!standalone && !supportsWebInstall) btn.hidden = false; });
+  window.addEventListener('appinstalled', () => { btn.hidden = true; toast('App instalada. Já a podes abrir pelo ícone DDN-INC.', 4000); });
+  btn.addEventListener('click', async () => {
+    if (btn.getAttribute('aria-disabled') === 'true') return;
+    btn.setAttribute('aria-disabled', 'true');
+    try {
+      if (supportsWebInstall){ await navigator.install(); btn.hidden = true; }
+      else if (deferred){ const ev = deferred; deferred = null; await ev.prompt(); const r = await ev.userChoice; if (r.outcome === 'accepted') btn.hidden = true; else if (!deferred) btn.hidden = true; }
+    } catch(e){ if (!e || e.name !== 'AbortError'){ toast('Não foi possível instalar daqui. Usa o menu do browser: “Instalar app” ou “Adicionar ao ecrã principal”.', 5000); console.error(e); } }
+    finally { btn.removeAttribute('aria-disabled'); }
+  });
+  const ios = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  if (ios && !standalone) $('#iosHint').hidden = false;
+  if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)){
+    navigator.serviceWorker.register('sw.js').catch(err => console.warn('service worker', err));
+    navigator.serviceWorker.addEventListener('message', ev => { if (ev.data && ev.data.type === 'ddn-update') $('#updBar').hidden = false; });
+  }
+  $('#updReload').onclick = () => location.reload();
+  $('#updLater').onclick = () => { $('#updBar').hidden = true; };
+})();
 
 /* ================= arranque ================= */
 (async () => {
